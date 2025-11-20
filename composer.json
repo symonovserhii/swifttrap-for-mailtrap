@@ -1,0 +1,26 @@
+{
+    "name": "crowdspace/mailtrap-mailer",
+    "description": "Mailtrap mailer for WordPress",
+    "type": "wordpress-plugin",
+    "license": "GPL-2.0-or-later",
+    "require": {
+        "railsware/mailtrap-php": "^3.0 || dev-master",
+        "psr/http-message": "^1.0 || ^2.0",
+        "psr/http-factory": "^1.0",
+        "psr/http-client": "^1.0",
+        "php-http/client-common": "^2.0",
+        "php-http/httplug": "^2.0",
+        "php-http/discovery": "^1.0",
+        "php-http/guzzle7-adapter": "^1.0",
+        "guzzlehttp/guzzle": "^7.0",
+        "symfony/mime": "^6.0 || ^7.0",
+        "egulias/email-validator": "^3.2"
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "config": {
+        "allow-plugins": {
+            "php-http/discovery": true
+        }
+    }
+}
