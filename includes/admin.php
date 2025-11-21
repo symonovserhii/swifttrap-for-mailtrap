@@ -390,7 +390,7 @@ function mailtrap_mailer_field_log_emails() {
 		<input type="checkbox" name="<?php echo esc_attr( MAILTRAP_MAILER_OPTION_KEY ); ?>[log_emails]" value="1" <?php checked( $settings['log_emails'], 1 ); ?> />
 		<?php esc_html_e( 'Keep detailed logs of all sent emails', 'mailtrap-mailer' ); ?>
 	</label>
-	<p class="description"><?php esc_html_e( 'Logs will be stored in wp-content/mailtrap-emails.log', 'mailtrap-mailer' ); ?></p>
+	<p class="description"><?php esc_html_e( 'Logs will be stored in wp-content/uploads/mailtrap-mailer/mailtrap-emails.log', 'mailtrap-mailer' ); ?></p>
 	<?php
 }
 
@@ -482,11 +482,11 @@ function mailtrap_mailer_settings_page() {
 
                     <!-- Log Emails -->
                     <div class="mailtrap-field-group">
-                        <label class="mailtrap-checkbox-label">
-                            <input type="checkbox" name="<?php echo esc_attr( MAILTRAP_MAILER_OPTION_KEY ); ?>[log_emails]" value="1" <?php checked( $settings['log_emails'], 1 ); ?> />
-                            <?php esc_html_e( 'Keep detailed logs of all sent emails', 'mailtrap-mailer' ); ?>
-                        </label>
-                        <p class="mailtrap-field-help"><?php esc_html_e( 'Logs will be stored in wp-content/mailtrap-emails.log', 'mailtrap-mailer' ); ?></p>
+						<label class="mailtrap-checkbox-label">
+							<input type="checkbox" name="<?php echo esc_attr( MAILTRAP_MAILER_OPTION_KEY ); ?>[log_emails]" value="1" <?php checked( $settings['log_emails'], 1 ); ?> />
+							<?php esc_html_e( 'Keep detailed logs of all sent emails', 'mailtrap-mailer' ); ?>
+						</label>
+						<p class="mailtrap-field-help"><?php esc_html_e( 'Logs will be stored in wp-content/uploads/mailtrap-mailer/mailtrap-emails.log', 'mailtrap-mailer' ); ?></p>
                     </div>
 
                     <!-- Log Retention Days -->
@@ -763,11 +763,11 @@ function mailtrap_mailer_stats_page() {
 										<tr style="border-bottom: 1px solid #eee; hover-background: #f9f9f9;">
 											<td style="padding: 12px; color: #333;">
 												<span title="<?php echo esc_attr( $formatted['to'] ); ?>">
-													<?php echo esc_html( mb_strimwidth( $formatted['to'], 0, 40, '...' ) ); ?>
+													<?php echo esc_html( wp_html_excerpt( $formatted['to'], 40, '...' ) ); ?>
 												</span>
 											</td>
 											<td style="padding: 12px; color: #666;">
-												<?php echo esc_html( mb_strimwidth( $formatted['from'], 0, 25, '...' ) ); ?>
+												<?php echo esc_html( wp_html_excerpt( $formatted['from'], 25, '...' ) ); ?>
 											</td>
 											<td style="padding: 12px; color: #666; font-size: 12px;">
 												<?php echo esc_html( $formatted['timestamp'] ); ?>

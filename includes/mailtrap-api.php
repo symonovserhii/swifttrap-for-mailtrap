@@ -88,12 +88,43 @@ function mailtrap_mailer_fetch_stats( $settings ) {
 }
 
 /**
+ * Get Mailtrap email log directory inside uploads.
+ *
+ * @return string|WP_Error Directory path or WP_Error when uploads are unavailable.
+ */
+function mailtrap_mailer_get_log_dir() {
+	$uploads = wp_upload_dir( null, false );
+
+	if ( ! empty( $uploads['error'] ) ) {
+		return new WP_Error( 'mailtrap_uploads_unavailable', __( 'Upload directory is not available for Mailtrap logs.', 'mailtrap-mailer' ) );
+	}
+
+	$dir = trailingslashit( $uploads['basedir'] ) . 'mailtrap-mailer';
+
+	if ( ! file_exists( $dir ) && ! wp_mkdir_p( $dir ) ) {
+		return new WP_Error( 'mailtrap_log_dir_unwritable', __( 'Unable to create Mailtrap log directory.', 'mailtrap-mailer' ) );
+	}
+
+	if ( ! wp_is_writable( $dir ) ) {
+		return new WP_Error( 'mailtrap_log_dir_unwritable', __( 'Mailtrap log directory is not writable.', 'mailtrap-mailer' ) );
+	}
+
+	return $dir;
+}
+
+/**
  * Get Mailtrap email log file path.
  *
- * @return string Path to log file.
+ * @return string|WP_Error Path to log file or WP_Error when unavailable.
  */
 function mailtrap_mailer_get_log_file() {
-	return WP_CONTENT_DIR . '/mailtrap-emails.log';
+	$log_dir = mailtrap_mailer_get_log_dir();
+
+	if ( is_wp_error( $log_dir ) ) {
+		return $log_dir;
+	}
+
+	return trailingslashit( $log_dir ) . 'mailtrap-emails.log';
 }
 
 /**
@@ -111,6 +142,10 @@ function mailtrap_mailer_log_email( $email_data, $response = array(), $success =
 	}
 
 	$log_file = mailtrap_mailer_get_log_file();
+
+	if ( is_wp_error( $log_file ) ) {
+		return;
+	}
 
 	// Get category if normalized data is available.
 	$category = '';
@@ -132,7 +167,9 @@ function mailtrap_mailer_log_email( $email_data, $response = array(), $success =
 
 	$log_line = wp_json_encode( $log_entry ) . "\n";
 
-	error_log( $log_line, 3, $log_file );
+	if ( ! function_exists( 'wp_is_writable' ) || wp_is_writable( dirname( $log_file ) ) ) {
+		error_log( $log_line, 3, $log_file );
+	}
 
 	// Clean old logs based on retention days setting.
 	mailtrap_mailer_cleanup_logs();
@@ -147,7 +184,7 @@ function mailtrap_mailer_cleanup_logs() {
 
 	$log_file = mailtrap_mailer_get_log_file();
 
-	if ( ! file_exists( $log_file ) || ! is_readable( $log_file ) ) {
+	if ( is_wp_error( $log_file ) || ! file_exists( $log_file ) || ! is_readable( $log_file ) ) {
 		return;
 	}
 
@@ -250,7 +287,7 @@ function mailtrap_mailer_get_email_category( $normalized ) {
 function mailtrap_mailer_read_email_logs( $limit = 20 ) {
 	$log_file = mailtrap_mailer_get_log_file();
 
-	if ( ! file_exists( $log_file ) || ! is_readable( $log_file ) ) {
+	if ( is_wp_error( $log_file ) || ! file_exists( $log_file ) || ! is_readable( $log_file ) ) {
 		return array();
 	}
 

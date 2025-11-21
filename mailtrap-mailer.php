@@ -8,6 +8,9 @@
  * License: GPL-2.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain: mailtrap-mailer
+ * Domain Path: /languages
+ * Requires at least: 6.0
+ * Tested up to: 6.8
  * Requires PHP: 8.0
  */
 
@@ -120,7 +123,7 @@ function mailtrap_mailer_default_settings() {
 		'sender_email'        => '',
 		'sender_name'         => '',
 		'endpoint'            => 'https://send.api.mailtrap.io/api/send',
-		'log_emails'          => 1,
+		'log_emails'          => 0,
 		'log_retention_days'  => 30,
 		'logs_per_page'       => 10,
 		'enable_categories'   => 1,
