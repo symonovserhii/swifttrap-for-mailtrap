@@ -1,38 +1,88 @@
-=== Mailtrap Mailer ===
-Contributors: CrowdSpace
-Tags: mailtrap, email, wp_mail, smtp, api
+=== SwiftTrap for Mailtrap ===
+Contributors: simmotorlp
+Tags: email, smtp, mailtrap, mail, transactional
 Requires at least: 6.0
-Tested up to: 6.8
+Tested up to: 6.9
+Stable tag: 2.2.0
 Requires PHP: 8.0
-Stable tag: 1.1.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Route all wp_mail() calls through the Mailtrap Send API with an easy settings page.
+Route WordPress emails through the Mailtrap Send API with stream routing, categories, and logging.
 
 == Description ==
 
-Mailtrap Mailer replaces the default mail transport with Mailtrap's Send API so all WordPress emails land in your Mailtrap inbox. Configure the API token, sender email/name, and endpoint directly in the admin panel—no environment variables or SMTP plugins required.
+SwiftTrap for Mailtrap replaces the default WordPress `wp_mail()` with the Mailtrap Send API.
+
+**Features:**
+
+* Send transactional and bulk emails via Mailtrap
+* Automatic email categorization (welcome, password-reset, notification, etc.)
+* Bulk stream routing for promotional emails
+* Email logging with retention management
+* Dashboard widget with account stats
+* Test email from settings page
+
+**No SDK required** — uses the WordPress HTTP API (`wp_remote_post`) for zero external dependencies.
+
+**Extensible via filters:**
+
+* `swifttrap_mailtrap_email_category` — override email category
+* `swifttrap_mailtrap_use_bulk_stream` — control bulk stream routing
+* `swifttrap_mailtrap_template` — send via Mailtrap template (template_uuid)
+* `swifttrap_mailtrap_custom_variables` — attach tracking metadata to emails
 
 == Installation ==
 
-1. Upload the plugin and activate it.
-2. Go to Settings → Mailtrap Mailer.
-3. Paste your Mailtrap Send API token and adjust the sender details if needed.
+1. Upload the `swifttrap-for-mailtrap` folder to `/wp-content/plugins/`
+2. Activate the plugin
+3. Go to Mailtrap → Settings
+4. Enter your Mailtrap Send API token
+5. Configure sender email and name
 
 == Frequently Asked Questions ==
 
-= Does it work alongside other SMTP plugins? =
-When enabled and a token is present, Mailtrap Mailer intercepts wp_mail() before other transports. Disable the plugin to fall back to your previous mailer.
+= Where do I get my API token? =
+Log in to [mailtrap.io](https://mailtrap.io), go to your sending domain, and copy the API token.
 
-= Are attachments supported? =
-Yes, attachments are base64-encoded and sent through the Mailtrap API.
+= What data is sent externally? =
+This plugin sends email data (recipients, subject, body, attachments) to the Mailtrap API at `send.api.mailtrap.io` and `bulk.api.mailtrap.io`. Account stats are fetched from `mailtrap.io/api/accounts`. See [Mailtrap Privacy Policy](https://mailtrap.io/privacy-policy).
+
+= Does the plugin work without Mailtrap? =
+When disabled or if the API token is empty, WordPress falls back to its default mail handler.
 
 == Changelog ==
 
-= 1.1.0 =
-* Added built-in Mailtrap SDK support with WordPress HTTP fallback, dashboard and stats pages.
-* Improved admin UI styling.
+= 2.2.0 =
+* Replaced all file_get_contents/file_put_contents with WP_Filesystem API
+* Fixed $_GET sanitization with proper wp_unslash() and phpcs annotations
+* Improved PHPDoc headers across all files
+* Better WordPress Coding Standards compliance
 
-= 1.0.0 =
-* Initial release.
+= 2.1.0 =
+* Added sending domain verification status on Stats page
+* Added suppression list (bounces, complaints, unsubscribes) on Stats page
+* Added `swifttrap_mailtrap_template` filter for Mailtrap template support
+* Added `swifttrap_mailtrap_custom_variables` filter for email tracking metadata
+* Extracted reusable `swifttrap_mailtrap_get_account_id()` with transient caching
+
+= 2.0.0 =
+* Removed Mailtrap SDK dependency — uses WordPress HTTP API directly
+* Zero external dependencies, ~30 KB total plugin size
+* Improved WP.org compliance
+
+= 1.3.0 =
+* Security: protected log directory from direct web access
+* Added attachment size validation (25 MB limit)
+* Added empty recipient validation
+* Fixed timezone handling in log display
+* Optimized email category computation
+* Improved log file locking
+
+== Upgrade Notice ==
+
+= 2.1.0 =
+New Stats page cards: domain verification and suppression list. New filters for template and custom variables support.
+
+= 2.0.0 =
+Major update: SDK removed, plugin now uses WordPress HTTP API directly. No configuration changes needed.

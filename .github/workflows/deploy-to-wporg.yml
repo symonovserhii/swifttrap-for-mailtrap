@@ -1,0 +1,30 @@
+name: Deploy to WordPress.org
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy to WordPress.org SVN
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: WordPress Plugin Deploy
+        uses: 10up/action-wordpress-plugin-deploy@stable
+        with:
+          generate-zip: true
+        env:
+          SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
+          SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
+          SLUG: swifttrap-for-mailtrap
+          ASSETS_DIR: .wordpress-org
+
+      - name: Upload release asset
+        uses: actions/upload-artifact@v4
+        with:
+          name: swifttrap-for-mailtrap
+          path: ${{ github.workspace }}/swifttrap-for-mailtrap.zip
