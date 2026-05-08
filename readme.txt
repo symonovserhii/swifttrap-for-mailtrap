@@ -3,7 +3,7 @@ Contributors: simmotorlp
 Tags: mailtrap, transactional-email, email-api, wp-mail, email-log
 Requires at least: 6.0
 Tested up to: 6.9.4
-Stable tag: 2.2.1
+Stable tag: 2.2.2
 Requires PHP: 8.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -104,6 +104,10 @@ Yes — 25 MB per email (matches Mailtrap's API limit).
 
 == Changelog ==
 
+= 2.2.2 =
+* Plugin URI: now points to the dedicated landing page at https://plugins.symonov.com/swifttrap-for-mailtrap/
+* No code or behavior changes
+
 = 2.2.1 =
 * Readme: USP-first rewrite emphasizing Mailtrap Email API (vs SMTP) and bulk/transactional stream routing
 * Tags: replaced `email`/`mail`/`smtp` with targeted `mailtrap`, `transactional-email`, `email-api`, `wp-mail`, `email-log`
@@ -137,6 +141,9 @@ Yes — 25 MB per email (matches Mailtrap's API limit).
 * Improved log file locking
 
 == Upgrade Notice ==
+
+= 2.2.2 =
+Plugin URI now points to the dedicated landing page on plugins.symonov.com. No code changes.
 
 = 2.2.1 =
 Documentation-only release. Refreshed readme and confirmed compatibility with WordPress 6.9.4.
