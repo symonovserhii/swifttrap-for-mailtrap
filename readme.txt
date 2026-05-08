@@ -34,7 +34,7 @@ Send WordPress emails through the Mailtrap Email API (not SMTP). Bulk and transa
 * Automatic email categorization (welcome, password-reset, notification, marketing, etc.).
 * Bulk stream routing for promotional emails; transactional stream for everything else.
 * Email log with retention management — see what was sent, when, and to whom.
-* Dashboard widget with account stats (sent, bounced, complaints).
+* Dashboard widget — at-a-glance integration status and quick links to Stats and Settings.
 * Stats page: sending domain verification status + suppression list.
 * Test email button on the settings page.
 * Mailtrap template support via `template_uuid`.
@@ -99,7 +99,7 @@ Yes — 25 MB per email (matches Mailtrap's API limit).
 1. Settings page — API token, verified sender, stream routing.
 2. Stats page — sending domain verification status and suppression list (bounces, complaints, unsubscribes).
 3. Email log with retention controls.
-4. Dashboard widget showing account stats at a glance.
+4. Dashboard widget showing integration status, sender, and quick links to Stats and Settings.
 5. Test email confirmation.
 
 == Changelog ==
