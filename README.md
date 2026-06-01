@@ -36,16 +36,28 @@ Route WordPress emails through the Mailtrap Send API with stream routing, catego
 
 ## Development
 
-This plugin has zero build process. Edit PHP/CSS files directly.
+No build step for the plugin itself — edit PHP/CSS directly. Dev tooling (PHPUnit) is managed via Composer.
 
-### Releasing a New Version
+### Tests
 
-1. Update version in `swifttrap-for-mailtrap.php` (header + `SWIFTTRAP_MAILTRAP_VERSION` constant)
-2. Update `Stable tag` in `readme.txt`
-3. Add changelog entry in `readme.txt`
-4. Commit and push to `main`
-5. Create a GitHub Release with tag `X.Y.Z` (e.g., `2.3.0`)
-6. GitHub Actions will automatically deploy to WordPress.org SVN
+```bash
+composer install
+vendor/bin/phpunit
+```
+
+### Releasing a new version
+
+The project is split into a GitHub working copy (`github/`) and a WordPress.org SVN working copy (`svn/`).
+Releases are pushed to SVN **manually** (no CI auto-deploy).
+
+1. Bump the version in `swifttrap-for-mailtrap.php` (header + `SWIFTTRAP_MAILTRAP_VERSION`) and `Stable tag` in `readme.txt`; add a changelog entry.
+2. Commit and push to `main`; tag `vX.Y.Z`.
+3. Sync to SVN trunk, tag, and commit:
+
+```bash
+../sync-to-svn.sh                 # rsync github/ → svn/trunk honoring .distignore
+cd ../svn && svn cp trunk tags/X.Y.Z && svn ci -m "Release X.Y.Z"
+```
 
 ## License
 
