@@ -274,4 +274,251 @@ class PluginTest extends TestCase {
 		$this->assertInstanceOf( WP_Error::class, $res );
 		$this->assertEquals( 'swifttrap_api_error', $res->get_error_code() );
 	}
+
+	/**
+	 * Test that if API sending fails, the pre_wp_mail hook returns null,
+	 * allowing WordPress to fallback to its native wp_mail handler.
+	 */
+	public function test_fallback() {
+		Monkey\Functions\expect( 'swifttrap_mailtrap_get_settings' )
+			->andReturn( array(
+				'token'        => 'test_token',
+				'enabled'      => 1,
+				'sender_email' => 'from@example.com',
+				'sender_name'  => 'From Name',
+			) );
+
+		$atts = array(
+			'to'          => 'test@example.com',
+			'subject'     => 'Fallback Test',
+			'message'     => 'Hello World',
+			'headers'     => array(),
+			'attachments' => array(),
+		);
+
+		Monkey\Functions\expect( 'swifttrap_mailtrap_is_recipient_suppressed' )
+			->andReturn( false );
+
+		Monkey\Functions\expect( 'swifttrap_mailtrap_send' )
+			->andReturn( new WP_Error( 'api_failure', 'Mailtrap API was unreachable' ) );
+
+		Monkey\Functions\expect( 'swifttrap_mailtrap_trigger_failed' )
+			->once();
+
+		$res = swifttrap_mailtrap_pre_wp_mail( null, $atts );
+
+		$this->assertNull( $res );
+	}
+
+	/**
+	 * Test that if all recipients are suppressed, sending is aborted,
+	 * a failed entry is logged, and a WP_Error is returned.
+	 */
+	public function test_suppression_skip_all() {
+		Monkey\Functions\expect( 'swifttrap_mailtrap_get_settings' )
+			->andReturn( array(
+				'token'        => 'test_token',
+				'enabled'      => 1,
+				'sender_email' => 'from@example.com',
+				'sender_name'  => 'From Name',
+			) );
+
+		$atts = array(
+			'to'          => 'suppressed@example.com',
+			'subject'     => 'All Suppressed Test',
+			'message'     => 'Hello World',
+			'headers'     => array(),
+			'attachments' => array(),
+		);
+
+		Monkey\Functions\expect( 'swifttrap_mailtrap_is_recipient_suppressed' )
+			->with( 'suppressed@example.com', Mockery::any() )
+			->andReturn( true );
+
+		Monkey\Functions\expect( 'swifttrap_mailtrap_log_email' )
+			->once();
+		Monkey\Functions\expect( 'swifttrap_mailtrap_trigger_failed' )
+			->once();
+
+		$res = swifttrap_mailtrap_pre_wp_mail( null, $atts );
+
+		$this->assertInstanceOf( WP_Error::class, $res );
+		$this->assertEquals( 'swifttrap_all_recipients_suppressed', $res->get_error_code() );
+	}
+
+	/**
+	 * Test that if only some recipients are suppressed, they are filtered out
+	 * and the remaining active ones are successfully sent.
+	 */
+	public function test_suppression_skip_partial() {
+		Monkey\Functions\expect( 'swifttrap_mailtrap_get_settings' )
+			->andReturn( array(
+				'token'        => 'test_token',
+				'enabled'      => 1,
+				'sender_email' => 'from@example.com',
+				'sender_name'  => 'From Name',
+			) );
+
+		$atts = array(
+			'to'          => 'suppressed@example.com, active@example.com',
+			'subject'     => 'Partial Suppressed Test',
+			'message'     => 'Hello World',
+			'headers'     => array(),
+			'attachments' => array(),
+		);
+
+		Monkey\Functions\expect( 'swifttrap_mailtrap_is_recipient_suppressed' )
+			->andReturnUsing( function( $email ) {
+				return $email === 'suppressed@example.com';
+			} );
+
+		Monkey\Functions\expect( 'swifttrap_mailtrap_send' )
+			->once()
+			->with( Mockery::on( function( $normalized ) {
+				$to_emails = array_map( function( $rec ) { return $rec['email']; }, $normalized['to'] );
+				return count( $to_emails ) === 1 && $to_emails[0] === 'active@example.com' && in_array( 'suppressed@example.com', $normalized['skipped_recipients'], true );
+			} ), Mockery::any() )
+			->andReturn( true );
+
+		$res = swifttrap_mailtrap_pre_wp_mail( null, $atts );
+
+		$this->assertTrue( $res );
+	}
+
+	/**
+	 * Test webhook delivery status update endpoint.
+	 */
+	public function test_webhook_status_update() {
+		Monkey\Functions\expect( 'swifttrap_mailtrap_get_settings' )
+			->andReturn( array(
+				'webhook_secret' => 'super_secret_webhook_token',
+			) );
+
+		$request = new \WP_REST_Request( 'POST', '/swifttrap/v1/webhook' );
+		$request->set_header( 'X-Mailtrap-Secret', 'super_secret_webhook_token' );
+		$request->set_body( json_encode( array(
+			array(
+				'message_id' => 'msg-uuid-456',
+				'event'      => 'delivered',
+			)
+		) ) );
+
+		Monkey\Functions\expect( 'swifttrap_mailtrap_update_log_status' )
+			->once()
+			->with( 'msg-uuid-456', 'delivered' )
+			->andReturn( true );
+
+		$response = swifttrap_mailtrap_handle_webhook_request( $request );
+
+		$this->assertInstanceOf( \WP_REST_Response::class, $response );
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( array( 'success' => true, 'updated' => 1 ), $response->get_data() );
+	}
+
+	/**
+	 * Test webhook endpoint denies access with an invalid secret.
+	 */
+	public function test_webhook_status_update_unauthorized() {
+		Monkey\Functions\expect( 'swifttrap_mailtrap_get_settings' )
+			->andReturn( array(
+				'webhook_secret' => 'super_secret_webhook_token',
+			) );
+
+		$request = new \WP_REST_Request( 'POST', '/swifttrap/v1/webhook' );
+		$request->set_header( 'X-Mailtrap-Secret', 'wrong_secret' );
+
+		$response = swifttrap_mailtrap_handle_webhook_request( $request );
+
+		$this->assertInstanceOf( WP_Error::class, $response );
+		$this->assertEquals( 'swifttrap_webhook_unauthorized', $response->get_error_code() );
+	}
+
+	/**
+	 * Test mapping of log entries to CSV rows.
+	 */
+	public function test_csv_row_building() {
+		$entry = array(
+			'timestamp'   => '2026-06-01 10:00:00',
+			'status'      => 'delivered',
+			'from'        => 'sender@example.com',
+			'to'          => array(
+				array( 'email' => 'to1@example.com', 'name' => 'John Doe' ),
+				array( 'email' => 'to2@example.com' ),
+			),
+			'subject'     => '=1+1',
+			'category'    => 'promotional',
+			'http_status' => 200,
+			'message'     => '@payload',
+		);
+
+		$row = swifttrap_mailtrap_build_csv_row( $entry );
+
+		$this->assertIsArray( $row );
+		$this->assertCount( 8, $row );
+		$this->assertEquals( '2026-06-01 10:00:00', $row[0] );
+		$this->assertEquals( 'delivered', $row[1] );
+		$this->assertEquals( 'sender@example.com', $row[2] );
+		$this->assertEquals( 'John Doe <to1@example.com>, to2@example.com', $row[3] );
+		$this->assertEquals( "'=1+1", $row[4] );
+		$this->assertEquals( 'promotional', $row[5] );
+		$this->assertEquals( 200, $row[6] );
+		$this->assertEquals( "'@payload", $row[7] );
+	}
+
+	/**
+	 * Test aggregation of email log statistics.
+	 */
+	public function test_analytics_aggregation() {
+		Monkey\Functions\expect( 'swifttrap_mailtrap_get_log_file' )
+			->andReturn( '/dummy/path.log' );
+
+		$now_time       = time();
+		$today_date     = date( 'Y-m-d', $now_time );
+		$yesterday_date = date( 'Y-m-d', strtotime( '-1 day', $now_time ) );
+
+		$entry1 = array(
+			'timestamp' => date( 'Y-m-d H:i:s', $now_time ),
+			'status'    => 'success',
+			'category'  => 'promotional',
+		);
+		$entry2 = array(
+			'timestamp' => date( 'Y-m-d H:i:s', $now_time ),
+			'status'    => 'failed',
+			'category'  => 'promotional',
+		);
+		$entry3 = array(
+			'timestamp' => date( 'Y-m-d H:i:s', strtotime( '-1 day', $now_time ) ),
+			'status'    => 'success',
+			'category'  => 'transactional',
+		);
+		$entry4 = array(
+			'timestamp' => date( 'Y-m-d H:i:s', strtotime( '-10 days', $now_time ) ),
+			'status'    => 'success',
+			'category'  => 'transactional',
+		);
+
+		$log_content = json_encode( $entry1 ) . "\n"
+			. json_encode( $entry2 ) . "\n"
+			. json_encode( $entry3 ) . "\n"
+			. json_encode( $entry4 ) . "\n";
+
+		$fs = Mockery::mock( 'WP_Filesystem_Base' );
+		$fs->shouldReceive( 'exists' )->andReturn( true );
+		$fs->shouldReceive( 'is_readable' )->andReturn( true );
+		$fs->shouldReceive( 'get_contents' )->andReturn( $log_content );
+
+		$GLOBALS['wp_filesystem'] = $fs;
+
+		Monkey\Functions\expect( 'set_transient' )->andReturn( true );
+
+		$stats = swifttrap_mailtrap_compute_log_stats( 7 );
+
+		$this->assertEquals( 3, $stats['total_sent'] );
+		$this->assertEquals( 2, $stats['total_success'] );
+		$this->assertEquals( 1, $stats['total_failed'] );
+		$this->assertEquals( 66.7, $stats['success_rate'] );
+		$this->assertEquals( array( 'promotional' => 2, 'transactional' => 1 ), $stats['by_category'] );
+		$this->assertEquals( 2, $stats['daily_volume'][ $today_date ] );
+		$this->assertEquals( 1, $stats['daily_volume'][ $yesterday_date ] );
+	}
 }

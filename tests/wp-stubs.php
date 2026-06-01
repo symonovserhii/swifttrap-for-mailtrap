@@ -172,3 +172,9 @@ if ( ! function_exists( 'wp_date' ) ) {
 		return date( $format, $timestamp ?? time() );
 	}
 }
+
+if ( ! function_exists( 'update_option' ) ) {
+	function update_option( $option, $value, $autoload = null ) {
+		return true;
+	}
+}

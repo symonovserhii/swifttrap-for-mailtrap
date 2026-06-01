@@ -67,6 +67,36 @@ if ( ! class_exists( 'WP_Filesystem_Base' ) ) {
 	}
 }
 
+if ( ! class_exists( 'WP_REST_Request' ) ) {
+	class WP_REST_Request {
+		protected $params = array();
+		protected $headers = array();
+		protected $body = '';
+
+		public function __construct( $method = 'POST', $route = '' ) {}
+		public function get_param( $key ) { return $this->params[ $key ] ?? null; }
+		public function set_param( $key, $value ) { $this->params[ $key ] = $value; }
+		public function get_header( $key ) { return $this->headers[ $key ] ?? null; }
+		public function set_header( $key, $value ) { $this->headers[ $key ] = $value; }
+		public function get_body() { return $this->body; }
+		public function set_body( $body ) { $this->body = $body; }
+	}
+}
+
+if ( ! class_exists( 'WP_REST_Response' ) ) {
+	class WP_REST_Response {
+		public $data;
+		public $status;
+
+		public function __construct( $data = null, $status = 200 ) {
+			$this->data   = $data;
+			$this->status = $status;
+		}
+		public function get_data() { return $this->data; }
+		public function get_status() { return $this->status; }
+	}
+}
+
 // Load core WordPress function stubs through the stream wrapper so Patchwork can intercept them.
 require_once __DIR__ . '/wp-stubs.php';
 

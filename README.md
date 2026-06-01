@@ -2,7 +2,7 @@
 
 [![Version](https://img.shields.io/wordpress/plugin/v/swifttrap-for-mailtrap)](https://wordpress.org/plugins/swifttrap-for-mailtrap/) [![Rating](https://img.shields.io/wordpress/plugin/stars/swifttrap-for-mailtrap)](https://wordpress.org/plugins/swifttrap-for-mailtrap/) [![Active installs](https://img.shields.io/wordpress/plugin/installs/swifttrap-for-mailtrap)](https://wordpress.org/plugins/swifttrap-for-mailtrap/) [![License: GPL v2](https://img.shields.io/badge/License-GPLv2-blue.svg)](https://www.gnu.org/licenses/gpl-2.0.html)
 
-Requires at least: **6.0** · Tested up to: **7.0** · Requires PHP: **8.0** · Stable tag: **2.3.0**
+Requires at least: **6.0** · Tested up to: **7.0** · Requires PHP: **8.0** · Stable tag: **2.4.0**
 
 Send WordPress emails through the Mailtrap Email API (not SMTP). Bulk and transactional streams, categories, suppression list, email log.
 
@@ -22,12 +22,16 @@ Send WordPress emails through the Mailtrap Email API (not SMTP). Bulk and transa
 * Stats page shows your sending domain verification status and the live suppression list (bounces, complaints, unsubscribes).
 
 ### Features
-* Drop-in replacement for `wp_mail()` — works with Contact Form 7, WooCommerce, Gravity Forms, and any plugin that uses WordPress mail.
-* Automatic email categorization (welcome, password-reset, notification, marketing, etc.).
-* Bulk stream routing for promotional emails; transactional stream for everything else.
-* Email log with retention management — see what was sent, when, and to whom.
-* Dashboard widget — at-a-glance integration status and quick links to Stats and Settings.
-* Stats page: sending domain verification status + suppression list.
+* Drop-in replacement for `wp_mail()` — works with WooCommerce, Contact Form 7, Gravity Forms, and any plugin that uses WordPress mail.
+* Automatic email categorization and stream routing overrides via settings grid.
+* Delivery Tracking & Webhooks — Real-time event tracking via custom REST route `swifttrap/v1/webhook`.
+* Suppression Management — CRUD panel for Mailtrap suppression lists with pre-send recipient suppression checks.
+* Reliability Fallback — Graceful failover back to WordPress native `wp_mail()` if the Mailtrap API call fails.
+* Site Health integration — Verification test checking Mailtrap token status and sending domain verification.
+* Advanced Admin Log — Search and filter logs, view rendered HTML/text bodies in modals, and manual email resend capability.
+* CSV Export — Download complete email logs directly from the dashboard.
+* WP-CLI commands — Command-line management via `wp swifttrap` (test, stats, prune-logs, send-suppression-sync).
+* Attachment size guard — Configurable limits to prevent oversized files from rejecting at the API gateway.
 * Test email button on the settings page.
 * Mailtrap template support via `template_uuid`.
 * Falls back to default WordPress mail handler when disabled or token is empty.
@@ -82,6 +86,17 @@ Yes — 25 MB per email (matches Mailtrap's API limit).
 5. Test email confirmation.
 
 ## Changelog
+### 2.4.0
+* New: REST Webhook Endpoint (`swifttrap/v1/webhook`) for tracking delivered, bounced, opened, and clicked statuses.
+* New: Suppression Management CRUD in Admin Stats and pre-send recipient checks to skip suppressed emails.
+* New: Fallback mechanism returning `null` in `pre_wp_mail` on API failure so native `wp_mail` sends the email instead.
+* New: Site Health connection and verified domain status test.
+* New: Upgraded Admin logs UI with search, filtering, CSV export, iframe payload preview modals, and resend actions.
+* New: Category settings grid for category stream mapping rules and sender overrides.
+* New: WP-CLI namespace `wp swifttrap` (test, stats, prune-logs, send-suppression-sync).
+* New: Attachment size guard setting.
+* Refactored: Extracted CSV row formatter into a helper function for unit tests. Fully covered and verified by the test suite.
+
 ### 2.3.0
 * PHP 8.0 is now the minimum; tested up to WordPress 7.0.
 * Reliability: automatic retry with backoff on transient Mailtrap API errors (429/5xx, honors Retry-After).
@@ -128,6 +143,12 @@ Yes — 25 MB per email (matches Mailtrap's API limit).
 * Improved log file locking
 
 ## Upgrade Notice
+### 2.4.0
+Upgrades WordPress plugin to 2.4.0, introducing delivery tracking webhooks, suppression management, graceful native fallback, enhanced logs UI with CSV export, WP-CLI commands, and a WordPress Site Health check.
+
+### 2.3.0
+Minor reliability release: automatic sending retries on transient API errors, cron-based log cleanup, and modern PHP 8 updates.
+
 ### 2.2.2
 Plugin URI now points to the dedicated landing page on plugins.symonov.com. No code changes.
 
@@ -136,9 +157,3 @@ Documentation-only release. Refreshed readme and confirmed compatibility with Wo
 
 ### 2.2.0
 WordPress Coding Standards pass — WP_Filesystem API, hardened input sanitization, and improved PHPDoc. No configuration changes required.
-
-### 2.1.0
-New Stats page cards: sending domain verification and suppression list. New filters for Mailtrap template and custom-variables support.
-
-### 2.0.0
-Major update: SDK removed, plugin now uses WordPress HTTP API directly. No configuration changes needed.
