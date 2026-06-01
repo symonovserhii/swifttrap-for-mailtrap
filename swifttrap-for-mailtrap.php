@@ -3,7 +3,7 @@
  * Plugin Name: SwiftTrap for Mailtrap
  * Plugin URI: https://plugins.symonov.com/swifttrap-for-mailtrap/
  * Description: Routes wp_mail() through the Mailtrap HTTP API with configurable sender settings.
- * Version: 2.2.2
+ * Version: 2.3.0
  * Author: simmotorlp
  * Author URI: https://profiles.wordpress.org/simmotorlp/
  * License: GPL-2.0-or-later
@@ -11,7 +11,7 @@
  * Text Domain: swifttrap-for-mailtrap
  * Domain Path: /languages
  * Requires at least: 6.0
- * Tested up to: 6.9.4
+ * Tested up to: 7.0
  * Requires PHP: 8.0
  */
 
@@ -19,11 +19,32 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'SWIFTTRAP_MAILTRAP_VERSION', '2.2.2' );
+define( 'SWIFTTRAP_MAILTRAP_VERSION', '2.3.0' );
 define( 'SWIFTTRAP_MAILTRAP_OPTION_KEY', 'swifttrap_mailtrap_settings' );
 
 require_once __DIR__ . '/includes/admin.php';
 require_once __DIR__ . '/includes/swifttrap-api.php';
+
+register_activation_hook( __FILE__, 'swifttrap_mailtrap_activate' );
+register_deactivation_hook( __FILE__, 'swifttrap_mailtrap_deactivate' );
+
+/**
+ * Activate plugin and schedule daily cleanup cron.
+ */
+function swifttrap_mailtrap_activate(): void {
+	if ( ! wp_next_scheduled( 'swifttrap_mailtrap_cleanup_logs_cron' ) ) {
+		wp_schedule_event( time(), 'daily', 'swifttrap_mailtrap_cleanup_logs_cron' );
+	}
+}
+
+/**
+ * Deactivate plugin and clear scheduled cleanup cron.
+ */
+function swifttrap_mailtrap_deactivate(): void {
+	wp_clear_scheduled_hook( 'swifttrap_mailtrap_cleanup_logs_cron' );
+}
+
+add_action( 'swifttrap_mailtrap_cleanup_logs_cron', 'swifttrap_mailtrap_cleanup_logs' );
 
 /**
  * Main hook: short-circuit wp_mail() and send via Mailtrap API when enabled.
@@ -33,7 +54,7 @@ require_once __DIR__ . '/includes/swifttrap-api.php';
  *
  * @return bool|WP_Error|null
  */
-function swifttrap_mailtrap_pre_wp_mail( $pre_wp_mail, $atts ) {
+function swifttrap_mailtrap_pre_wp_mail( ?bool $pre_wp_mail, array $atts ): bool|WP_Error|null {
 	$settings = swifttrap_mailtrap_get_settings();
 
 	if ( empty( $settings['enabled'] ) || empty( $settings['token'] ) ) {
@@ -65,7 +86,7 @@ add_filter( 'pre_wp_mail', 'swifttrap_mailtrap_pre_wp_mail', 1, 2 );
  *
  * @return array
  */
-function swifttrap_mailtrap_default_settings() {
+function swifttrap_mailtrap_default_settings(): array {
 	return array(
 		'enabled'             => 1,
 		'token'               => '',
@@ -84,11 +105,13 @@ function swifttrap_mailtrap_default_settings() {
  *
  * @return array
  */
-function swifttrap_mailtrap_get_settings() {
-	static $cached = null;
+function swifttrap_mailtrap_get_settings(): array {
+	static $cached = array();
 
-	if ( null !== $cached ) {
-		return $cached;
+	$blog_id = get_current_blog_id();
+
+	if ( isset( $cached[ $blog_id ] ) ) {
+		return $cached[ $blog_id ];
 	}
 
 	$settings = get_option( SWIFTTRAP_MAILTRAP_OPTION_KEY, array() );
@@ -107,9 +130,9 @@ function swifttrap_mailtrap_get_settings() {
 	// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Intentional WP core filter override.
 	$settings['sender_name']  = apply_filters( 'wp_mail_from_name', $settings['sender_name'] );
 
-	$cached = $settings;
+	$cached[ $blog_id ] = $settings;
 
-	return $cached;
+	return $cached[ $blog_id ];
 }
 
 /**
@@ -120,7 +143,7 @@ function swifttrap_mailtrap_get_settings() {
  *
  * @return array|WP_Error
  */
-function swifttrap_mailtrap_normalize_atts( $atts, $settings ) {
+function swifttrap_mailtrap_normalize_atts( array $atts, array $settings ): array|WP_Error {
 	$atts = wp_parse_args(
 		$atts,
 		array(
@@ -166,7 +189,7 @@ function swifttrap_mailtrap_normalize_atts( $atts, $settings ) {
 			continue;
 		}
 
-		list( $name, $content ) = explode( ':', trim( $header_line ), 2 );
+		[ $name, $content ] = explode( ':', trim( $header_line ), 2 );
 
 		$name    = trim( $name );
 		$content = trim( $content );
@@ -186,7 +209,7 @@ function swifttrap_mailtrap_normalize_atts( $atts, $settings ) {
 				break;
 			case 'content-type':
 				if ( str_contains( $content, ';' ) ) {
-					list( $type, ) = explode( ';', $content );
+					[ $type, ] = explode( ';', $content );
 					$content_type  = trim( $type );
 				} elseif ( '' !== $content ) {
 					$content_type = $content;
@@ -261,7 +284,7 @@ function swifttrap_mailtrap_normalize_atts( $atts, $settings ) {
  *
  * @return bool
  */
-function swifttrap_mailtrap_message_looks_html( $message ) {
+function swifttrap_mailtrap_message_looks_html( mixed $message ): bool {
 	if ( ! is_string( $message ) || '' === trim( $message ) ) {
 		return false;
 	}
@@ -291,7 +314,7 @@ function swifttrap_mailtrap_message_looks_html( $message ) {
  *
  * @return array|WP_Error
  */
-function swifttrap_mailtrap_parse_recipients( $recipients ) {
+function swifttrap_mailtrap_parse_recipients( mixed $recipients ): array|WP_Error {
 	$parsed = array();
 
 	foreach ( (array) $recipients as $recipient ) {
@@ -340,7 +363,7 @@ function swifttrap_mailtrap_parse_recipients( $recipients ) {
  *
  * @return array|WP_Error
  */
-function swifttrap_mailtrap_normalize_attachments( $attachments ) {
+function swifttrap_mailtrap_normalize_attachments( mixed $attachments ): array|WP_Error {
 	if ( empty( $attachments ) ) {
 		return array();
 	}
@@ -406,6 +429,7 @@ function swifttrap_mailtrap_normalize_attachments( $attachments ) {
 	return $normalized;
 }
 
+
 /**
  * Send email through Mailtrap HTTP API.
  *
@@ -414,7 +438,7 @@ function swifttrap_mailtrap_normalize_attachments( $attachments ) {
  *
  * @return true|WP_Error
  */
-function swifttrap_mailtrap_send( $normalized, $settings ) {
+function swifttrap_mailtrap_send( array $normalized, array $settings ): bool|WP_Error {
 	$category = swifttrap_mailtrap_get_email_category( $normalized );
 
 	// Block bulk/promotional emails when SWIFTTRAP_BLOCK_BULK is enabled (e.g. staging).
@@ -447,14 +471,47 @@ function swifttrap_mailtrap_send( $normalized, $settings ) {
 
 	$body = swifttrap_mailtrap_build_payload( $normalized, $category );
 
-	$response = wp_remote_post( $host, array(
-		'headers' => array(
-			'Authorization' => 'Bearer ' . $settings['token'],
-			'Content-Type'  => 'application/json',
-		),
-		'body'    => wp_json_encode( $body ),
-		'timeout' => 30,
-	) );
+	$max_attempts = 3;
+	$attempt      = 0;
+	$response     = null;
+
+	while ( $attempt < $max_attempts ) {
+		$attempt++;
+		$response = wp_remote_post( $host, array(
+			'headers' => array(
+				'Authorization' => 'Bearer ' . $settings['token'],
+				'Content-Type'  => 'application/json',
+			),
+			'body'    => wp_json_encode( $body ),
+			'timeout' => 30,
+		) );
+
+		$should_retry = false;
+		$retry_after  = 1;
+
+		if ( is_wp_error( $response ) ) {
+			$error_msg = $response->get_error_message();
+			if ( false !== stripos( $error_msg, 'timeout' ) || false !== stripos( $error_msg, 'timed out' ) ) {
+				$should_retry = true;
+			}
+		} else {
+			$status_code = wp_remote_retrieve_response_code( $response );
+			if ( 429 === $status_code || ( $status_code >= 500 && $status_code < 600 ) ) {
+				$should_retry = true;
+				$retry_after_header = wp_remote_retrieve_header( $response, 'retry-after' );
+				if ( ! empty( $retry_after_header ) && is_numeric( $retry_after_header ) ) {
+					$retry_after = max( 1, (int) $retry_after_header );
+				}
+			}
+		}
+
+		if ( $should_retry && $attempt < $max_attempts ) {
+			sleep( min( $retry_after, 10 ) );
+			continue;
+		}
+
+		break;
+	}
 
 	$log_data = array(
 		'to'      => $normalized['to'],
@@ -519,7 +576,7 @@ function swifttrap_mailtrap_send( $normalized, $settings ) {
  *
  * @return array API payload.
  */
-function swifttrap_mailtrap_build_payload( $normalized, $category ) {
+function swifttrap_mailtrap_build_payload( array $normalized, string $category ): array {
 	$payload = array(
 		'from'    => array( 'email' => $normalized['from_email'], 'name' => $normalized['from_name'] ),
 		'to'      => $normalized['to'],
@@ -600,7 +657,7 @@ function swifttrap_mailtrap_build_payload( $normalized, $category ) {
  * @param WP_Error $error The error object.
  * @return void
  */
-function swifttrap_mailtrap_trigger_failed( WP_Error $error ) {
+function swifttrap_mailtrap_trigger_failed( WP_Error $error ): void {
 	// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Intentional WP core action.
 	do_action( 'wp_mail_failed', $error );
 }
@@ -614,7 +671,7 @@ function swifttrap_mailtrap_trigger_failed( WP_Error $error ) {
  *
  * @return WP_Filesystem_Base|false Filesystem instance or false on failure.
  */
-function swifttrap_mailtrap_filesystem() {
+function swifttrap_mailtrap_filesystem(): object|false {
 	global $wp_filesystem;
 
 	if ( $wp_filesystem instanceof WP_Filesystem_Base ) {

@@ -2,8 +2,8 @@
 Contributors: simmotorlp
 Tags: mailtrap, transactional-email, email-api, wp-mail, email-log
 Requires at least: 6.0
-Tested up to: 6.9.4
-Stable tag: 2.2.2
+Tested up to: 7.0
+Stable tag: 2.3.0
 Requires PHP: 8.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -104,6 +104,15 @@ Yes — 25 MB per email (matches Mailtrap's API limit).
 
 == Changelog ==
 
+= 2.3.0 =
+* PHP 8.0 is now the minimum; tested up to WordPress 7.0.
+* Reliability: automatic retry with backoff on transient Mailtrap API errors (429/5xx, honors Retry-After).
+* Deterministic log retention via a daily cron event (replaces the previous probabilistic cleanup).
+* Account/stats/domain/suppression caches are now keyed per API token, so switching tokens no longer serves stale data.
+* Robust JSON handling for all Mailtrap API responses; multisite-safe settings cache.
+* New: "Verify token" button on the settings screen.
+* Code modernized to PHP 8 idioms; first unit-test suite added.
+
 = 2.2.2 =
 * Plugin URI: now points to the dedicated landing page at https://plugins.symonov.com/swifttrap-for-mailtrap/
 * No code or behavior changes
@@ -112,7 +121,7 @@ Yes — 25 MB per email (matches Mailtrap's API limit).
 * Readme: USP-first rewrite emphasizing Mailtrap Email API (vs SMTP) and bulk/transactional stream routing
 * Tags: replaced `email`/`mail`/`smtp` with targeted `mailtrap`, `transactional-email`, `email-api`, `wp-mail`, `email-log`
 * FAQ: added comparison with WP Mail SMTP / Post SMTP, Mailtrap template support, and bulk stream routing
-* Tested up to WordPress 6.9.4
+* Tested up to WordPress 7.0
 
 = 2.2.0 =
 * Replaced all file_get_contents/file_put_contents with WP_Filesystem API
@@ -146,7 +155,7 @@ Yes — 25 MB per email (matches Mailtrap's API limit).
 Plugin URI now points to the dedicated landing page on plugins.symonov.com. No code changes.
 
 = 2.2.1 =
-Documentation-only release. Refreshed readme and confirmed compatibility with WordPress 6.9.4.
+Documentation-only release. Refreshed readme and confirmed compatibility with WordPress 7.0.
 
 = 2.2.0 =
 WordPress Coding Standards pass — WP_Filesystem API, hardened input sanitization, and improved PHPDoc. No configuration changes required.

@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @return bool Whether to use bulk stream.
  */
-function swifttrap_mailtrap_should_use_bulk_stream( $category, $settings ) {
+function swifttrap_mailtrap_should_use_bulk_stream( string $category, array $settings ): bool {
 	// Use bulk stream for promotional emails.
 	$bulk_categories = array( 'promotional' );
 
@@ -40,13 +40,14 @@ function swifttrap_mailtrap_should_use_bulk_stream( $category, $settings ) {
  *
  * @return array|WP_Error Account data array ('id', 'name') or error.
  */
-function swifttrap_mailtrap_get_account_data( $settings ) {
+function swifttrap_mailtrap_get_account_data( array $settings ): array|WP_Error {
 	if ( empty( $settings['token'] ) ) {
 		return new WP_Error( 'swifttrap_missing_token', __( 'Mailtrap API token is not set.', 'swifttrap-for-mailtrap' ) );
 	}
 
-	$cache_key = 'swifttrap_account_data';
-	$cached    = get_transient( $cache_key );
+	$token_hash = substr( md5( $settings['token'] ), 0, 8 );
+	$cache_key  = 'swifttrap_account_data_' . $token_hash;
+	$cached     = get_transient( $cache_key );
 	if ( false !== $cached && is_array( $cached ) ) {
 		return $cached;
 	}
@@ -66,7 +67,7 @@ function swifttrap_mailtrap_get_account_data( $settings ) {
 	$body     = wp_remote_retrieve_body( $response );
 	$accounts = json_decode( $body, true );
 
-	if ( ! is_array( $accounts ) || empty( $accounts ) ) {
+	if ( JSON_ERROR_NONE !== json_last_error() || ! is_array( $accounts ) || empty( $accounts ) ) {
 		return new WP_Error( 'swifttrap_account_failed', __( 'Unable to retrieve Mailtrap account info.', 'swifttrap-for-mailtrap' ) );
 	}
 
@@ -93,7 +94,7 @@ function swifttrap_mailtrap_get_account_data( $settings ) {
  *
  * @return int|WP_Error Account ID or error.
  */
-function swifttrap_mailtrap_get_account_id( $settings ) {
+function swifttrap_mailtrap_get_account_id( array $settings ): int|WP_Error {
 	$data = swifttrap_mailtrap_get_account_data( $settings );
 
 	if ( is_wp_error( $data ) ) {
@@ -110,9 +111,10 @@ function swifttrap_mailtrap_get_account_id( $settings ) {
  *
  * @return array|WP_Error
  */
-function swifttrap_mailtrap_fetch_stats( $settings ) {
-	$cache_key = 'swifttrap_mailtrap_stats';
-	$cached    = get_transient( $cache_key );
+function swifttrap_mailtrap_fetch_stats( array $settings ): array|WP_Error {
+	$token_hash = substr( md5( $settings['token'] ?? '' ), 0, 8 );
+	$cache_key  = 'swifttrap_mailtrap_stats_' . $token_hash;
+	$cached     = get_transient( $cache_key );
 	if ( false !== $cached ) {
 		return $cached;
 	}
@@ -140,7 +142,7 @@ function swifttrap_mailtrap_fetch_stats( $settings ) {
 	if ( ! is_wp_error( $billing_response ) ) {
 		$billing_body = wp_remote_retrieve_body( $billing_response );
 		$billing      = json_decode( $billing_body, true );
-		if ( ! is_array( $billing ) ) {
+		if ( JSON_ERROR_NONE !== json_last_error() || ! is_array( $billing ) ) {
 			$billing = array();
 		}
 	}
@@ -170,9 +172,10 @@ function swifttrap_mailtrap_fetch_stats( $settings ) {
  *
  * @return array|WP_Error List of domains or error.
  */
-function swifttrap_mailtrap_fetch_domains( $settings ) {
-	$cache_key = 'swifttrap_domains';
-	$cached    = get_transient( $cache_key );
+function swifttrap_mailtrap_fetch_domains( array $settings ): array|WP_Error {
+	$token_hash = substr( md5( $settings['token'] ?? '' ), 0, 8 );
+	$cache_key  = 'swifttrap_domains_' . $token_hash;
+	$cached     = get_transient( $cache_key );
 	if ( false !== $cached ) {
 		return $cached;
 	}
@@ -204,6 +207,9 @@ function swifttrap_mailtrap_fetch_domains( $settings ) {
 	}
 
 	$body = json_decode( wp_remote_retrieve_body( $response ), true );
+	if ( JSON_ERROR_NONE !== json_last_error() ) {
+		return new WP_Error( 'swifttrap_domains_failed', __( 'Invalid domains response.', 'swifttrap-for-mailtrap' ) );
+	}
 	$data = $body['data'] ?? $body;
 
 	if ( ! is_array( $data ) ) {
@@ -241,9 +247,10 @@ function swifttrap_mailtrap_fetch_domains( $settings ) {
  *
  * @return array|WP_Error Suppressions data with items and summary, or error.
  */
-function swifttrap_mailtrap_fetch_suppressions( $settings ) {
-	$cache_key = 'swifttrap_suppressions';
-	$cached    = get_transient( $cache_key );
+function swifttrap_mailtrap_fetch_suppressions( array $settings ): array|WP_Error {
+	$token_hash = substr( md5( $settings['token'] ?? '' ), 0, 8 );
+	$cache_key  = 'swifttrap_suppressions_' . $token_hash;
+	$cached     = get_transient( $cache_key );
 	if ( false !== $cached ) {
 		return $cached;
 	}
@@ -276,7 +283,7 @@ function swifttrap_mailtrap_fetch_suppressions( $settings ) {
 
 	$data = json_decode( wp_remote_retrieve_body( $response ), true );
 
-	if ( ! is_array( $data ) ) {
+	if ( JSON_ERROR_NONE !== json_last_error() || ! is_array( $data ) ) {
 		return new WP_Error( 'swifttrap_suppressions_failed', __( 'Invalid suppressions response.', 'swifttrap-for-mailtrap' ) );
 	}
 
@@ -318,7 +325,7 @@ function swifttrap_mailtrap_fetch_suppressions( $settings ) {
  *
  * @return string|WP_Error Directory path or WP_Error when uploads are unavailable.
  */
-function swifttrap_mailtrap_get_log_dir() {
+function swifttrap_mailtrap_get_log_dir(): string|WP_Error {
 	$uploads = wp_upload_dir( null, false );
 
 	if ( ! empty( $uploads['error'] ) ) {
@@ -358,7 +365,7 @@ function swifttrap_mailtrap_get_log_dir() {
  *
  * @return string|WP_Error Path to log file or WP_Error when unavailable.
  */
-function swifttrap_mailtrap_get_log_file() {
+function swifttrap_mailtrap_get_log_file(): string|WP_Error {
 	$log_dir = swifttrap_mailtrap_get_log_dir();
 
 	if ( is_wp_error( $log_dir ) ) {
@@ -376,7 +383,7 @@ function swifttrap_mailtrap_get_log_file() {
  * @param bool   $success    Whether send was successful.
  * @param string $category   Pre-computed email category.
  */
-function swifttrap_mailtrap_log_email( $email_data, $response = array(), $success = false, $category = '' ) {
+function swifttrap_mailtrap_log_email( array $email_data, array $response = array(), bool $success = false, string $category = '' ): void {
 	$settings = swifttrap_mailtrap_get_settings();
 	if ( empty( $settings['log_emails'] ) ) {
 		return; // Logging disabled.
@@ -407,17 +414,12 @@ function swifttrap_mailtrap_log_email( $email_data, $response = array(), $succes
 		$existing = $wp_filesystem->exists( $log_file ) ? $wp_filesystem->get_contents( $log_file ) : '';
 		$wp_filesystem->put_contents( $log_file, $existing . $log_line, FS_CHMOD_FILE );
 	}
-
-	// Probabilistic cleanup: ~1% chance per log write (similar to PHP session GC).
-	if ( wp_rand( 1, 100 ) === 1 ) {
-		swifttrap_mailtrap_cleanup_logs();
-	}
 }
 
 /**
  * Clean old email logs based on retention period.
  */
-function swifttrap_mailtrap_cleanup_logs() {
+function swifttrap_mailtrap_cleanup_logs(): void {
 	$settings       = swifttrap_mailtrap_get_settings();
 	$retention_days = ! empty( $settings['log_retention_days'] ) ? (int) $settings['log_retention_days'] : 30;
 
@@ -448,7 +450,7 @@ function swifttrap_mailtrap_cleanup_logs() {
 		}
 
 		$entry = json_decode( $line, true );
-		if ( ! is_array( $entry ) || empty( $entry['timestamp'] ) ) {
+		if ( JSON_ERROR_NONE !== json_last_error() || ! is_array( $entry ) || empty( $entry['timestamp'] ) ) {
 			$lines[] = $line;
 			continue;
 		}
@@ -469,7 +471,7 @@ function swifttrap_mailtrap_cleanup_logs() {
  *
  * @return string Email category for Mailtrap.
  */
-function swifttrap_mailtrap_detect_email_category( $normalized ) {
+function swifttrap_mailtrap_detect_email_category( array $normalized ): string {
 	$subject = strtolower( $normalized['subject'] );
 	$message = strtolower( $normalized['message'] );
 
@@ -508,7 +510,7 @@ function swifttrap_mailtrap_detect_email_category( $normalized ) {
  *
  * @return string Category name.
  */
-function swifttrap_mailtrap_get_email_category( $normalized ) {
+function swifttrap_mailtrap_get_email_category( array $normalized ): string {
 	$settings = swifttrap_mailtrap_get_settings();
 
 	if ( empty( $settings['enable_categories'] ) ) {
@@ -533,7 +535,7 @@ function swifttrap_mailtrap_get_email_category( $normalized ) {
  *
  * @return array Array of email log entries.
  */
-function swifttrap_mailtrap_read_email_logs( $limit = 20, $offset = 0 ) {
+function swifttrap_mailtrap_read_email_logs( int $limit = 20, int $offset = 0 ): array {
 	$log_file = swifttrap_mailtrap_get_log_file();
 
 	if ( is_wp_error( $log_file ) ) {
@@ -559,7 +561,7 @@ function swifttrap_mailtrap_read_email_logs( $limit = 20, $offset = 0 ) {
 			continue;
 		}
 		$entry = json_decode( $line, true );
-		if ( is_array( $entry ) ) {
+		if ( JSON_ERROR_NONE === json_last_error() && is_array( $entry ) ) {
 			$parsed[] = $entry;
 		}
 	}
@@ -584,7 +586,7 @@ function swifttrap_mailtrap_read_email_logs( $limit = 20, $offset = 0 ) {
  *
  * @return array Stats array with totals, by_category, and daily_volume.
  */
-function swifttrap_mailtrap_compute_log_stats( $days = 7 ) {
+function swifttrap_mailtrap_compute_log_stats( int $days = 7 ): array {
 	$cache_key = 'swifttrap_log_stats_' . $days;
 	$cached    = get_transient( $cache_key );
 	if ( false !== $cached ) {
@@ -634,7 +636,7 @@ function swifttrap_mailtrap_compute_log_stats( $days = 7 ) {
 		}
 
 		$entry = json_decode( $line, true );
-		if ( ! is_array( $entry ) || empty( $entry['timestamp'] ) ) {
+		if ( JSON_ERROR_NONE !== json_last_error() || ! is_array( $entry ) || empty( $entry['timestamp'] ) ) {
 			continue;
 		}
 
@@ -681,7 +683,7 @@ function swifttrap_mailtrap_compute_log_stats( $days = 7 ) {
 /**
  * AJAX handler: send test email.
  */
-function swifttrap_mailtrap_ajax_send_test_email() {
+function swifttrap_mailtrap_ajax_send_test_email(): void {
 	check_ajax_referer( 'swifttrap_send_test_email', '_nonce' );
 
 	if ( ! current_user_can( 'manage_options' ) ) {
@@ -713,7 +715,7 @@ add_action( 'wp_ajax_swifttrap_send_test_email', 'swifttrap_mailtrap_ajax_send_t
 /**
  * AJAX handler: clear email logs.
  */
-function swifttrap_mailtrap_ajax_clear_logs() {
+function swifttrap_mailtrap_ajax_clear_logs(): void {
 	check_ajax_referer( 'swifttrap_clear_logs', '_nonce' );
 
 	if ( ! current_user_can( 'manage_options' ) ) {
@@ -746,7 +748,7 @@ add_action( 'wp_ajax_swifttrap_clear_logs', 'swifttrap_mailtrap_ajax_clear_logs'
  *
  * @since 2.2.0
  */
-function swifttrap_mailtrap_ajax_load_api_data() {
+function swifttrap_mailtrap_ajax_load_api_data(): void {
 	check_ajax_referer( 'swifttrap_load_api_data', '_nonce' );
 
 	if ( ! current_user_can( 'manage_options' ) ) {

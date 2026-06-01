@@ -4,3 +4,13 @@
 /.distignore
 /.wordpress-org
 /README.md
+/.ai-factory
+/.ai-factory.json
+/.claude
+/tests
+/composer.json
+/composer.lock
+/phpunit.xml.dist
+/vendor
+/.phpunit.result.cache
+/sync-to-svn.sh

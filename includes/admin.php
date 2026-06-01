@@ -15,11 +15,12 @@ add_action( 'admin_init', 'swifttrap_mailtrap_register_settings' );
 add_action( 'admin_menu', 'swifttrap_mailtrap_register_menu' );
 add_action( 'admin_enqueue_scripts', 'swifttrap_mailtrap_admin_assets' );
 add_action( 'wp_dashboard_setup', 'swifttrap_mailtrap_register_dashboard_widget' );
+add_action( 'wp_ajax_swifttrap_verify_token', 'swifttrap_mailtrap_ajax_verify_token' );
 
 /**
  * Register settings and fields.
  */
-function swifttrap_mailtrap_register_settings() {
+function swifttrap_mailtrap_register_settings(): void {
 	register_setting(
 		'swifttrap_mailtrap',
 		SWIFTTRAP_MAILTRAP_OPTION_KEY,
@@ -35,7 +36,7 @@ function swifttrap_mailtrap_register_settings() {
 /**
  * Enqueue admin styling for cards layout.
  */
-function swifttrap_mailtrap_admin_assets( $hook ) {
+function swifttrap_mailtrap_admin_assets( string $hook ): void {
 	$is_swifttrap_page = strpos( $hook, 'swifttrap-for-mailtrap' ) !== false;
 	$is_dashboard     = 'index.php' === $hook;
 
@@ -83,6 +84,24 @@ function swifttrap_mailtrap_admin_assets( $hook ) {
 					if(r.success){ location.reload(); }
 					else{ alert(r.data.message); btn.prop("disabled",false); }
 				}).fail(function(){ btn.prop("disabled",false); });
+			});
+			// Verify API Token
+			$(document).on("click","#swifttrap-verify-token",function(){
+				var btn = $(this), result = $("#swifttrap-verify-result"),
+					token = $("input[name=\"swifttrap_mailtrap_settings[token]\"]").val();
+				btn.prop("disabled",true).text("' . esc_js( __( 'Verifying...', 'swifttrap-for-mailtrap' ) ) . '");
+				result.text("").removeClass("swifttrap-test-result--success swifttrap-test-result--error");
+				$.post(ajaxurl,{action:"swifttrap_verify_token",token:token,_nonce:btn.data("nonce")},function(r){
+					btn.prop("disabled",false).text("' . esc_js( __( 'Verify Token', 'swifttrap-for-mailtrap' ) ) . '");
+					if(r.success){
+						result.addClass("swifttrap-test-result--success").text(r.data.message);
+					}else{
+						result.addClass("swifttrap-test-result--error").text(r.data.message);
+					}
+				}).fail(function(){
+					btn.prop("disabled",false).text("' . esc_js( __( 'Verify Token', 'swifttrap-for-mailtrap' ) ) . '");
+					result.addClass("swifttrap-test-result--error").text("' . esc_js( __( 'Request failed.', 'swifttrap-for-mailtrap' ) ) . '");
+				});
 			});
 		});
 	' );
@@ -212,7 +231,7 @@ function swifttrap_mailtrap_admin_assets( $hook ) {
 /**
  * Add settings page to menu.
  */
-function swifttrap_mailtrap_register_menu() {
+function swifttrap_mailtrap_register_menu(): void {
 	add_menu_page(
 		__( 'Mailtrap', 'swifttrap-for-mailtrap' ),
 		__( 'Mailtrap', 'swifttrap-for-mailtrap' ),
@@ -245,7 +264,7 @@ function swifttrap_mailtrap_register_menu() {
 /**
  * Register dashboard widget.
  */
-function swifttrap_mailtrap_register_dashboard_widget() {
+function swifttrap_mailtrap_register_dashboard_widget(): void {
 	if ( ! current_user_can( 'manage_options' ) ) {
 		return;
 	}
@@ -260,7 +279,7 @@ function swifttrap_mailtrap_register_dashboard_widget() {
 /**
  * Display dashboard widget content.
  */
-function swifttrap_mailtrap_dashboard_widget_content() {
+function swifttrap_mailtrap_dashboard_widget_content(): void {
 	$settings = swifttrap_mailtrap_get_settings();
 	$is_ready = ! empty( $settings['enabled'] ) && ! empty( $settings['token'] );
 	?>
@@ -303,7 +322,7 @@ function swifttrap_mailtrap_dashboard_widget_content() {
 /**
  * Settings page markup.
  */
-function swifttrap_mailtrap_settings_page() {
+function swifttrap_mailtrap_settings_page(): void {
 	if ( ! current_user_can( 'manage_options' ) ) {
 		return;
 	}
@@ -335,6 +354,12 @@ function swifttrap_mailtrap_settings_page() {
                         <label class="swifttrap-field-label"><?php esc_html_e( 'API Token', 'swifttrap-for-mailtrap' ); ?></label>
                         <input type="password" name="<?php echo esc_attr( SWIFTTRAP_MAILTRAP_OPTION_KEY ); ?>[token]" value="<?php echo esc_attr( $settings['token'] ); ?>" class="swifttrap-input-full" autocomplete="off" />
                         <p class="swifttrap-field-help"><?php esc_html_e( 'Use the "Send API token" from your Mailtrap inbox or project.', 'swifttrap-for-mailtrap' ); ?></p>
+                        <div style="margin-top: 10px;">
+                            <button type="button" id="swifttrap-verify-token" class="button button-secondary" data-nonce="<?php echo esc_attr( wp_create_nonce( 'swifttrap_verify_token' ) ); ?>">
+                                <?php esc_html_e( 'Verify Token', 'swifttrap-for-mailtrap' ); ?>
+                            </button>
+                            <span id="swifttrap-verify-result" class="swifttrap-test-result"></span>
+                        </div>
                     </div>
 
                     <!-- Sender Email -->
@@ -432,7 +457,7 @@ function swifttrap_mailtrap_settings_page() {
  *
  * @return array|null Formatted entry with display strings.
  */
-function swifttrap_mailtrap_format_log_entry( $entry ) {
+function swifttrap_mailtrap_format_log_entry( mixed $entry ): ?array {
 	if ( ! is_array( $entry ) ) {
 		return null;
 	}
@@ -465,7 +490,7 @@ function swifttrap_mailtrap_format_log_entry( $entry ) {
 /**
  * Stats page with usage, analytics, categories, daily chart, and logs.
  */
-function swifttrap_mailtrap_stats_page() {
+function swifttrap_mailtrap_stats_page(): void {
 	if ( ! current_user_can( 'manage_options' ) ) {
 		return;
 	}
@@ -706,7 +731,7 @@ function swifttrap_mailtrap_stats_page() {
  *
  * @return array
  */
-function swifttrap_mailtrap_sanitize_settings( $settings ) {
+function swifttrap_mailtrap_sanitize_settings( mixed $settings ): array {
 	$settings = wp_parse_args( is_array( $settings ) ? $settings : array(), swifttrap_mailtrap_default_settings() );
 
 	$settings['enabled'] = empty( $settings['enabled'] ) ? 0 : 1;
@@ -730,3 +755,34 @@ function swifttrap_mailtrap_sanitize_settings( $settings ) {
 
 	return $settings;
 }
+
+/**
+ * AJAX handler: verify Mailtrap token.
+ *
+ * @since 2.3.0
+ */
+function swifttrap_mailtrap_ajax_verify_token(): void {
+	check_ajax_referer( 'swifttrap_verify_token', '_nonce' );
+
+	if ( ! current_user_can( 'manage_options' ) ) {
+		wp_send_json_error( array( 'message' => __( 'Permission denied.', 'swifttrap-for-mailtrap' ) ) );
+	}
+
+	$token = isset( $_POST['token'] ) ? sanitize_text_field( wp_unslash( $_POST['token'] ) ) : '';
+
+	if ( empty( $token ) ) {
+		wp_send_json_error( array( 'message' => __( 'Please enter an API token.', 'swifttrap-for-mailtrap' ) ) );
+	}
+
+	// Temporarily construct settings array with the provided token to test it.
+	$test_settings = array( 'token' => $token );
+
+	$data = swifttrap_mailtrap_get_account_data( $test_settings );
+
+	if ( is_wp_error( $data ) ) {
+		wp_send_json_error( array( 'message' => sprintf( __( 'Verification failed: %s', 'swifttrap-for-mailtrap' ), $data->get_error_message() ) ) );
+	}
+
+	wp_send_json_success( array( 'message' => sprintf( __( 'Token verified successfully. Account: %s', 'swifttrap-for-mailtrap' ), $data['name'] ) ) );
+}
+
