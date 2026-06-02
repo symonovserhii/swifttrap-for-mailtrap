@@ -38,6 +38,9 @@
   border-bottom: 1px solid #eee;
   font-size: 18px;
   font-weight: 600;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .wrap .swifttrap-card h3 {
@@ -66,6 +69,7 @@
 .wrap input[type="email"],
 .wrap input[type="password"],
 .wrap input[type="number"],
+.wrap input[type="date"],
 .wrap textarea,
 .wrap select {
   width: 100%;
@@ -85,6 +89,7 @@
 .wrap input[type="email"]:focus,
 .wrap input[type="password"]:focus,
 .wrap input[type="number"]:focus,
+.wrap input[type="date"]:focus,
 .wrap textarea:focus,
 .wrap select:focus {
   outline: none;
@@ -495,8 +500,11 @@
   border-bottom: none;
 }
 
-.swifttrap-logs-header .button {
+.swifttrap-logs-header__actions {
   margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .swifttrap-logs-header .swifttrap-timezone {
@@ -839,6 +847,17 @@
 .swifttrap-suppression-reason--manual {
   background: #f0f0f1;
   color: #999;
+}
+
+.swifttrap-suppression-bounce-cat {
+  display: inline-block;
+  padding: 1px 6px;
+  font-size: 10px;
+  border-radius: 3px;
+  background: #f8d7da;
+  color: #721c24;
+  font-weight: 600;
+  text-transform: uppercase;
 }
 
 /* ============================================================================

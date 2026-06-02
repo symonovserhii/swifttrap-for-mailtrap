@@ -385,7 +385,8 @@ function swifttrap_mailtrap_admin_assets( string $hook ): void {
 							sh+="<li><span class=\"swifttrap-suppression-email\" title=\""+esc(it.email)+"\">"+esc(it.email)+"</span>";
 							sh+="<span class=\"swifttrap-suppression-meta\">";
 							sh+="<span class=\"swifttrap-suppression-reason swifttrap-suppression-reason--"+it.reason+"\">"+esc(it.reason)+"</span>";
-							if(it.created_at){sh+="<span class=\"swifttrap-suppression-date\">"+new Date(it.created_at).toLocaleDateString()+"</span>";}
+							if(it.bounce_category){sh+="<span class=\"swifttrap-suppression-bounce-cat\">"+esc(it.bounce_category)+"</span>";}
+							if(it.created_at_fmt){sh+="<span class=\"swifttrap-suppression-date\">"+esc(it.created_at_fmt)+"</span>";}
 							if(it.id){
 								sh+="<a href=\"#\" class=\"swifttrap-delete-suppression\" data-id=\""+esc(it.id)+"\" style=\"margin-left:8px;color:#a00;text-decoration:none;font-weight:bold;\" title=\""+esc(L.remove)+"\">&times;</a>";
 							}
@@ -814,7 +815,10 @@ function swifttrap_mailtrap_stats_page(): void {
 	// Get pagination parameters.
 	// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only pagination parameter.
 	$page     = isset( $_GET['swifttrap_page'] ) ? max( 1, absint( wp_unslash( $_GET['swifttrap_page'] ) ) ) : 1;
-	$per_page = $settings['logs_per_page'];
+	// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only per-page parameter.
+	$per_page = isset( $_GET['swifttrap_per_page'] )
+		? max( 5, min( 100, absint( wp_unslash( $_GET['swifttrap_per_page'] ) ) ) )
+		: $settings['logs_per_page'];
 
 	// Read logs with offset-based pagination (newest first).
 	$start_index = ( $page - 1 ) * $per_page;
@@ -851,7 +855,10 @@ function swifttrap_mailtrap_stats_page(): void {
 				</div>
 			</div>
 			<div class="swifttrap-card" id="swifttrap-suppressions-card">
-				<h2><?php esc_html_e( 'Suppressions', 'swifttrap-for-mailtrap' ); ?></h2>
+				<h2>
+					<span><?php esc_html_e( 'Suppressions', 'swifttrap-for-mailtrap' ); ?></span>
+					<a class="button button-secondary" href="https://mailtrap.io/suppressions" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'View all in Mailtrap', 'swifttrap-for-mailtrap' ); ?></a>
+				</h2>
 				<div class="swifttrap-card__body">
 					<p class="swifttrap-loading"><?php esc_html_e( 'Loading...', 'swifttrap-for-mailtrap' ); ?></p>
 				</div>
@@ -927,21 +934,23 @@ function swifttrap_mailtrap_stats_page(): void {
 			<div class="swifttrap-card">
 				<div class="swifttrap-logs-header">
 					<h2><?php esc_html_e( 'Recent Email Logs', 'swifttrap-for-mailtrap' ); ?></h2>
-					<a href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin.php?page=swifttrap-for-mailtrap&swifttrap_export_csv=1' ), 'swifttrap_export_csv', '_nonce' ) ); ?>" class="button button-secondary"><?php esc_html_e( 'Export to CSV', 'swifttrap-for-mailtrap' ); ?></a>
-					<button type="button" id="swifttrap-clear-logs" class="button" data-nonce="<?php echo esc_attr( wp_create_nonce( 'swifttrap_clear_logs' ) ); ?>">
-						<?php esc_html_e( 'Clear Logs', 'swifttrap-for-mailtrap' ); ?>
-					</button>
-					<span class="swifttrap-timezone">
-						<?php
-						$timezone = get_option( 'timezone_string' );
-						if ( empty( $timezone ) ) {
-							$offset = get_option( 'gmt_offset' );
-							$timezone = 'UTC' . ( $offset >= 0 ? '+' : '' ) . $offset;
-						}
-						/* translators: %s: timezone name */
-						printf( esc_html__( 'Times in %s', 'swifttrap-for-mailtrap' ), esc_html( $timezone ) );
-						?>
-					</span>
+					<div class="swifttrap-logs-header__actions">
+						<a href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin.php?page=swifttrap-for-mailtrap&swifttrap_export_csv=1' ), 'swifttrap_export_csv', '_nonce' ) ); ?>" class="button button-secondary"><?php esc_html_e( 'Export to CSV', 'swifttrap-for-mailtrap' ); ?></a>
+						<button type="button" id="swifttrap-clear-logs" class="button" data-nonce="<?php echo esc_attr( wp_create_nonce( 'swifttrap_clear_logs' ) ); ?>">
+							<?php esc_html_e( 'Clear Logs', 'swifttrap-for-mailtrap' ); ?>
+						</button>
+						<span class="swifttrap-timezone">
+							<?php
+							$timezone = get_option( 'timezone_string' );
+							if ( empty( $timezone ) ) {
+								$offset = get_option( 'gmt_offset' );
+								$timezone = 'UTC' . ( $offset >= 0 ? '+' : '' ) . $offset;
+							}
+							/* translators: %s: timezone name */
+							printf( esc_html__( 'Times in %s', 'swifttrap-for-mailtrap' ), esc_html( $timezone ) );
+							?>
+						</span>
+					</div>
 				</div>
 
 				<!-- Search / Filter Form -->
@@ -970,6 +979,11 @@ function swifttrap_mailtrap_stats_page(): void {
 					<input type="date" name="date" value="<?php echo esc_attr( $filters['date'] ); ?>" style="max-width: 150px; margin: 0;" />
 
 					<button type="submit" class="button button-primary"><?php esc_html_e( 'Filter', 'swifttrap-for-mailtrap' ); ?></button>
+					<select name="swifttrap_per_page" onchange="this.form.submit()" style="max-width:120px;margin:0;">
+						<?php foreach ( array( 10, 25, 50, 100 ) as $pp ) : ?>
+							<option value="<?php echo esc_attr( $pp ); ?>" <?php selected( $per_page, $pp ); ?>><?php echo esc_html( $pp ); ?> / page</option>
+						<?php endforeach; ?>
+					</select>
 					<?php if ( ! empty( $filters['search'] ) || ! empty( $filters['category'] ) || ! empty( $filters['status'] ) || ! empty( $filters['date'] ) ) : ?>
 						<a href="<?php echo esc_url( admin_url( 'admin.php?page=swifttrap-for-mailtrap' ) ); ?>" class="button"><?php esc_html_e( 'Clear Filters', 'swifttrap-for-mailtrap' ); ?></a>
 					<?php endif; ?>

@@ -294,17 +294,27 @@ function swifttrap_mailtrap_fetch_suppressions( array $settings ): array|WP_Erro
 
 	$items = array();
 	foreach ( $data as $item ) {
-		$reason = $item['reason'] ?? 'manual';
+		$type_map = array(
+			'hard bounce'    => 'bounce',
+			'spam complaint' => 'complaint',
+			'unsubscription' => 'unsubscribe',
+			'manual import'  => 'manual',
+		);
+		$raw_type = $item['type'] ?? '';
+		$reason   = $type_map[ $raw_type ] ?? 'manual';
 		if ( isset( $summary[ $reason ] ) ) {
 			$summary[ $reason ]++;
 		}
 		$summary['total']++;
 
+		$created_at = $item['created_at'] ?? '';
 		$items[] = array(
-			'id'         => $item['id'] ?? '',
-			'email'      => $item['email'] ?? '',
-			'reason'     => $reason,
-			'created_at' => $item['created_at'] ?? '',
+			'id'              => $item['id'] ?? '',
+			'email'           => $item['email'] ?? '',
+			'reason'          => $reason,
+			'bounce_category' => $item['message_bounce_category'] ?? '',
+			'created_at'      => $created_at,
+			'created_at_fmt'  => $created_at ? wp_date( get_option( 'date_format' ), strtotime( $created_at ) ) : '',
 		);
 	}
 

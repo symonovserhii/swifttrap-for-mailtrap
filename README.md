@@ -2,7 +2,7 @@
 
 [![Version](https://img.shields.io/wordpress/plugin/v/swifttrap-for-mailtrap)](https://wordpress.org/plugins/swifttrap-for-mailtrap/) [![Rating](https://img.shields.io/wordpress/plugin/stars/swifttrap-for-mailtrap)](https://wordpress.org/plugins/swifttrap-for-mailtrap/) [![Active installs](https://img.shields.io/wordpress/plugin/installs/swifttrap-for-mailtrap)](https://wordpress.org/plugins/swifttrap-for-mailtrap/) [![License: GPL v2](https://img.shields.io/badge/License-GPLv2-blue.svg)](https://www.gnu.org/licenses/gpl-2.0.html)
 
-Requires at least: **6.0** · Tested up to: **7.0** · Requires PHP: **8.0** · Stable tag: **2.4.0**
+Requires at least: **6.0** · Tested up to: **7.0** · Requires PHP: **8.0** · Stable tag: **2.4.1**
 
 Send WordPress emails through the Mailtrap Email API (not SMTP). Bulk and transactional streams, categories, suppression list, email log.
 
@@ -86,6 +86,14 @@ Yes — 25 MB per email (matches Mailtrap's API limit).
 5. Test email confirmation.
 
 ## Changelog
+### 2.4.1
+* Fixed: Suppression list now reads the Mailtrap `type` field, so the dashboard shows real BOUNCE / COMPLAINT / UNSUBSCRIBE / MANUAL counts instead of marking every record as manual.
+* New: Suppression rows display the message bounce category (when provided) for hard-bounce detail.
+* Fixed: Suppression dates are now formatted server-side using the site's date format instead of the browser locale.
+* New: "View all in Mailtrap" link on the Suppressions card.
+* New: Per-page selector (10/25/50/100) on the Email Logs screen.
+* Improved: Email Logs header actions aligned to the right; date filter input restyled to match other fields.
+
 ### 2.4.0
 * New: REST Webhook Endpoint (`swifttrap/v1/webhook`) for tracking delivered, bounced, opened, and clicked statuses.
 * New: Suppression Management CRUD in Admin Stats and pre-send recipient checks to skip suppressed emails.
