@@ -3,7 +3,7 @@ Contributors: simmotorlp
 Tags: mailtrap, transactional-email, email-api, wp-mail, email-log
 Requires at least: 6.0
 Tested up to: 7.0
-Stable tag: 2.4.1
+Stable tag: 2.4.2
 Requires PHP: 8.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -107,6 +107,10 @@ Yes — 25 MB per email (matches Mailtrap's API limit).
 5. Test email confirmation.
 
 == Changelog ==
+
+= 2.4.2 =
+* Fixed: The email log dropped most entries during high-volume or concurrent sends. Each write re-read and rewrote the whole log file, so parallel processes overwrote each other's lines. Writes now use an atomic, exclusively-locked append, so the Stats dashboard (sends-per-day, categories, totals) reflects the real number of sent emails.
+* Improved: Logging no longer slows down large mailings — appends are O(1) instead of re-reading and rewriting the entire file on every email.
 
 = 2.4.1 =
 * Fixed: Suppression list now reads the Mailtrap `type` field, so the dashboard shows real BOUNCE / COMPLAINT / UNSUBSCRIBE / MANUAL counts instead of marking every record as manual.

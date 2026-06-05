@@ -423,9 +423,26 @@ function swifttrap_mailtrap_log_email( array $email_data, array $response = arra
 	$log_line = wp_json_encode( $log_entry ) . "\n";
 
 	$wp_filesystem = swifttrap_mailtrap_filesystem();
-	if ( $wp_filesystem && $wp_filesystem->is_writable( dirname( $log_file ) ) ) {
-		$existing = $wp_filesystem->exists( $log_file ) ? $wp_filesystem->get_contents( $log_file ) : '';
-		$wp_filesystem->put_contents( $log_file, $existing . $log_line, FS_CHMOD_FILE );
+	if ( ! $wp_filesystem || ! $wp_filesystem->is_writable( dirname( $log_file ) ) ) {
+		return;
+	}
+
+	/*
+	 * Append atomically with an exclusive lock. WP_Filesystem has no append
+	 * mode, so the previous read-all-then-write-all approach raced under
+	 * concurrent sends during mass mailings: parallel processes each read the
+	 * same file then overwrote it, clobbering each other's lines and silently
+	 * dropping the majority of entries. It was also O(n^2) as the file grew.
+	 * A locked append is process-safe and O(1) per write.
+	 */
+	$file_existed = $wp_filesystem->exists( $log_file );
+
+	// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Atomic append (FILE_APPEND|LOCK_EX) is required and WP_Filesystem cannot append.
+	file_put_contents( $log_file, $log_line, FILE_APPEND | LOCK_EX );
+
+	if ( ! $file_existed ) {
+		$chmod = defined( 'FS_CHMOD_FILE' ) ? FS_CHMOD_FILE : 0644;
+		@chmod( $log_file, $chmod ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- Best-effort permissions on first creation.
 	}
 }
 
