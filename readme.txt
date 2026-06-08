@@ -36,8 +36,7 @@ Send WordPress emails through the Mailtrap Email API (not SMTP). Bulk and transa
 * Suppression Management — CRUD panel for Mailtrap suppression lists with pre-send recipient suppression checks.
 * Reliability Fallback — Graceful failover back to WordPress native `wp_mail()` if the Mailtrap API call fails.
 * Site Health integration — Verification test checking Mailtrap token status and sending domain verification.
-* Advanced Admin Log — Search and filter logs, view rendered HTML/text bodies in modals, and manual email resend capability.
-* CSV Export — Download complete email logs directly from the dashboard.
+* Live Email Log — Browse and filter delivery data pulled directly from the Mailtrap API; search by recipient address, status, or date range with automatic pagination.
 * WP-CLI commands — Command-line management via `wp swifttrap` (test, stats, prune-logs, send-suppression-sync).
 * Attachment size guard — Configurable limits to prevent oversized files from rejecting at the API gateway.
 * Test email button on the settings page.
@@ -53,7 +52,7 @@ Send WordPress emails through the Mailtrap Email API (not SMTP). Bulk and transa
 
 = Privacy =
 
-This plugin sends email payloads (recipients, subject, body, attachments) to the Mailtrap API at `send.api.mailtrap.io` and `bulk.api.mailtrap.io`. Account stats are fetched from `mailtrap.io/api/accounts`. See the [Mailtrap Privacy Policy](https://mailtrap.io/privacy-policy). No data is sent anywhere else.
+This plugin sends email payloads (recipients, subject, body, attachments) to the Mailtrap API at `send.api.mailtrap.io` and `bulk.api.mailtrap.io`. Account stats and email logs are fetched from `mailtrap.io/api/accounts` and `mailtrap.io/api/email_logs`. See the [Mailtrap Privacy Policy](https://mailtrap.io/privacy-policy). No data is sent anywhere else.
 
 == Installation ==
 
@@ -102,7 +101,7 @@ Yes — 25 MB per email (matches Mailtrap's API limit).
 
 1. Settings page — API token, verified sender, stream routing.
 2. Stats page — sending domain verification status and suppression list (bounces, complaints, unsubscribes).
-3. Email log with retention controls.
+3. Email log — live Mailtrap API data with filters and pagination.
 4. Dashboard widget showing integration status, sender, and quick links to Stats and Settings.
 5. Test email confirmation.
 
