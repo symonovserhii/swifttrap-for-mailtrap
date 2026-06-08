@@ -72,15 +72,13 @@ class SwiftTrap_CLI {
 	}
 
 	/**
-	 * Clean old email logs.
+	 * No-op: local log files are no longer used; email history is in Mailtrap.
 	 *
 	 * @param array $args       Command positional arguments.
 	 * @param array $assoc_args Command associative arguments.
 	 */
 	public function prune_logs( array $args, array $assoc_args ): void {
-		WP_CLI::log( 'Pruning old logs...' );
-		swifttrap_mailtrap_cleanup_logs();
-		WP_CLI::success( 'Logs pruned successfully.' );
+		WP_CLI::success( 'Nothing to prune — email history is stored in Mailtrap.' );
 	}
 
 	/**

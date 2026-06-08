@@ -158,44 +158,6 @@ class PluginTest extends TestCase {
 	}
 
 	/**
-	 * Test log parsing resilience to JSON errors.
-	 */
-	public function test_log_json_error_resilience() {
-		// Mock log file retrieval
-		Monkey\Functions\expect( 'swifttrap_mailtrap_get_log_file' )
-			->andReturn( '/dummy/path.log' );
-
-		// Setup filesystem with corrupted/invalid JSON line + valid JSON line
-		$invalid_line = "{invalid_json_here}\n";
-		$valid_line   = json_encode( [
-			'timestamp' => '2026-05-31 12:00:00',
-			'status'    => 'success',
-			'to'        => [ [ 'email' => 'test@example.com' ] ],
-			'from'      => 'from@example.com',
-			'subject'   => 'Valid',
-		] ) . "\n";
-
-		$fs = Mockery::mock( 'WP_Filesystem_Base' );
-		$fs->shouldReceive( 'exists' )->andReturn( true );
-		$fs->shouldReceive( 'is_readable' )->andReturn( true );
-		$fs->shouldReceive( 'get_contents' )->andReturn( $invalid_line . $valid_line );
-
-		$GLOBALS['wp_filesystem'] = $fs;
-
-		// Verify read_email_logs skips corrupted lines and successfully parses valid ones
-		$res = swifttrap_mailtrap_read_email_logs( 20, 0 );
-		$this->assertCount( 1, $res['entries'] );
-		$this->assertEquals( 'Valid', $res['entries'][0]['subject'] );
-
-		// Verify compute_log_stats handles corrupted lines gracefully
-		Monkey\Functions\expect( 'wp_date' )->andReturn( '2026-05-31' );
-
-		$stats = swifttrap_mailtrap_compute_log_stats( 7 );
-		$this->assertEquals( 1, $stats['total_sent'] );
-		$this->assertEquals( 1, $stats['total_success'] );
-	}
-
-	/**
 	 * Test sending retry/backoff on network errors or timeouts.
 	 */
 	public function test_send_retry_timeout() {
@@ -217,7 +179,6 @@ class PluginTest extends TestCase {
 		Monkey\Functions\expect( 'swifttrap_mailtrap_should_use_bulk_stream' )->andReturn( false );
 		Monkey\Functions\expect( 'swifttrap_mailtrap_build_payload' )->andReturn( [] );
 		Monkey\Functions\expect( 'wp_json_encode' )->andReturn( '{}' );
-		Monkey\Functions\expect( 'swifttrap_mailtrap_log_email' )->andReturnNull();
 
 		// Mock remote post to fail twice on timeout, then succeed on 3rd attempt
 		Monkey\Functions\expect( 'wp_remote_post' )
@@ -256,7 +217,6 @@ class PluginTest extends TestCase {
 		Monkey\Functions\expect( 'swifttrap_mailtrap_should_use_bulk_stream' )->andReturn( false );
 		Monkey\Functions\expect( 'swifttrap_mailtrap_build_payload' )->andReturn( [] );
 		Monkey\Functions\expect( 'wp_json_encode' )->andReturn( '{}' );
-		Monkey\Functions\expect( 'swifttrap_mailtrap_log_email' )->andReturnNull();
 
 		// Mock remote post to consistently fail on 500 error code
 		Monkey\Functions\expect( 'wp_remote_post' )
@@ -335,8 +295,6 @@ class PluginTest extends TestCase {
 			->with( 'suppressed@example.com', Mockery::any() )
 			->andReturn( true );
 
-		Monkey\Functions\expect( 'swifttrap_mailtrap_log_email' )
-			->once();
 		Monkey\Functions\expect( 'swifttrap_mailtrap_trigger_failed' )
 			->once();
 
@@ -403,16 +361,15 @@ class PluginTest extends TestCase {
 			)
 		) ) );
 
-		Monkey\Functions\expect( 'swifttrap_mailtrap_update_log_status' )
+		Monkey\Actions\expectDone( 'swifttrap_mailtrap_webhook_event' )
 			->once()
-			->with( 'msg-uuid-456', 'delivered' )
-			->andReturn( true );
+			->with( array( 'message_id' => 'msg-uuid-456', 'event' => 'delivered' ) );
 
 		$response = swifttrap_mailtrap_handle_webhook_request( $request );
 
 		$this->assertInstanceOf( \WP_REST_Response::class, $response );
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( array( 'success' => true, 'updated' => 1 ), $response->get_data() );
+		$this->assertEquals( array( 'success' => true, 'count' => 1 ), $response->get_data() );
 	}
 
 	/**
@@ -433,92 +390,4 @@ class PluginTest extends TestCase {
 		$this->assertEquals( 'swifttrap_webhook_unauthorized', $response->get_error_code() );
 	}
 
-	/**
-	 * Test mapping of log entries to CSV rows.
-	 */
-	public function test_csv_row_building() {
-		$entry = array(
-			'timestamp'   => '2026-06-01 10:00:00',
-			'status'      => 'delivered',
-			'from'        => 'sender@example.com',
-			'to'          => array(
-				array( 'email' => 'to1@example.com', 'name' => 'John Doe' ),
-				array( 'email' => 'to2@example.com' ),
-			),
-			'subject'     => '=1+1',
-			'category'    => 'promotional',
-			'http_status' => 200,
-			'message'     => '@payload',
-		);
-
-		$row = swifttrap_mailtrap_build_csv_row( $entry );
-
-		$this->assertIsArray( $row );
-		$this->assertCount( 8, $row );
-		$this->assertEquals( '2026-06-01 10:00:00', $row[0] );
-		$this->assertEquals( 'delivered', $row[1] );
-		$this->assertEquals( 'sender@example.com', $row[2] );
-		$this->assertEquals( 'John Doe <to1@example.com>, to2@example.com', $row[3] );
-		$this->assertEquals( "'=1+1", $row[4] );
-		$this->assertEquals( 'promotional', $row[5] );
-		$this->assertEquals( 200, $row[6] );
-		$this->assertEquals( "'@payload", $row[7] );
-	}
-
-	/**
-	 * Test aggregation of email log statistics.
-	 */
-	public function test_analytics_aggregation() {
-		Monkey\Functions\expect( 'swifttrap_mailtrap_get_log_file' )
-			->andReturn( '/dummy/path.log' );
-
-		$now_time       = time();
-		$today_date     = date( 'Y-m-d', $now_time );
-		$yesterday_date = date( 'Y-m-d', strtotime( '-1 day', $now_time ) );
-
-		$entry1 = array(
-			'timestamp' => date( 'Y-m-d H:i:s', $now_time ),
-			'status'    => 'success',
-			'category'  => 'promotional',
-		);
-		$entry2 = array(
-			'timestamp' => date( 'Y-m-d H:i:s', $now_time ),
-			'status'    => 'failed',
-			'category'  => 'promotional',
-		);
-		$entry3 = array(
-			'timestamp' => date( 'Y-m-d H:i:s', strtotime( '-1 day', $now_time ) ),
-			'status'    => 'success',
-			'category'  => 'transactional',
-		);
-		$entry4 = array(
-			'timestamp' => date( 'Y-m-d H:i:s', strtotime( '-10 days', $now_time ) ),
-			'status'    => 'success',
-			'category'  => 'transactional',
-		);
-
-		$log_content = json_encode( $entry1 ) . "\n"
-			. json_encode( $entry2 ) . "\n"
-			. json_encode( $entry3 ) . "\n"
-			. json_encode( $entry4 ) . "\n";
-
-		$fs = Mockery::mock( 'WP_Filesystem_Base' );
-		$fs->shouldReceive( 'exists' )->andReturn( true );
-		$fs->shouldReceive( 'is_readable' )->andReturn( true );
-		$fs->shouldReceive( 'get_contents' )->andReturn( $log_content );
-
-		$GLOBALS['wp_filesystem'] = $fs;
-
-		Monkey\Functions\expect( 'set_transient' )->andReturn( true );
-
-		$stats = swifttrap_mailtrap_compute_log_stats( 7 );
-
-		$this->assertEquals( 3, $stats['total_sent'] );
-		$this->assertEquals( 2, $stats['total_success'] );
-		$this->assertEquals( 1, $stats['total_failed'] );
-		$this->assertEquals( 66.7, $stats['success_rate'] );
-		$this->assertEquals( array( 'promotional' => 2, 'transactional' => 1 ), $stats['by_category'] );
-		$this->assertEquals( 2, $stats['daily_volume'][ $today_date ] );
-		$this->assertEquals( 1, $stats['daily_volume'][ $yesterday_date ] );
-	}
 }

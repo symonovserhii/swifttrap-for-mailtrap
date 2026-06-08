@@ -12,7 +12,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 
 add_action( 'admin_init', 'swifttrap_mailtrap_register_settings' );
-add_action( 'admin_init', 'swifttrap_mailtrap_handle_csv_export' );
 add_action( 'admin_menu', 'swifttrap_mailtrap_register_menu' );
 add_action( 'admin_enqueue_scripts', 'swifttrap_mailtrap_admin_assets' );
 add_action( 'wp_dashboard_setup', 'swifttrap_mailtrap_register_dashboard_widget' );
@@ -32,81 +31,6 @@ function swifttrap_mailtrap_register_settings(): void {
 			'default'           => swifttrap_mailtrap_default_settings(),
 		)
 	);
-}
-
-/**
- * Handle CSV export request.
- */
-function swifttrap_mailtrap_handle_csv_export(): void {
-	if ( ! isset( $_GET['swifttrap_export_csv'] ) ) {
-		return;
-	}
-
-	if ( ! current_user_can( 'manage_options' ) ) {
-		wp_die( esc_html__( 'Permission denied.', 'swifttrap-for-mailtrap' ) );
-	}
-
-	check_admin_referer( 'swifttrap_export_csv', '_nonce' );
-
-	$log_result = swifttrap_mailtrap_read_email_logs( 9999, 0 );
-	$logs       = $log_result['entries'];
-
-	header( 'Content-Type: text/csv; charset=utf-8' );
-	header( 'Content-Disposition: attachment; filename=swifttrap-email-logs-' . wp_date( 'Y-m-d' ) . '.csv' );
-
-	$output = fopen( 'php://output', 'w' );
-	fputcsv( $output, array( 'Timestamp', 'Status', 'From', 'To', 'Subject', 'Category', 'HTTP Status', 'Message' ) );
-
-	foreach ( $logs as $entry ) {
-		fputcsv( $output, swifttrap_mailtrap_build_csv_row( $entry ) );
-	}
-
-	fclose( $output );
-	exit;
-}
-
-/**
- * Format a log entry into a CSV row.
- *
- * @param array $entry Log entry.
- *
- * @return array CSV row fields.
- */
-function swifttrap_mailtrap_build_csv_row( array $entry ): array {
-	$recipients = array();
-	if ( ! empty( $entry['to'] ) && is_array( $entry['to'] ) ) {
-		foreach ( $entry['to'] as $to ) {
-			$email        = $to['email'] ?? '';
-			$name         = $to['name'] ?? '';
-			$recipients[] = $name ? "{$name} <{$email}>" : $email;
-		}
-	}
-
-	return array(
-		swifttrap_mailtrap_escape_csv_cell( $entry['timestamp'] ?? '' ),
-		swifttrap_mailtrap_escape_csv_cell( $entry['status'] ?? '' ),
-		swifttrap_mailtrap_escape_csv_cell( $entry['from'] ?? '' ),
-		swifttrap_mailtrap_escape_csv_cell( implode( ', ', $recipients ) ),
-		swifttrap_mailtrap_escape_csv_cell( $entry['subject'] ?? '' ),
-		swifttrap_mailtrap_escape_csv_cell( $entry['category'] ?? '' ),
-		swifttrap_mailtrap_escape_csv_cell( $entry['http_status'] ?? '' ),
-		swifttrap_mailtrap_escape_csv_cell( $entry['message'] ?? '' ),
-	);
-}
-
-/**
- * Escape a cell value for CSV export to prevent Formula Injection (CSV Injection).
- *
- * @param mixed $value Cell value.
- *
- * @return string Escaped cell value.
- */
-function swifttrap_mailtrap_escape_csv_cell( $value ): string {
-	$value = (string) $value;
-	if ( '' !== $value && in_array( $value[0], array( '=', '+', '-', '@' ), true ) ) {
-		return "'" . $value;
-	}
-	return $value;
 }
 
 /**
@@ -134,10 +58,9 @@ function swifttrap_mailtrap_admin_assets( string $hook ): void {
 
 	wp_localize_script( 'jquery-core', 'swifttrapStats', array(
 		'nonce'                    => wp_create_nonce( 'swifttrap_load_api_data' ),
+		'emails_nonce'             => wp_create_nonce( 'swifttrap_load_emails' ),
 		'add_suppression_nonce'    => wp_create_nonce( 'swifttrap_add_suppression' ),
 		'delete_suppression_nonce' => wp_create_nonce( 'swifttrap_delete_suppression' ),
-		'get_log_details_nonce'    => wp_create_nonce( 'swifttrap_get_log_details' ),
-		'resend_email_nonce'       => wp_create_nonce( 'swifttrap_resend_email' ),
 		'l10n'                     => array(
 			'sent'           => __( 'sent', 'swifttrap-for-mailtrap' ),
 			'limit'          => __( 'limit', 'swifttrap-for-mailtrap' ),
@@ -156,6 +79,20 @@ function swifttrap_mailtrap_admin_assets( string $hook ): void {
 			'supError'       => __( 'Unable to load suppressions.', 'swifttrap-for-mailtrap' ),
 			'loadError'      => __( 'Failed to load data. Please refresh the page.', 'swifttrap-for-mailtrap' ),
 			'remove'         => __( 'Remove', 'swifttrap-for-mailtrap' ),
+			'emailLogs'      => __( 'Email Logs', 'swifttrap-for-mailtrap' ),
+			'colFrom'        => __( 'From', 'swifttrap-for-mailtrap' ),
+			'colTo'          => __( 'To', 'swifttrap-for-mailtrap' ),
+			'colSubject'     => __( 'Subject', 'swifttrap-for-mailtrap' ),
+			'colCategory'    => __( 'Category', 'swifttrap-for-mailtrap' ),
+			'colStatus'      => __( 'Status', 'swifttrap-for-mailtrap' ),
+			'colDate'        => __( 'Date', 'swifttrap-for-mailtrap' ),
+			'noEmails'       => __( 'No emails found.', 'swifttrap-for-mailtrap' ),
+			'emailsError'    => __( 'Unable to load email logs.', 'swifttrap-for-mailtrap' ),
+			'prevPage'       => __( '&laquo; Prev', 'swifttrap-for-mailtrap' ),
+			'nextPage'       => __( 'Next &raquo;', 'swifttrap-for-mailtrap' ),
+			'search'         => __( 'Search...', 'swifttrap-for-mailtrap' ),
+			'allStatuses'    => __( 'All statuses', 'swifttrap-for-mailtrap' ),
+			'pageOf'         => __( 'Page %1$s of %2$s', 'swifttrap-for-mailtrap' ),
 		),
 	) );
 
@@ -177,16 +114,6 @@ function swifttrap_mailtrap_admin_assets( string $hook ): void {
 					btn.prop("disabled",false).text("' . esc_js( __( 'Send Test Email', 'swifttrap-for-mailtrap' ) ) . '");
 					result.addClass("swifttrap-test-result--error").text("' . esc_js( __( 'Request failed.', 'swifttrap-for-mailtrap' ) ) . '");
 				});
-			});
-			// Clear Logs
-			$(document).on("click","#swifttrap-clear-logs",function(){
-				if(!confirm("' . esc_js( __( 'Are you sure you want to clear all email logs?', 'swifttrap-for-mailtrap' ) ) . '")) return;
-				var btn = $(this);
-				btn.prop("disabled",true);
-				$.post(ajaxurl,{action:"swifttrap_clear_logs",_nonce:btn.data("nonce")},function(r){
-					if(r.success){ location.reload(); }
-					else{ alert(r.data.message); btn.prop("disabled",false); }
-				}).fail(function(){ btn.prop("disabled",false); });
 			});
 			// Verify API Token
 			$(document).on("click","#swifttrap-verify-token",function(){
@@ -257,52 +184,6 @@ function swifttrap_mailtrap_admin_assets( string $hook ): void {
 					alert("' . esc_js( __( 'Request failed.', 'swifttrap-for-mailtrap' ) ) . '");
 				});
 			});
-
-			// View Log Payload
-			$(document).on("click",".swifttrap-view-log",function(e){
-				e.preventDefault();
-				var link = $(this), id = link.data("id"), nonce = link.data("nonce");
-				$.post(ajaxurl,{action:"swifttrap_get_log_details",id:id,_nonce:nonce},function(r){
-					if(r.success){
-						$("#swifttrap-modal-subject").text(r.data.subject);
-						var bodyContent = r.data.body;
-						if (r.data.content_type.indexOf("text/html") !== -1) {
-							var escapedBody = $("<div>").text(bodyContent).html().replace(/"/g, "&quot;").replace(/\x27/g, "&#39;");
-							$("#swifttrap-modal-body").html("<iframe sandbox=\"\" srcdoc=\"" + escapedBody + "\" style=\"width:100%;height:300px;border:1px solid #ddd;\"></iframe>");
-						} else {
-							$("#swifttrap-modal-body").html("<pre style=\"white-space:pre-wrap;background:#f9f9f9;padding:10px;border:1px solid #ddd;\">" + $("<span>").text(bodyContent).html() + "</pre>");
-						}
-						$("#swifttrap-log-modal").fadeIn(200);
-					}else{
-						alert(r.data.message);
-					}
-				});
-			});
-
-			// Resend Log
-			$(document).on("click",".swifttrap-resend-log",function(e){
-				e.preventDefault();
-				if(!confirm("' . esc_js( __( 'Are you sure you want to resend this email?', 'swifttrap-for-mailtrap' ) ) . '")) return;
-				var link = $(this), id = link.data("id"), nonce = link.data("nonce");
-				link.css("pointer-events", "none").css("opacity", "0.5");
-				$.post(ajaxurl,{action:"swifttrap_resend_email",id:id,_nonce:nonce},function(r){
-					link.css("pointer-events", "auto").css("opacity", "1");
-					if(r.success){
-						alert(r.data.message);
-						location.reload();
-					}else{
-						alert(r.data.message);
-					}
-				}).fail(function(){
-					link.css("pointer-events", "auto").css("opacity", "1");
-					alert("' . esc_js( __( 'Request failed.', 'swifttrap-for-mailtrap' ) ) . '");
-				});
-			});
-
-			// Close Modal
-			$(document).on("click",".swifttrap-modal-close, .swifttrap-modal-close-btn",function(){
-				$("#swifttrap-log-modal").fadeOut(200);
-			});
 		});
 	' );
 
@@ -332,8 +213,8 @@ function swifttrap_mailtrap_admin_assets( string $hook ): void {
 						h+="<div class=\"swifttrap-quota-bar__label\"><span>"+sent.toLocaleString()+" "+esc(L.sent)+"</span><span>"+lim.toLocaleString()+" "+esc(L.limit)+"</span></div>";
 					}
 					h+="<div class=\"swifttrap-stats-grid\">";
-					h+="<div class=\"swifttrap-info-block\"><div class=\"swifttrap-info-label\">"+esc(L.plan)+"</div><div class=\"swifttrap-info-value\">"+esc(s.plan||"\u2014")+"</div></div>";
-					h+="<div class=\"swifttrap-info-block\"><div class=\"swifttrap-info-label\">"+esc(L.team)+"</div><div class=\"swifttrap-info-value\">"+esc(s.team||"\u2014")+"</div></div>";
+					h+="<div class=\"swifttrap-info-block\"><div class=\"swifttrap-info-label\">"+esc(L.plan)+"</div><div class=\"swifttrap-info-value\">"+esc(s.plan||"—")+"</div></div>";
+					h+="<div class=\"swifttrap-info-block\"><div class=\"swifttrap-info-label\">"+esc(L.team)+"</div><div class=\"swifttrap-info-value\">"+esc(s.team||"—")+"</div></div>";
 					h+="</div>";
 					$u.html(h);
 				}else{
@@ -429,6 +310,111 @@ function swifttrap_mailtrap_admin_assets( string $hook ): void {
 				var e=err(L.loadError);
 				$u.html(e);$("#swifttrap-domains-card .swifttrap-card__body").html(e);
 				$("#swifttrap-suppressions-card .swifttrap-card__body").html(e);
+			});
+		});
+
+		/* --- Email Logs (independent of stats AJAX) --- */
+		jQuery(function($){
+			var $et=$("#swifttrap-emails-table-wrap"), $ep=$("#swifttrap-emails-pagination");
+			if(!$et.length)return;
+			var L=swifttrapStats.l10n;
+			function esc(t){return $("<span>").text(t).html();}
+			function err(m){return "<p class=\"swifttrap-error\">"+esc(m)+"</p>";}
+
+			var STATUS_CLASSES={
+				delivered:"swifttrap-status--delivered",
+				not_delivered:"swifttrap-status--bounced",
+				enqueued:"swifttrap-status--opened",
+				opted_out:"swifttrap-status--unsub"
+			};
+
+			var PAGE_SIZE=20;
+			/* allEntries: buffer of all fetched entries; localPage: current display offset */
+			var allEntries=[], apiTotal=0, nextApiCursor=null, localPage=0, loading=false;
+
+			function renderTable(){
+				var start=localPage*PAGE_SIZE,
+					slice=allEntries.slice(start,start+PAGE_SIZE);
+				if(!slice.length){$et.html("<p>"+esc(L.noEmails)+"</p>");$ep.html("");return;}
+				var th=function(t){return "<th>"+esc(t)+"</th>";};
+				var h="<table class=\"wp-list-table widefat fixed striped\">";
+				h+="<thead><tr>"+th(L.colDate)+th(L.colFrom)+th(L.colTo)+th(L.colSubject)+th(L.colCategory)+th(L.colStatus)+"</tr></thead><tbody>";
+				$.each(slice,function(i,em){
+					var status=em.status||"—",sc=STATUS_CLASSES[status]||"",
+						sentAt=em.sent_at||"",
+						dateStr=sentAt?new Date(sentAt).toLocaleString():"—",
+						fromAddr=em.from||"—",
+						toAddr=em.to||"—";
+					if(Array.isArray(toAddr))toAddr=toAddr.join(", ");
+					h+="<tr>";
+					h+="<td>"+esc(dateStr)+"</td>";
+					h+="<td>"+esc(fromAddr)+"</td>";
+					h+="<td title=\""+esc(toAddr)+"\">"+esc(toAddr.length>40?toAddr.substring(0,40)+"…":toAddr)+"</td>";
+					h+="<td title=\""+esc(em.subject||"—")+"\">"+esc(em.subject?em.subject.substring(0,50)+(em.subject.length>50?"…":""):"—")+"</td>";
+					h+="<td>"+esc(em.category||em.sending_stream||"—")+"</td>";
+					h+="<td><span class=\"swifttrap-email-status "+sc+"\">"+esc(status)+"</span></td>";
+					h+="</tr>";
+				});
+				h+="</tbody></table>";
+				$et.html(h);
+				var from=start+1,to=Math.min(start+PAGE_SIZE,allEntries.length),
+					total=apiTotal||allEntries.length,pag="";
+				if(localPage>0)
+					pag+="<button class=\"button\" id=\"swifttrap-email-prev\">"+L.prevPage+"</button>";
+				pag+="<span style=\"margin:0 8px;\">"+esc(from+"–"+to+" / "+total.toLocaleString())+"</span>";
+				var hasNextLocal=allEntries.length>start+PAGE_SIZE,
+					hasNextApi=nextApiCursor!==null;
+				if(hasNextLocal||hasNextApi)
+					pag+="<button class=\"button\" id=\"swifttrap-email-next\">"+L.nextPage+"</button>";
+				$ep.html(pag);
+			}
+
+			function fetchFromApi(cursor,onDone){
+				loading=true;
+				$et.html("<p class=\"swifttrap-loading\">Loading...</p>");$ep.html("");
+				$.post(ajaxurl,{
+					action:"swifttrap_load_emails",
+					_nonce:swifttrapStats.emails_nonce,
+					cursor:cursor||"",
+					search:$("#swifttrap-email-search").val(),
+					status:$("#swifttrap-email-status").val(),
+					date_from:$("#swifttrap-email-date-from").val(),
+					date_to:$("#swifttrap-email-date-to").val()
+				},function(r){
+					loading=false;
+					if(!r.success){$et.html(err(r.data&&r.data.message||L.emailsError));return;}
+					var d=r.data;
+					allEntries=allEntries.concat(d.entries||[]);
+					apiTotal=d.total||0;
+					nextApiCursor=d.next_cursor||null;
+					if(onDone)onDone();
+					renderTable();
+				}).fail(function(){loading=false;$et.html(err(L.emailsError));$ep.html("");});
+			}
+
+			function reset(){
+				allEntries=[];apiTotal=0;nextApiCursor=null;localPage=0;
+				fetchFromApi("",null);
+			}
+
+			reset();
+
+			$(document).on("click","#swifttrap-email-next",function(){
+				if(loading)return;
+				var nextStart=(localPage+1)*PAGE_SIZE;
+				if(allEntries.length>nextStart){
+					localPage++;renderTable();
+				}else if(nextApiCursor){
+					localPage++;
+					fetchFromApi(nextApiCursor,null);
+				}
+			});
+			$(document).on("click","#swifttrap-email-prev",function(){
+				if(localPage>0){localPage--;renderTable();}
+			});
+			$(document).on("click","#swifttrap-email-filter-btn",function(){reset();});
+			$(document).on("keypress","#swifttrap-email-search",function(e){
+				if(e.which===13)reset();
 			});
 		});
 	' );
@@ -584,35 +570,9 @@ function swifttrap_mailtrap_settings_page(): void {
 
 				</div>
 
-				<!-- Email Logging Section -->
+				<!-- Attachments Section -->
 				<div class="swifttrap-card">
-					<h3><?php esc_html_e( 'Email Logging', 'swifttrap-for-mailtrap' ); ?></h3>
-					<p><?php esc_html_e( 'Configure email logging to keep track of sent messages.', 'swifttrap-for-mailtrap' ); ?></p>
-
-					<!-- Log Emails -->
-					<div class="swifttrap-field-group">
-						<label class="swifttrap-checkbox-label">
-							<input type="checkbox" name="<?php echo esc_attr( SWIFTTRAP_MAILTRAP_OPTION_KEY ); ?>[log_emails]" value="1" <?php checked( $settings['log_emails'], 1 ); ?> />
-							<?php esc_html_e( 'Keep detailed logs of all sent emails', 'swifttrap-for-mailtrap' ); ?>
-						</label>
-						<p class="swifttrap-field-help"><?php esc_html_e( 'Logs will be stored in wp-content/uploads/swifttrap-for-mailtrap/swifttrap-emails.log', 'swifttrap-for-mailtrap' ); ?></p>
-					</div>
-
-					<!-- Log Retention Days -->
-					<div class="swifttrap-field-group">
-						<label class="swifttrap-field-label"><?php esc_html_e( 'Log retention (days)', 'swifttrap-for-mailtrap' ); ?></label>
-						<input type="number" name="<?php echo esc_attr( SWIFTTRAP_MAILTRAP_OPTION_KEY ); ?>[log_retention_days]" value="<?php echo esc_attr( $settings['log_retention_days'] ); ?>" class="swifttrap-input-small" min="1" max="365" />
-						<p class="swifttrap-field-help"><?php esc_html_e( 'How long to keep email logs (1-365 days). Old logs are automatically deleted.', 'swifttrap-for-mailtrap' ); ?></p>
-					</div>
-
-					<!-- Logs Per Page -->
-					<div class="swifttrap-field-group">
-						<label class="swifttrap-field-label"><?php esc_html_e( 'Logs per page', 'swifttrap-for-mailtrap' ); ?></label>
-						<input type="number" name="<?php echo esc_attr( SWIFTTRAP_MAILTRAP_OPTION_KEY ); ?>[logs_per_page]" value="<?php echo esc_attr( $settings['logs_per_page'] ); ?>" class="swifttrap-input-small" min="5" max="100" />
-						<p class="swifttrap-field-help"><?php esc_html_e( 'Number of email logs to display per page on Stats page (5-100).', 'swifttrap-for-mailtrap' ); ?></p>
-					</div>
-
-					<!-- Max Attachment Size -->
+					<h3><?php esc_html_e( 'Attachments', 'swifttrap-for-mailtrap' ); ?></h3>
 					<div class="swifttrap-field-group">
 						<label class="swifttrap-field-label"><?php esc_html_e( 'Max attachment size (MB)', 'swifttrap-for-mailtrap' ); ?></label>
 						<input type="number" name="<?php echo esc_attr( SWIFTTRAP_MAILTRAP_OPTION_KEY ); ?>[max_attachment_size_mb]" value="<?php echo esc_attr( $settings['max_attachment_size_mb'] ?? 25 ); ?>" class="swifttrap-input-small" min="1" max="25" />
@@ -724,111 +684,16 @@ function swifttrap_mailtrap_settings_page(): void {
 }
 
 /**
- * Format email log entry for display.
- *
- * @param array $entry Log entry from swifttrap-emails.log.
- *
- * @return array|null Formatted entry with display strings.
- */
-function swifttrap_mailtrap_format_log_entry( mixed $entry ): ?array {
-	if ( ! is_array( $entry ) ) {
-		return null;
-	}
-
-	$status_key = $entry['status'] ?? 'failed';
-	switch ( $status_key ) {
-		case 'delivered':
-			$status_label = __( 'Delivered', 'swifttrap-for-mailtrap' );
-			$status_class = 'swifttrap-log-status--delivered';
-			break;
-		case 'bounce':
-		case 'bounced':
-			$status_label = __( 'Bounced', 'swifttrap-for-mailtrap' );
-			$status_class = 'swifttrap-log-status--bounced';
-			break;
-		case 'spam':
-			$status_label = __( 'Spam', 'swifttrap-for-mailtrap' );
-			$status_class = 'swifttrap-log-status--spam';
-			break;
-		case 'open':
-		case 'opened':
-			$status_label = __( 'Opened', 'swifttrap-for-mailtrap' );
-			$status_class = 'swifttrap-log-status--opened';
-			break;
-		case 'click':
-		case 'clicked':
-			$status_label = __( 'Clicked', 'swifttrap-for-mailtrap' );
-			$status_class = 'swifttrap-log-status--clicked';
-			break;
-		case 'success':
-			$status_label = __( 'Success', 'swifttrap-for-mailtrap' );
-			$status_class = 'swifttrap-log-status--success';
-			break;
-		case 'failed':
-		default:
-			$status_label = __( 'Failed', 'swifttrap-for-mailtrap' );
-			$status_class = 'swifttrap-log-status--failed';
-			break;
-	}
-
-	// Format recipient list.
-	$recipients = array();
-	if ( ! empty( $entry['to'] ) && is_array( $entry['to'] ) ) {
-		foreach ( $entry['to'] as $to ) {
-			$email = $to['email'] ?? '';
-			$name  = $to['name'] ?? '';
-			$recipients[] = $name ? "{$name} <{$email}>" : $email;
-		}
-	}
-
-	return array(
-		'timestamp'    => $entry['timestamp'] ? wp_date( 'd.m.Y H:i', strtotime( $entry['timestamp'] ) ) : '',
-		'status'       => $status_label,
-		'status_class' => $status_class,
-		'from'         => $entry['from'] ?? '',
-		'to'           => implode( ', ', $recipients ),
-		'subject'      => $entry['subject'] ?? '',
-		'http_status'  => $entry['http_status'] ?? '—',
-		'message'      => $entry['message'] ?? '',
-	);
-}
-
-/**
- * Stats page with usage, analytics, categories, daily chart, and logs.
+ * Stats page with usage, domains, and suppressions from Mailtrap API.
  */
 function swifttrap_mailtrap_stats_page(): void {
 	if ( ! current_user_can( 'manage_options' ) ) {
 		return;
 	}
 
-	$settings  = swifttrap_mailtrap_get_settings();
-	$log_stats = swifttrap_mailtrap_compute_log_stats( 7 );
-
-	// Get filter parameters.
-	$filters = array(
-		'search'   => isset( $_GET['s'] ) ? sanitize_text_field( wp_unslash( $_GET['s'] ) ) : '',
-		'category' => isset( $_GET['cat'] ) ? sanitize_text_field( wp_unslash( $_GET['cat'] ) ) : '',
-		'status'   => isset( $_GET['status'] ) ? sanitize_text_field( wp_unslash( $_GET['status'] ) ) : '',
-		'date'     => isset( $_GET['date'] ) ? sanitize_text_field( wp_unslash( $_GET['date'] ) ) : '',
-	);
-
-	// Get pagination parameters.
-	// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only pagination parameter.
-	$page     = isset( $_GET['swifttrap_page'] ) ? max( 1, absint( wp_unslash( $_GET['swifttrap_page'] ) ) ) : 1;
-	// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only per-page parameter.
-	$per_page = isset( $_GET['swifttrap_per_page'] )
-		? max( 5, min( 100, absint( wp_unslash( $_GET['swifttrap_per_page'] ) ) ) )
-		: $settings['logs_per_page'];
-
-	// Read logs with offset-based pagination (newest first).
-	$start_index = ( $page - 1 ) * $per_page;
-	$log_result  = swifttrap_mailtrap_read_email_logs( $per_page, $start_index, $filters );
-	$logs        = $log_result['entries'];
-	$total_logs  = $log_result['total'];
-	$total_pages = max( 1, (int) ceil( $total_logs / $per_page ) );
-	$page        = min( $page, $total_pages );
+	$settings = swifttrap_mailtrap_get_settings();
 	?>
-	<div class="wrap" data-api-nonce="<?php echo esc_attr( wp_create_nonce( 'swifttrap_load_api_data' ) ); ?>">
+	<div class="wrap">
 		<h1><?php esc_html_e( 'Mailtrap Stats', 'swifttrap-for-mailtrap' ); ?></h1>
 
 		<!-- Row 1: Usage + Mailtrap link -->
@@ -865,242 +730,26 @@ function swifttrap_mailtrap_stats_page(): void {
 			</div>
 		</div>
 
-		<!-- Row 3: Email Analytics + Categories -->
-		<div class="swifttrap-grid">
-			<div class="swifttrap-card">
-				<h2><?php esc_html_e( 'Email Analytics', 'swifttrap-for-mailtrap' ); ?></h2>
-				<?php if ( $log_stats['total_sent'] > 0 ) : ?>
-					<div class="swifttrap-stats-summary">
-						<div class="swifttrap-stats-summary__item">
-							<span class="swifttrap-stats-summary__label"><?php esc_html_e( 'Sent', 'swifttrap-for-mailtrap' ); ?></span>
-							<span class="swifttrap-stats-summary__value swifttrap-stats-summary__value--success"><?php echo esc_html( number_format_i18n( $log_stats['total_success'] ) ); ?></span>
-							<span class="swifttrap-stats-summary__sub"><?php
-							/* translators: %d: total number of emails sent */
-							printf( esc_html__( '%d total', 'swifttrap-for-mailtrap' ), absint( $log_stats['total_sent'] ) );
-						?></span>
-						</div>
-						<div class="swifttrap-stats-summary__item">
-							<span class="swifttrap-stats-summary__label"><?php esc_html_e( 'Failed', 'swifttrap-for-mailtrap' ); ?></span>
-							<span class="swifttrap-stats-summary__value swifttrap-stats-summary__value--failed"><?php echo esc_html( number_format_i18n( $log_stats['total_failed'] ) ); ?></span>
-						</div>
-						<div class="swifttrap-stats-summary__item">
-							<span class="swifttrap-stats-summary__label"><?php esc_html_e( 'Success Rate', 'swifttrap-for-mailtrap' ); ?></span>
-							<span class="swifttrap-stats-summary__value"><?php echo esc_html( $log_stats['success_rate'] . '%' ); ?></span>
-						</div>
-					</div>
-
-					<?php if ( ! empty( $log_stats['daily_volume'] ) ) :
-						$max_volume = max( 1, max( $log_stats['daily_volume'] ) );
-					?>
-						<h3><?php esc_html_e( 'Daily Volume (7 days)', 'swifttrap-for-mailtrap' ); ?></h3>
-						<div class="swifttrap-daily-chart">
-							<?php foreach ( $log_stats['daily_volume'] as $date => $count ) :
-								$bar_pct = round( ( $count / $max_volume ) * 100 );
-							?>
-								<div class="swifttrap-daily-chart__bar">
-									<div class="swifttrap-daily-chart__bar-fill" style="height: <?php echo esc_attr( $bar_pct ); ?>%;" title="<?php echo esc_attr( $count ); ?>"></div>
-								</div>
-							<?php endforeach; ?>
-						</div>
-						<div class="swifttrap-daily-chart__labels">
-							<?php foreach ( $log_stats['daily_volume'] as $date => $count ) : ?>
-								<span><?php echo esc_html( wp_date( 'D', strtotime( $date ) ) ); ?></span>
-							<?php endforeach; ?>
-						</div>
-					<?php endif; ?>
-				<?php else : ?>
-					<p><?php esc_html_e( 'No log data. Enable logging in Settings.', 'swifttrap-for-mailtrap' ); ?></p>
-				<?php endif; ?>
+		<!-- Row 3: Email Logs -->
+		<div class="swifttrap-card swifttrap-card--full" id="swifttrap-emails-card">
+			<h2><?php esc_html_e( 'Email Logs', 'swifttrap-for-mailtrap' ); ?></h2>
+			<div class="swifttrap-email-filters" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+				<input type="text" id="swifttrap-email-search" placeholder="<?php esc_attr_e( 'Search by recipient email...', 'swifttrap-for-mailtrap' ); ?>" style="flex:1;min-width:160px;" />
+				<select id="swifttrap-email-status" style="min-width:140px;">
+					<option value=""><?php esc_html_e( 'All statuses', 'swifttrap-for-mailtrap' ); ?></option>
+					<option value="delivered"><?php esc_html_e( 'Delivered', 'swifttrap-for-mailtrap' ); ?></option>
+					<option value="not_delivered"><?php esc_html_e( 'Not Delivered', 'swifttrap-for-mailtrap' ); ?></option>
+					<option value="enqueued"><?php esc_html_e( 'Enqueued', 'swifttrap-for-mailtrap' ); ?></option>
+					<option value="opted_out"><?php esc_html_e( 'Opted Out', 'swifttrap-for-mailtrap' ); ?></option>
+				</select>
+				<input type="date" id="swifttrap-email-date-from" title="<?php esc_attr_e( 'From date', 'swifttrap-for-mailtrap' ); ?>" style="width:140px;" />
+				<input type="date" id="swifttrap-email-date-to" title="<?php esc_attr_e( 'To date', 'swifttrap-for-mailtrap' ); ?>" style="width:140px;" />
+				<button class="button" id="swifttrap-email-filter-btn"><?php esc_html_e( 'Filter', 'swifttrap-for-mailtrap' ); ?></button>
 			</div>
-			<div class="swifttrap-card">
-				<h2><?php esc_html_e( 'Categories', 'swifttrap-for-mailtrap' ); ?></h2>
-				<?php if ( ! empty( $log_stats['by_category'] ) ) : ?>
-					<ul class="swifttrap-category-list">
-						<?php foreach ( $log_stats['by_category'] as $cat_name => $cat_count ) : ?>
-							<li>
-								<span class="swifttrap-category-badge"><?php echo esc_html( $cat_name ); ?></span>
-								<span class="swifttrap-category-count"><?php echo esc_html( number_format_i18n( $cat_count ) ); ?></span>
-							</li>
-						<?php endforeach; ?>
-					</ul>
-				<?php else : ?>
-					<p><?php esc_html_e( 'No category data available.', 'swifttrap-for-mailtrap' ); ?></p>
-				<?php endif; ?>
+			<div id="swifttrap-emails-table-wrap">
+				<p class="swifttrap-loading"><?php esc_html_e( 'Loading...', 'swifttrap-for-mailtrap' ); ?></p>
 			</div>
-		</div>
-
-		<!-- Row 4: Recent Email Logs -->
-		<div class="swifttrap-logs-section">
-			<div class="swifttrap-card">
-				<div class="swifttrap-logs-header">
-					<h2><?php esc_html_e( 'Recent Email Logs', 'swifttrap-for-mailtrap' ); ?></h2>
-					<div class="swifttrap-logs-header__actions">
-						<a href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin.php?page=swifttrap-for-mailtrap&swifttrap_export_csv=1' ), 'swifttrap_export_csv', '_nonce' ) ); ?>" class="button button-secondary"><?php esc_html_e( 'Export to CSV', 'swifttrap-for-mailtrap' ); ?></a>
-						<button type="button" id="swifttrap-clear-logs" class="button" data-nonce="<?php echo esc_attr( wp_create_nonce( 'swifttrap_clear_logs' ) ); ?>">
-							<?php esc_html_e( 'Clear Logs', 'swifttrap-for-mailtrap' ); ?>
-						</button>
-						<span class="swifttrap-timezone">
-							<?php
-							$timezone = get_option( 'timezone_string' );
-							if ( empty( $timezone ) ) {
-								$offset = get_option( 'gmt_offset' );
-								$timezone = 'UTC' . ( $offset >= 0 ? '+' : '' ) . $offset;
-							}
-							/* translators: %s: timezone name */
-							printf( esc_html__( 'Times in %s', 'swifttrap-for-mailtrap' ), esc_html( $timezone ) );
-							?>
-						</span>
-					</div>
-				</div>
-
-				<!-- Search / Filter Form -->
-				<form method="get" action="" style="margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
-					<input type="hidden" name="page" value="swifttrap-for-mailtrap" />
-					<input type="text" name="s" placeholder="<?php esc_attr_e( 'Search recipient / subject...', 'swifttrap-for-mailtrap' ); ?>" value="<?php echo esc_attr( $filters['search'] ); ?>" style="max-width: 250px; margin: 0;" />
-					
-					<select name="cat" style="max-width: 160px; margin: 0;">
-						<option value=""><?php esc_html_e( 'All Categories', 'swifttrap-for-mailtrap' ); ?></option>
-						<?php foreach ( array( 'verification', 'password-reset', 'welcome', 'notification', 'transactional', 'promotional', 'general' ) as $cat ) : ?>
-							<option value="<?php echo esc_attr( $cat ); ?>" <?php selected( $filters['category'], $cat ); ?>><?php echo esc_html( $cat ); ?></option>
-						<?php endforeach; ?>
-					</select>
-
-					<select name="status" style="max-width: 140px; margin: 0;">
-						<option value=""><?php esc_html_e( 'All Statuses', 'swifttrap-for-mailtrap' ); ?></option>
-						<option value="success" <?php selected( $filters['status'], 'success' ); ?>><?php esc_html_e( 'Success', 'swifttrap-for-mailtrap' ); ?></option>
-						<option value="failed" <?php selected( $filters['status'], 'failed' ); ?>><?php esc_html_e( 'Failed', 'swifttrap-for-mailtrap' ); ?></option>
-						<option value="delivered" <?php selected( $filters['status'], 'delivered' ); ?>><?php esc_html_e( 'Delivered', 'swifttrap-for-mailtrap' ); ?></option>
-						<option value="bounce" <?php selected( $filters['status'], 'bounce' ); ?>><?php esc_html_e( 'Bounced', 'swifttrap-for-mailtrap' ); ?></option>
-						<option value="spam" <?php selected( $filters['status'], 'spam' ); ?>><?php esc_html_e( 'Spam', 'swifttrap-for-mailtrap' ); ?></option>
-						<option value="open" <?php selected( $filters['status'], 'open' ); ?>><?php esc_html_e( 'Opened', 'swifttrap-for-mailtrap' ); ?></option>
-						<option value="click" <?php selected( $filters['status'], 'click' ); ?>><?php esc_html_e( 'Clicked', 'swifttrap-for-mailtrap' ); ?></option>
-					</select>
-
-					<input type="date" name="date" value="<?php echo esc_attr( $filters['date'] ); ?>" style="max-width: 150px; margin: 0;" />
-
-					<button type="submit" class="button button-primary"><?php esc_html_e( 'Filter', 'swifttrap-for-mailtrap' ); ?></button>
-					<select name="swifttrap_per_page" onchange="this.form.submit()" style="max-width:120px;margin:0;">
-						<?php foreach ( array( 10, 25, 50, 100 ) as $pp ) : ?>
-							<option value="<?php echo esc_attr( $pp ); ?>" <?php selected( $per_page, $pp ); ?>><?php echo esc_html( $pp ); ?> / page</option>
-						<?php endforeach; ?>
-					</select>
-					<?php if ( ! empty( $filters['search'] ) || ! empty( $filters['category'] ) || ! empty( $filters['status'] ) || ! empty( $filters['date'] ) ) : ?>
-						<a href="<?php echo esc_url( admin_url( 'admin.php?page=swifttrap-for-mailtrap' ) ); ?>" class="button"><?php esc_html_e( 'Clear Filters', 'swifttrap-for-mailtrap' ); ?></a>
-					<?php endif; ?>
-				</form>
-
-				<?php if ( empty( $logs ) ) : ?>
-					<p><?php esc_html_e( 'No email logs found matching the filter criteria.', 'swifttrap-for-mailtrap' ); ?></p>
-				<?php else : ?>
-					<div class="swifttrap-logs-wrapper">
-						<table class="swifttrap-logs-table">
-							<thead>
-								<tr>
-									<th><?php esc_html_e( 'To', 'swifttrap-for-mailtrap' ); ?></th>
-									<th><?php esc_html_e( 'Subject', 'swifttrap-for-mailtrap' ); ?></th>
-									<th><?php esc_html_e( 'Category', 'swifttrap-for-mailtrap' ); ?></th>
-									<th><?php esc_html_e( 'Date', 'swifttrap-for-mailtrap' ); ?></th>
-									<th><?php esc_html_e( 'Status', 'swifttrap-for-mailtrap' ); ?></th>
-									<th><?php esc_html_e( 'HTTP', 'swifttrap-for-mailtrap' ); ?></th>
-									<th><?php esc_html_e( 'Actions', 'swifttrap-for-mailtrap' ); ?></th>
-								</tr>
-							</thead>
-							<tbody>
-								<?php foreach ( $logs as $log_entry ) : ?>
-									<?php $formatted = swifttrap_mailtrap_format_log_entry( $log_entry ); ?>
-									<?php if ( $formatted ) : ?>
-										<tr>
-											<td class="swifttrap-log-to">
-												<span title="<?php echo esc_attr( $formatted['to'] ); ?>">
-													<?php echo esc_html( wp_html_excerpt( $formatted['to'], 30, '...' ) ); ?>
-												</span>
-											</td>
-											<td class="swifttrap-log-to">
-												<span title="<?php echo esc_attr( $formatted['subject'] ); ?>">
-													<?php echo esc_html( wp_html_excerpt( $formatted['subject'], 40, '...' ) ); ?>
-												</span>
-											</td>
-											<td>
-												<?php if ( ! empty( $log_entry['category'] ) ) : ?>
-													<span class="swifttrap-category-badge"><?php echo esc_html( $log_entry['category'] ); ?></span>
-												<?php else : ?>
-													<span class="swifttrap-category-badge--empty">&mdash;</span>
-												<?php endif; ?>
-											</td>
-											<td class="swifttrap-log-date">
-												<?php echo esc_html( $formatted['timestamp'] ); ?>
-											</td>
-											<td>
-												<strong class="swifttrap-log-status <?php echo esc_attr( $formatted['status_class'] ); ?>">
-													<?php echo esc_html( $formatted['status'] ); ?>
-												</strong>
-											</td>
-											<td class="swifttrap-log-http">
-												<?php echo esc_html( $formatted['http_status'] ); ?>
-											</td>
-											<td>
-												<?php if ( ! empty( $log_entry['id'] ) ) : ?>
-													<a href="#" class="swifttrap-view-log" data-id="<?php echo esc_attr( $log_entry['id'] ); ?>" data-nonce="<?php echo esc_attr( wp_create_nonce( 'swifttrap_get_log_details' ) ); ?>"><?php esc_html_e( 'View', 'swifttrap-for-mailtrap' ); ?></a>
-													|
-													<a href="#" class="swifttrap-resend-log" data-id="<?php echo esc_attr( $log_entry['id'] ); ?>" data-nonce="<?php echo esc_attr( wp_create_nonce( 'swifttrap_resend_email' ) ); ?>"><?php esc_html_e( 'Resend', 'swifttrap-for-mailtrap' ); ?></a>
-												<?php else : ?>
-													&mdash;
-												<?php endif; ?>
-											</td>
-										</tr>
-									<?php endif; ?>
-								<?php endforeach; ?>
-							</tbody>
-						</table>
-					</div>
-				<?php endif; ?>
-
-				<?php if ( $total_pages > 1 ) : ?>
-					<div class="swifttrap-pagination">
-						<nav class="swifttrap-pagination-nav">
-							<?php if ( $page > 1 ) : ?>
-								<a href="<?php echo esc_url( add_query_arg( 'swifttrap_page', 1 ) ); ?>" class="button"><?php esc_html_e( 'First', 'swifttrap-for-mailtrap' ); ?></a>
-								<a href="<?php echo esc_url( add_query_arg( 'swifttrap_page', $page - 1 ) ); ?>" class="button"><?php esc_html_e( 'Previous', 'swifttrap-for-mailtrap' ); ?></a>
-							<?php endif; ?>
-
-							<span class="swifttrap-pagination-info">
-								<?php
-								/* translators: %1$d: current page number, %2$d: total number of pages */
-								printf( esc_html__( 'Page %1$d of %2$d', 'swifttrap-for-mailtrap' ), absint( $page ), absint( $total_pages ) );
-								?>
-							</span>
-
-							<?php if ( $page < $total_pages ) : ?>
-								<a href="<?php echo esc_url( add_query_arg( 'swifttrap_page', $page + 1 ) ); ?>" class="button"><?php esc_html_e( 'Next', 'swifttrap-for-mailtrap' ); ?></a>
-								<a href="<?php echo esc_url( add_query_arg( 'swifttrap_page', $total_pages ) ); ?>" class="button"><?php esc_html_e( 'Last', 'swifttrap-for-mailtrap' ); ?></a>
-							<?php endif; ?>
-						</nav>
-						<p class="swifttrap-pagination-info">
-							<?php
-							printf(
-								/* translators: %1$d: first log index, %2$d: last log index, %3$d: total number of logs */
-								esc_html__( 'Showing %1$d-%2$d of %3$d total logs', 'swifttrap-for-mailtrap' ),
-								$total_logs > 0 ? absint( $start_index + 1 ) : 0,
-								absint( min( $start_index + $per_page, $total_logs ) ),
-								absint( $total_logs )
-							);
-							?>
-						</p>
-					</div>
-				<?php endif; ?>
-			</div>
-		</div>
-
-		<!-- Log Details Modal -->
-		<div id="swifttrap-log-modal" class="swifttrap-modal" style="display:none;">
-			<div class="swifttrap-modal-content">
-				<span class="swifttrap-modal-close">&times;</span>
-				<h2 id="swifttrap-modal-subject" style="border-bottom: 1px solid #eee; padding-bottom: 10px; margin-top: 0;"></h2>
-				<div id="swifttrap-modal-body" class="swifttrap-modal-body-content"></div>
-				<div style="margin-top: 20px; text-align: right;">
-					<button type="button" class="button swifttrap-modal-close-btn"><?php esc_html_e( 'Close', 'swifttrap-for-mailtrap' ); ?></button>
-				</div>
-			</div>
+			<div id="swifttrap-emails-pagination" style="display:flex;align-items:center;gap:12px;margin-top:10px;"></div>
 		</div>
 
 	</div>
@@ -1122,15 +771,6 @@ function swifttrap_mailtrap_sanitize_settings( mixed $settings ): array {
 
 	$settings['sender_email'] = sanitize_email( $settings['sender_email'] );
 	$settings['sender_name']  = sanitize_text_field( $settings['sender_name'] );
-
-	// Logging settings.
-	$settings['log_emails'] = empty( $settings['log_emails'] ) ? 0 : 1;
-	$retention_days = (int) ( $settings['log_retention_days'] ?? 30 );
-	$settings['log_retention_days'] = max( 1, min( 365, $retention_days ) );
-
-	// Display settings.
-	$logs_per_page = (int) ( $settings['logs_per_page'] ?? 10 );
-	$settings['logs_per_page'] = max( 5, min( 100, $logs_per_page ) );
 
 	// Advanced settings.
 	$settings['enable_categories'] = empty( $settings['enable_categories'] ) ? 0 : 1;
@@ -1195,4 +835,3 @@ function swifttrap_mailtrap_ajax_verify_token(): void {
 
 	wp_send_json_success( array( 'message' => sprintf( __( 'Token verified successfully. Account: %s', 'swifttrap-for-mailtrap' ), $data['name'] ) ) );
 }
-

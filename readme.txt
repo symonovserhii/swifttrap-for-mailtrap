@@ -3,7 +3,7 @@ Contributors: simmotorlp
 Tags: mailtrap, transactional-email, email-api, wp-mail, email-log
 Requires at least: 6.0
 Tested up to: 7.0
-Stable tag: 2.4.2
+Stable tag: 3.0.0
 Requires PHP: 8.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -107,6 +107,15 @@ Yes — 25 MB per email (matches Mailtrap's API limit).
 5. Test email confirmation.
 
 == Changelog ==
+
+= 3.0.0 =
+* Breaking: Removed all local file-based email logging. No more log files written to disk — eliminates OOM/disk-full risk on high-volume sites.
+* New: Email Logs panel on the Stats page pulls live data directly from the Mailtrap API (`GET /api/email_logs`).
+* New: Email Logs support filtering by recipient email address, delivery status, and date range.
+* New: Client-side pagination — buffers up to 1,000 entries from Mailtrap per API call, displays 20 rows at a time with Prev/Next navigation. Automatically fetches the next batch when the buffer is exhausted.
+* New: Webhook handler now fires `do_action('swifttrap_mailtrap_webhook_event', $event)` for every delivery event, allowing third-party integrations without modifying the plugin.
+* Removed: CSV export, log file clear, log detail modal, log resend, per-page logs setting, and cron-based log cleanup. All replaced by the live API view.
+* Fixed: Stats page no longer creates a redundant nonce attribute on the wrapper element.
 
 = 2.4.2 =
 * Fixed: The email log dropped most entries during high-volume or concurrent sends. Each write re-read and rewrote the whole log file, so parallel processes overwrote each other's lines. Writes now use an atomic, exclusively-locked append, so the Stats dashboard (sends-per-day, categories, totals) reflects the real number of sent emails.

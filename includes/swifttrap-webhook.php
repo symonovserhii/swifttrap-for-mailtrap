@@ -56,22 +56,12 @@ function swifttrap_mailtrap_handle_webhook_request( WP_REST_Request $request ): 
 	// Webhook payload can be an array of events or a single event.
 	$events = isset( $payload[0] ) ? $payload : array( $payload );
 
-	$updated_count = 0;
 	foreach ( $events as $event ) {
-		$message_id = $event['message_id'] ?? '';
-		$event_type = $event['event'] ?? '';
-
-		if ( empty( $message_id ) || empty( $event_type ) ) {
+		if ( empty( $event['message_id'] ) || empty( $event['event'] ) ) {
 			continue;
 		}
-
-		if ( swifttrap_mailtrap_update_log_status( $message_id, $event_type ) ) {
-			$updated_count++;
-		}
+		do_action( 'swifttrap_mailtrap_webhook_event', $event );
 	}
 
-	// Invalidate stats cache.
-	delete_transient( 'swifttrap_log_stats_7' );
-
-	return new WP_REST_Response( array( 'success' => true, 'updated' => $updated_count ), 200 );
+	return new WP_REST_Response( array( 'success' => true, 'count' => count( $events ) ), 200 );
 }

@@ -3,7 +3,7 @@
  * Plugin Name: SwiftTrap for Mailtrap
  * Plugin URI: https://plugins.symonov.com/swifttrap-for-mailtrap/
  * Description: Routes wp_mail() through the Mailtrap HTTP API with configurable sender settings.
- * Version: 2.4.2
+ * Version: 3.0.0
  * Author: simmotorlp
  * Author URI: https://profiles.wordpress.org/simmotorlp/
  * License: GPL-2.0-or-later
@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'SWIFTTRAP_MAILTRAP_VERSION', '2.4.2' );
+define( 'SWIFTTRAP_MAILTRAP_VERSION', '3.0.0' );
 define( 'SWIFTTRAP_MAILTRAP_OPTION_KEY', 'swifttrap_mailtrap_settings' );
 
 require_once __DIR__ . '/includes/admin.php';
@@ -32,22 +32,17 @@ register_activation_hook( __FILE__, 'swifttrap_mailtrap_activate' );
 register_deactivation_hook( __FILE__, 'swifttrap_mailtrap_deactivate' );
 
 /**
- * Activate plugin and schedule daily cleanup cron.
+ * Activate plugin.
  */
 function swifttrap_mailtrap_activate(): void {
-	if ( ! wp_next_scheduled( 'swifttrap_mailtrap_cleanup_logs_cron' ) ) {
-		wp_schedule_event( time(), 'daily', 'swifttrap_mailtrap_cleanup_logs_cron' );
-	}
 }
 
 /**
- * Deactivate plugin and clear scheduled cleanup cron.
+ * Deactivate plugin: clear any leftover cleanup cron from prior versions.
  */
 function swifttrap_mailtrap_deactivate(): void {
 	wp_clear_scheduled_hook( 'swifttrap_mailtrap_cleanup_logs_cron' );
 }
-
-add_action( 'swifttrap_mailtrap_cleanup_logs_cron', 'swifttrap_mailtrap_cleanup_logs' );
 
 /**
  * Main hook: short-circuit wp_mail() and send via Mailtrap API when enabled.
@@ -111,19 +106,6 @@ function swifttrap_mailtrap_pre_wp_mail( ?bool $pre_wp_mail, array $atts ): bool
 			'swifttrap_all_recipients_suppressed',
 			sprintf( __( 'All recipients skipped due to suppression: %s', 'swifttrap-for-mailtrap' ), implode( ', ', $skipped_recipients ) )
 		);
-		swifttrap_mailtrap_log_email(
-			array(
-				'to'      => $atts['to'] ?? array(),
-				'from'    => $normalized['from_email'] ?? '',
-				'subject' => $normalized['subject'] ?? '',
-			),
-			array(
-				'http_status' => 0,
-				'message'     => $error->get_error_message(),
-			),
-			false,
-			swifttrap_mailtrap_get_email_category( $normalized )
-		);
 		swifttrap_mailtrap_trigger_failed( $error );
 
 		return $error;
@@ -152,9 +134,6 @@ function swifttrap_mailtrap_default_settings(): array {
 		'token'                  => '',
 		'sender_email'           => '',
 		'sender_name'            => '',
-		'log_emails'             => 0,
-		'log_retention_days'     => 30,
-		'logs_per_page'          => 10,
 		'enable_categories'      => 1,
 		'auto_categorize'        => 1,
 		'webhook_secret'         => '',
@@ -531,24 +510,10 @@ function swifttrap_mailtrap_send( array $normalized, array $settings ): bool|WP_
 
 	// Block bulk/promotional emails when SWIFTTRAP_BLOCK_BULK is enabled (e.g. staging).
 	if ( defined( 'SWIFTTRAP_BLOCK_BULK' ) && SWIFTTRAP_BLOCK_BULK && 'promotional' === $category ) {
-		$blocked = new WP_Error(
+		return new WP_Error(
 			'swifttrap_bulk_blocked',
 			__( 'Bulk/promotional emails are blocked on this environment.', 'swifttrap-for-mailtrap' )
 		);
-		swifttrap_mailtrap_log_email(
-			array(
-				'to'      => $normalized['to'],
-				'from'    => $normalized['from_email'],
-				'subject' => $normalized['subject'],
-			),
-			array(
-				'http_status' => 0,
-				'message'     => 'Blocked by SWIFTTRAP_BLOCK_BULK',
-			),
-			false,
-			$category
-		);
-		return $blocked;
 	}
 
 	$use_bulk = swifttrap_mailtrap_should_use_bulk_stream( $category, $settings );
@@ -601,30 +566,7 @@ function swifttrap_mailtrap_send( array $normalized, array $settings ): bool|WP_
 		break;
 	}
 
-	$log_data = array(
-		'to'           => $normalized['to'] ?? array(),
-		'from'         => $normalized['from_email'] ?? '',
-		'subject'      => $normalized['subject'] ?? '',
-		'message'      => $normalized['message'] ?? '',
-		'headers'      => $normalized['headers'] ?? array(),
-		'content_type' => $normalized['content_type'] ?? 'text/plain',
-	);
-
 	if ( is_wp_error( $response ) ) {
-		$err_msg = $response->get_error_message() . ' — falling back to native wp_mail()';
-		if ( ! empty( $normalized['skipped_recipients'] ) ) {
-			$err_msg .= ' (Skipped suppressed: ' . implode( ', ', $normalized['skipped_recipients'] ) . ')';
-		}
-		swifttrap_mailtrap_log_email(
-			$log_data,
-			array(
-				'http_status' => 0,
-				'message'     => $err_msg,
-			),
-			false,
-			$category
-		);
-
 		return new WP_Error( 'swifttrap_send_failed', $response->get_error_message() );
 	}
 
@@ -632,20 +574,6 @@ function swifttrap_mailtrap_send( array $normalized, array $settings ): bool|WP_
 	$body_raw    = wp_remote_retrieve_body( $response );
 
 	if ( $status_code < 200 || $status_code >= 300 ) {
-		$err_msg = $body_raw . ' — falling back to native wp_mail()';
-		if ( ! empty( $normalized['skipped_recipients'] ) ) {
-			$err_msg .= ' (Skipped suppressed: ' . implode( ', ', $normalized['skipped_recipients'] ) . ')';
-		}
-		swifttrap_mailtrap_log_email(
-			$log_data,
-			array(
-				'http_status' => $status_code,
-				'message'     => $err_msg,
-			),
-			false,
-			$category
-		);
-
 		return new WP_Error(
 			'swifttrap_api_error',
 			/* translators: %d: HTTP status code returned by the Mailtrap API */
@@ -653,28 +581,6 @@ function swifttrap_mailtrap_send( array $normalized, array $settings ): bool|WP_
 			array( 'body' => $body_raw )
 		);
 	}
-
-	$message_ids = array();
-	$body_decoded = json_decode( $body_raw, true );
-	if ( is_array( $body_decoded ) && ! empty( $body_decoded['message_ids'] ) ) {
-		$message_ids = (array) $body_decoded['message_ids'];
-	}
-
-	$success_msg = 'Email sent successfully';
-	if ( ! empty( $normalized['skipped_recipients'] ) ) {
-		$success_msg .= '. Skipped suppressed: ' . implode( ', ', $normalized['skipped_recipients'] );
-	}
-
-	swifttrap_mailtrap_log_email(
-		$log_data,
-		array(
-			'http_status' => $status_code,
-			'message'     => $success_msg,
-			'message_ids' => $message_ids,
-		),
-		true,
-		$category
-	);
 
 	return true;
 }

@@ -328,171 +328,6 @@ function swifttrap_mailtrap_fetch_suppressions( array $settings ): array|WP_Erro
 	return $result;
 }
 
-/**
- * Get Mailtrap email log directory inside uploads.
- *
- * @return string|WP_Error Directory path or WP_Error when uploads are unavailable.
- */
-function swifttrap_mailtrap_get_log_dir(): string|WP_Error {
-	$uploads = wp_upload_dir( null, false );
-
-	if ( ! empty( $uploads['error'] ) ) {
-		return new WP_Error( 'swifttrap_uploads_unavailable', __( 'Upload directory is not available for Mailtrap logs.', 'swifttrap-for-mailtrap' ) );
-	}
-
-	$dir = trailingslashit( $uploads['basedir'] ) . 'swifttrap-for-mailtrap';
-
-	if ( ! is_dir( $dir ) && ! wp_mkdir_p( $dir ) ) {
-		return new WP_Error( 'swifttrap_log_dir_unwritable', __( 'Unable to create Mailtrap log directory.', 'swifttrap-for-mailtrap' ) );
-	}
-
-	if ( ! wp_is_writable( $dir ) ) {
-		return new WP_Error( 'swifttrap_log_dir_unwritable', __( 'Mailtrap log directory is not writable.', 'swifttrap-for-mailtrap' ) );
-	}
-
-	// Protect log directory from direct web access.
-	$wp_filesystem = swifttrap_mailtrap_filesystem();
-
-	if ( $wp_filesystem ) {
-		$htaccess = trailingslashit( $dir ) . '.htaccess';
-		if ( ! $wp_filesystem->exists( $htaccess ) ) {
-			$wp_filesystem->put_contents( $htaccess, "Deny from all\n", FS_CHMOD_FILE );
-		}
-
-		$index = trailingslashit( $dir ) . 'index.php';
-		if ( ! $wp_filesystem->exists( $index ) ) {
-			$wp_filesystem->put_contents( $index, "<?php\n// Silence is golden.\n", FS_CHMOD_FILE );
-		}
-	}
-
-	return $dir;
-}
-
-/**
- * Get Mailtrap email log file path.
- *
- * @return string|WP_Error Path to log file or WP_Error when unavailable.
- */
-function swifttrap_mailtrap_get_log_file(): string|WP_Error {
-	$log_dir = swifttrap_mailtrap_get_log_dir();
-
-	if ( is_wp_error( $log_dir ) ) {
-		return $log_dir;
-	}
-
-	return trailingslashit( $log_dir ) . 'swifttrap-emails.log';
-}
-
-/**
- * Write email send entry to log file.
- *
- * @param array  $email_data Email information.
- * @param array  $response   API response data.
- * @param bool   $success    Whether send was successful.
- * @param string $category   Pre-computed email category.
- */
-function swifttrap_mailtrap_log_email( array $email_data, array $response = array(), bool $success = false, string $category = '' ): void {
-	$settings = swifttrap_mailtrap_get_settings();
-	if ( empty( $settings['log_emails'] ) ) {
-		return; // Logging disabled.
-	}
-
-	$log_file = swifttrap_mailtrap_get_log_file();
-
-	if ( is_wp_error( $log_file ) ) {
-		return;
-	}
-
-	$log_entry = array(
-		'id'           => wp_generate_uuid4(),
-		'timestamp'    => current_time( 'mysql' ),
-		'status'       => $success ? 'success' : 'failed',
-		'to'           => $email_data['to'] ?? array(),
-		'from'         => $email_data['from'] ?? '',
-		'subject'      => $email_data['subject'] ?? '',
-		'body'         => $email_data['message'] ?? '',
-		'headers'      => $email_data['headers'] ?? array(),
-		'content_type' => $email_data['content_type'] ?? 'text/plain',
-		'category'     => $category,
-		'response'     => $response,
-		'http_status'  => $response['http_status'] ?? null,
-		'message'      => $response['message'] ?? '',
-		'message_ids'  => $response['message_ids'] ?? array(),
-	);
-
-	$log_line = wp_json_encode( $log_entry ) . "\n";
-
-	$wp_filesystem = swifttrap_mailtrap_filesystem();
-	if ( ! $wp_filesystem || ! $wp_filesystem->is_writable( dirname( $log_file ) ) ) {
-		return;
-	}
-
-	/*
-	 * Append atomically with an exclusive lock. WP_Filesystem has no append
-	 * mode, so the previous read-all-then-write-all approach raced under
-	 * concurrent sends during mass mailings: parallel processes each read the
-	 * same file then overwrote it, clobbering each other's lines and silently
-	 * dropping the majority of entries. It was also O(n^2) as the file grew.
-	 * A locked append is process-safe and O(1) per write.
-	 */
-	$file_existed = $wp_filesystem->exists( $log_file );
-
-	// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Atomic append (FILE_APPEND|LOCK_EX) is required and WP_Filesystem cannot append.
-	file_put_contents( $log_file, $log_line, FILE_APPEND | LOCK_EX );
-
-	if ( ! $file_existed ) {
-		$chmod = defined( 'FS_CHMOD_FILE' ) ? FS_CHMOD_FILE : 0644;
-		@chmod( $log_file, $chmod ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- Best-effort permissions on first creation.
-	}
-}
-
-/**
- * Clean old email logs based on retention period.
- */
-function swifttrap_mailtrap_cleanup_logs(): void {
-	$settings       = swifttrap_mailtrap_get_settings();
-	$retention_days = ! empty( $settings['log_retention_days'] ) ? (int) $settings['log_retention_days'] : 30;
-
-	$log_file = swifttrap_mailtrap_get_log_file();
-
-	if ( is_wp_error( $log_file ) ) {
-		return;
-	}
-
-	$wp_filesystem = swifttrap_mailtrap_filesystem();
-	if ( ! $wp_filesystem || ! $wp_filesystem->exists( $log_file ) || ! $wp_filesystem->is_readable( $log_file ) ) {
-		return;
-	}
-
-	$cutoff_time = time() - ( $retention_days * DAY_IN_SECONDS );
-	$contents    = $wp_filesystem->get_contents( $log_file );
-
-	if ( false === $contents || '' === $contents ) {
-		return;
-	}
-
-	$all_lines = explode( "\n", $contents );
-	$lines     = array();
-
-	foreach ( $all_lines as $line ) {
-		if ( '' === trim( $line ) ) {
-			continue;
-		}
-
-		$entry = json_decode( $line, true );
-		if ( JSON_ERROR_NONE !== json_last_error() || ! is_array( $entry ) || empty( $entry['timestamp'] ) ) {
-			$lines[] = $line;
-			continue;
-		}
-
-		$entry_time = strtotime( $entry['timestamp'] );
-		if ( $entry_time > $cutoff_time ) {
-			$lines[] = $line;
-		}
-	}
-
-	$wp_filesystem->put_contents( $log_file, implode( "\n", $lines ) . "\n", FS_CHMOD_FILE );
-}
 
 /**
  * Determine email category based on email content and subject.
@@ -559,196 +394,76 @@ function swifttrap_mailtrap_get_email_category( array $normalized ): string {
 }
 
 /**
- * Read email logs from file.
+ * Fetch email sending history from Mailtrap API.
  *
- * @param int $limit Number of logs to retrieve.
+ * @param array $settings Plugin settings.
+ * @param string $cursor  Pagination cursor (empty = first page).
+ * @param array  $filters Optional: search, status, date_from, date_to.
  *
- * @return array Array of email log entries.
+ * @return array|WP_Error Array with 'entries', 'total', 'next_cursor', or WP_Error.
  */
-function swifttrap_mailtrap_read_email_logs( int $limit = 20, int $offset = 0, array $filters = array() ): array {
-	$log_file = swifttrap_mailtrap_get_log_file();
-
-	if ( is_wp_error( $log_file ) ) {
-		return array( 'entries' => array(), 'total' => 0 );
+function swifttrap_mailtrap_fetch_emails( array $settings, string $cursor = '', array $filters = array() ): array|WP_Error {
+	$base_params = array();
+	if ( ! empty( $cursor ) ) {
+		$base_params['search_after'] = $cursor;
 	}
 
-	$wp_filesystem = swifttrap_mailtrap_filesystem();
-	if ( ! $wp_filesystem || ! $wp_filesystem->exists( $log_file ) || ! $wp_filesystem->is_readable( $log_file ) ) {
-		return array( 'entries' => array(), 'total' => 0 );
+	// Build filter query parts with correct bracket notation.
+	$filter_parts = array();
+	if ( ! empty( $filters['search'] ) ) {
+		$v = rawurlencode( sanitize_text_field( $filters['search'] ) );
+		$filter_parts[] = 'filters%5Bto%5D%5Boperator%5D=contain&filters%5Bto%5D%5Bvalue%5D=' . $v;
+	}
+	if ( ! empty( $filters['status'] ) ) {
+		$v = rawurlencode( sanitize_key( $filters['status'] ) );
+		$filter_parts[] = 'filters%5Bstatus%5D%5Boperator%5D=equal&filters%5Bstatus%5D%5Bvalue%5D%5B%5D=' . $v;
+	}
+	if ( ! empty( $filters['date_from'] ) ) {
+		$filter_parts[] = 'filters%5Bsent_after%5D=' . rawurlencode( sanitize_text_field( $filters['date_from'] ) . 'T00:00:00Z' );
+	}
+	if ( ! empty( $filters['date_to'] ) ) {
+		$filter_parts[] = 'filters%5Bsent_before%5D=' . rawurlencode( sanitize_text_field( $filters['date_to'] ) . 'T23:59:59Z' );
 	}
 
-	$contents = $wp_filesystem->get_contents( $log_file );
-	if ( false === $contents || '' === trim( $contents ) ) {
-		return array( 'entries' => array(), 'total' => 0 );
+	$url = 'https://mailtrap.io/api/email_logs?' . http_build_query( $base_params );
+	if ( ! empty( $filter_parts ) ) {
+		$url .= '&' . implode( '&', $filter_parts );
 	}
 
-	$all_lines = explode( "\n", $contents );
+	$response = wp_remote_get( $url, array(
+		'headers' => array(
+			'Api-Token'    => $settings['token'],
+			'Content-Type' => 'application/json',
+		),
+		'timeout' => 15,
+	) );
 
-	// Parse all valid entries.
-	$parsed = array();
-	foreach ( $all_lines as $line ) {
-		if ( '' === trim( $line ) ) {
-			continue;
-		}
-		$entry = json_decode( $line, true );
-		if ( JSON_ERROR_NONE === json_last_error() && is_array( $entry ) ) {
-			// Apply filters
-			if ( ! empty( $filters['search'] ) ) {
-				$search = strtolower( $filters['search'] );
-				$to_emails = array();
-				if ( ! empty( $entry['to'] ) && is_array( $entry['to'] ) ) {
-					foreach ( $entry['to'] as $t ) {
-						$to_emails[] = $t['email'] ?? '';
-						$to_emails[] = $t['name'] ?? '';
-					}
-				}
-				$to_string = implode( ' ', $to_emails );
-				$subject = $entry['subject'] ?? '';
-				if (
-					str_contains( strtolower( $subject ), $search ) === false &&
-					str_contains( strtolower( $to_string ), $search ) === false
-				) {
-					continue;
-				}
-			}
-
-			if ( ! empty( $filters['category'] ) ) {
-				$cat = $entry['category'] ?? 'uncategorized';
-				if ( strcasecmp( $cat, $filters['category'] ) !== 0 ) {
-					continue;
-				}
-			}
-
-			if ( ! empty( $filters['status'] ) ) {
-				$status = $entry['status'] ?? '';
-				if ( strcasecmp( $status, $filters['status'] ) !== 0 ) {
-					continue;
-				}
-			}
-
-			if ( ! empty( $filters['date'] ) ) {
-				$entry_date = wp_date( 'Y-m-d', strtotime( $entry['timestamp'] ) );
-				if ( $entry_date !== $filters['date'] ) {
-					continue;
-				}
-			}
-
-			$parsed[] = $entry;
-		}
+	if ( is_wp_error( $response ) ) {
+		return new WP_Error( 'swifttrap_emails_failed', $response->get_error_message() );
 	}
 
-	$total = count( $parsed );
-
-	if ( 0 === $total ) {
-		return array( 'entries' => array(), 'total' => 0 );
+	$status_code = wp_remote_retrieve_response_code( $response );
+	if ( $status_code < 200 || $status_code >= 300 ) {
+		/* translators: %d: HTTP status code returned by the Mailtrap API */
+		return new WP_Error( 'swifttrap_emails_failed', sprintf( __( 'Mailtrap API returned HTTP %d', 'swifttrap-for-mailtrap' ), $status_code ) );
 	}
 
-	// Newest first: reverse, then apply offset and limit.
-	$reversed = array_reverse( $parsed );
-	$entries  = array_slice( $reversed, $offset, $limit );
-
-	return array( 'entries' => $entries, 'total' => $total );
-}
-
-/**
- * Compute email log statistics from the log file.
- *
- * @param int $days Number of days to analyze.
- *
- * @return array Stats array with totals, by_category, and daily_volume.
- */
-function swifttrap_mailtrap_compute_log_stats( int $days = 7 ): array {
-	$cache_key = 'swifttrap_log_stats_' . $days;
-	$cached    = get_transient( $cache_key );
-	if ( false !== $cached ) {
-		return $cached;
+	$raw  = wp_remote_retrieve_body( $response );
+	$body = json_decode( $raw, true );
+	if ( JSON_ERROR_NONE !== json_last_error() || ! is_array( $body ) ) {
+		/* translators: %s: raw API response snippet for debugging */
+		return new WP_Error( 'swifttrap_emails_failed', sprintf( __( 'Invalid emails response: %s', 'swifttrap-for-mailtrap' ), substr( $raw, 0, 300 ) ) );
 	}
 
-	$result = array(
-		'total_sent'    => 0,
-		'total_success' => 0,
-		'total_failed'  => 0,
-		'success_rate'  => 0,
-		'by_category'   => array(),
-		'daily_volume'  => array(),
+	$entries     = $body['messages'] ?? array();
+	$total       = (int) ( $body['total_count'] ?? count( $entries ) );
+	$next_cursor = $body['next_page_cursor'] ?? null;
+
+	return array(
+		'entries'     => is_array( $entries ) ? $entries : array(),
+		'total'       => $total,
+		'next_cursor' => $next_cursor,
 	);
-
-	// Pre-fill daily_volume with zeros for last N days.
-	for ( $i = $days - 1; $i >= 0; $i-- ) {
-		$date = wp_date( 'Y-m-d', strtotime( "-{$i} days" ) );
-		$result['daily_volume'][ $date ] = 0;
-	}
-
-	$log_file = swifttrap_mailtrap_get_log_file();
-
-	if ( is_wp_error( $log_file ) ) {
-		set_transient( $cache_key, $result, 5 * MINUTE_IN_SECONDS );
-		return $result;
-	}
-
-	$wp_filesystem = swifttrap_mailtrap_filesystem();
-	if ( ! $wp_filesystem || ! $wp_filesystem->exists( $log_file ) || ! $wp_filesystem->is_readable( $log_file ) ) {
-		set_transient( $cache_key, $result, 5 * MINUTE_IN_SECONDS );
-		return $result;
-	}
-
-	$contents = $wp_filesystem->get_contents( $log_file );
-	if ( false === $contents || '' === trim( $contents ) ) {
-		set_transient( $cache_key, $result, 5 * MINUTE_IN_SECONDS );
-		return $result;
-	}
-
-	$cutoff_time = strtotime( "-{$days} days" );
-	$all_lines   = explode( "\n", $contents );
-
-	foreach ( $all_lines as $line ) {
-		if ( '' === trim( $line ) ) {
-			continue;
-		}
-
-		$entry = json_decode( $line, true );
-		if ( JSON_ERROR_NONE !== json_last_error() || ! is_array( $entry ) || empty( $entry['timestamp'] ) ) {
-			continue;
-		}
-
-		$entry_time = strtotime( $entry['timestamp'] );
-		if ( $entry_time < $cutoff_time ) {
-			continue;
-		}
-
-		$result['total_sent']++;
-
-		if ( 'success' === ( $entry['status'] ?? '' ) ) {
-			$result['total_success']++;
-		} else {
-			$result['total_failed']++;
-		}
-
-		// Category counts.
-		$category = ! empty( $entry['category'] ) ? $entry['category'] : 'uncategorized';
-		if ( ! isset( $result['by_category'][ $category ] ) ) {
-			$result['by_category'][ $category ] = 0;
-		}
-		$result['by_category'][ $category ]++;
-
-		// Daily volume.
-		$date = wp_date( 'Y-m-d', $entry_time );
-		if ( isset( $result['daily_volume'][ $date ] ) ) {
-			$result['daily_volume'][ $date ]++;
-		}
-	}
-
-	// Sort categories by count descending.
-	arsort( $result['by_category'] );
-
-	// Calculate success rate.
-	if ( $result['total_sent'] > 0 ) {
-		$result['success_rate'] = round( ( $result['total_success'] / $result['total_sent'] ) * 100, 1 );
-	}
-
-	set_transient( $cache_key, $result, 5 * MINUTE_IN_SECONDS );
-
-	return $result;
 }
 
 /**
@@ -783,33 +498,6 @@ function swifttrap_mailtrap_ajax_send_test_email(): void {
 }
 add_action( 'wp_ajax_swifttrap_send_test_email', 'swifttrap_mailtrap_ajax_send_test_email' );
 
-/**
- * AJAX handler: clear email logs.
- */
-function swifttrap_mailtrap_ajax_clear_logs(): void {
-	check_ajax_referer( 'swifttrap_clear_logs', '_nonce' );
-
-	if ( ! current_user_can( 'manage_options' ) ) {
-		wp_send_json_error( array( 'message' => __( 'Permission denied.', 'swifttrap-for-mailtrap' ) ) );
-	}
-
-	$log_file = swifttrap_mailtrap_get_log_file();
-
-	if ( is_wp_error( $log_file ) ) {
-		wp_send_json_error( array( 'message' => $log_file->get_error_message() ) );
-	}
-
-	$wp_filesystem = swifttrap_mailtrap_filesystem();
-	if ( $wp_filesystem && $wp_filesystem->exists( $log_file ) ) {
-		$wp_filesystem->put_contents( $log_file, '', FS_CHMOD_FILE );
-	}
-
-	// Invalidate log stats cache.
-	delete_transient( 'swifttrap_log_stats_7' );
-
-	wp_send_json_success( array( 'message' => __( 'Email logs cleared.', 'swifttrap-for-mailtrap' ) ) );
-}
-add_action( 'wp_ajax_swifttrap_clear_logs', 'swifttrap_mailtrap_ajax_clear_logs' );
 
 /**
  * AJAX handler: load all Mailtrap API data for Stats page.
@@ -856,6 +544,38 @@ function swifttrap_mailtrap_ajax_load_api_data(): void {
 	wp_send_json_success( $data );
 }
 add_action( 'wp_ajax_swifttrap_load_api_data', 'swifttrap_mailtrap_ajax_load_api_data' );
+
+/**
+ * AJAX handler: load email log entries from Mailtrap.
+ */
+function swifttrap_mailtrap_ajax_load_emails(): void {
+	check_ajax_referer( 'swifttrap_load_emails', '_nonce' );
+
+	if ( ! current_user_can( 'manage_options' ) ) {
+		wp_send_json_error( array( 'message' => __( 'Permission denied.', 'swifttrap-for-mailtrap' ) ) );
+		return;
+	}
+
+	$settings = swifttrap_mailtrap_get_settings();
+	$cursor   = sanitize_text_field( wp_unslash( $_POST['cursor'] ?? '' ) );
+
+	$filters = array(
+		'search'    => sanitize_text_field( wp_unslash( $_POST['search'] ?? '' ) ),
+		'status'    => sanitize_key( $_POST['status'] ?? '' ),
+		'date_from' => sanitize_text_field( wp_unslash( $_POST['date_from'] ?? '' ) ),
+		'date_to'   => sanitize_text_field( wp_unslash( $_POST['date_to'] ?? '' ) ),
+	);
+
+	$result = swifttrap_mailtrap_fetch_emails( $settings, $cursor, $filters );
+
+	if ( is_wp_error( $result ) ) {
+		wp_send_json_error( array( 'message' => $result->get_error_message() ) );
+		return;
+	}
+
+	wp_send_json_success( $result );
+}
+add_action( 'wp_ajax_swifttrap_load_emails', 'swifttrap_mailtrap_ajax_load_emails' );
 
 /**
  * Add an email suppression to Mailtrap.
@@ -971,73 +691,6 @@ function swifttrap_mailtrap_is_recipient_suppressed( string $email, array $setti
 	return false;
 }
 
-/**
- * Find matching log row by message ID and update its status.
- *
- * @param string $message_id Message UUID from Mailtrap.
- * @param string $status     New delivery status.
- *
- * @return bool True if log entry updated, false otherwise.
- */
-function swifttrap_mailtrap_update_log_status( string $message_id, string $status ): bool {
-	$log_file = swifttrap_mailtrap_get_log_file();
-
-	if ( is_wp_error( $log_file ) ) {
-		return false;
-	}
-
-	$wp_filesystem = swifttrap_mailtrap_filesystem();
-	if ( ! $wp_filesystem || ! $wp_filesystem->exists( $log_file ) || ! $wp_filesystem->is_writable( $log_file ) ) {
-		return false;
-	}
-
-	$contents = $wp_filesystem->get_contents( $log_file );
-	if ( false === $contents || '' === trim( $contents ) ) {
-		return false;
-	}
-
-	$all_lines = explode( "\n", $contents );
-	$updated   = false;
-	$lines     = array();
-
-	foreach ( $all_lines as $line ) {
-		if ( '' === trim( $line ) ) {
-			continue;
-		}
-
-		$entry = json_decode( $line, true );
-		if ( JSON_ERROR_NONE !== json_last_error() || ! is_array( $entry ) ) {
-			$lines[] = $line;
-			continue;
-		}
-
-		// Look for message_id inside message_ids array or as single field.
-		$match = false;
-		if ( ! empty( $entry['message_ids'] ) && is_array( $entry['message_ids'] ) ) {
-			if ( in_array( $message_id, $entry['message_ids'], true ) ) {
-				$match = true;
-			}
-		} elseif ( ! empty( $entry['response']['message_ids'] ) && is_array( $entry['response']['message_ids'] ) ) {
-			if ( in_array( $message_id, $entry['response']['message_ids'], true ) ) {
-				$match = true;
-			}
-		}
-
-		if ( $match ) {
-			$entry['status'] = $status;
-			$lines[]         = wp_json_encode( $entry );
-			$updated         = true;
-		} else {
-			$lines[] = $line;
-		}
-	}
-
-	if ( $updated ) {
-		$wp_filesystem->put_contents( $log_file, implode( "\n", $lines ) . "\n", FS_CHMOD_FILE );
-	}
-
-	return $updated;
-}
 
 /**
  * AJAX handler: add suppression.
@@ -1099,100 +752,3 @@ function swifttrap_mailtrap_ajax_delete_suppression(): void {
 }
 add_action( 'wp_ajax_swifttrap_delete_suppression', 'swifttrap_mailtrap_ajax_delete_suppression' );
 
-/**
- * AJAX handler: get log details for modal viewer.
- */
-function swifttrap_mailtrap_ajax_get_log_details(): void {
-	check_ajax_referer( 'swifttrap_get_log_details', '_nonce' );
-
-	if ( ! current_user_can( 'manage_options' ) ) {
-		wp_send_json_error( array( 'message' => __( 'Permission denied.', 'swifttrap-for-mailtrap' ) ) );
-	}
-
-	$log_id = isset( $_POST['id'] ) ? sanitize_text_field( wp_unslash( $_POST['id'] ) ) : '';
-	if ( empty( $log_id ) ) {
-		wp_send_json_error( array( 'message' => __( 'Invalid log ID.', 'swifttrap-for-mailtrap' ) ) );
-	}
-
-	$log_result = swifttrap_mailtrap_read_email_logs( 9999, 0 );
-	$entry      = null;
-	foreach ( $log_result['entries'] as $e ) {
-		if ( isset( $e['id'] ) && $e['id'] === $log_id ) {
-			$entry = $e;
-			break;
-		}
-	}
-
-	if ( ! $entry ) {
-		wp_send_json_error( array( 'message' => __( 'Log entry not found.', 'swifttrap-for-mailtrap' ) ) );
-	}
-
-	wp_send_json_success(
-		array(
-			'subject'      => $entry['subject'] ?? '',
-			'body'         => $entry['body'] ?? '',
-			'content_type' => $entry['content_type'] ?? 'text/plain',
-			'response'     => $entry['response'] ?? array(),
-		)
-	);
-}
-add_action( 'wp_ajax_swifttrap_get_log_details', 'swifttrap_mailtrap_ajax_get_log_details' );
-
-/**
- * AJAX handler: resend a failed/logged email.
- */
-function swifttrap_mailtrap_ajax_resend_email(): void {
-	check_ajax_referer( 'swifttrap_resend_email', '_nonce' );
-
-	if ( ! current_user_can( 'manage_options' ) ) {
-		wp_send_json_error( array( 'message' => __( 'Permission denied.', 'swifttrap-for-mailtrap' ) ) );
-	}
-
-	$log_id = isset( $_POST['id'] ) ? sanitize_text_field( wp_unslash( $_POST['id'] ) ) : '';
-	if ( empty( $log_id ) ) {
-		wp_send_json_error( array( 'message' => __( 'Invalid log ID.', 'swifttrap-for-mailtrap' ) ) );
-	}
-
-	$log_result = swifttrap_mailtrap_read_email_logs( 9999, 0 );
-	$entry      = null;
-	foreach ( $log_result['entries'] as $e ) {
-		if ( isset( $e['id'] ) && $e['id'] === $log_id ) {
-			$entry = $e;
-			break;
-		}
-	}
-
-	if ( ! $entry ) {
-		wp_send_json_error( array( 'message' => __( 'Log entry not found.', 'swifttrap-for-mailtrap' ) ) );
-	}
-
-	$to_emails = array();
-	if ( ! empty( $entry['to'] ) && is_array( $entry['to'] ) ) {
-		foreach ( $entry['to'] as $to ) {
-			$to_emails[] = ! empty( $to['name'] ) ? "{$to['name']} <{$to['email']}>" : $to['email'];
-		}
-	}
-
-	$headers = array();
-	if ( ! empty( $entry['headers'] ) && is_array( $entry['headers'] ) ) {
-		foreach ( $entry['headers'] as $name => $val ) {
-			$headers[] = "{$name}: {$val}";
-		}
-	}
-
-	if ( ! empty( $entry['content_type'] ) ) {
-		$headers[] = "Content-Type: {$entry['content_type']}";
-	}
-
-	$subject = $entry['subject'] ?? '';
-	$body    = $entry['body'] ?? '';
-
-	$result = wp_mail( $to_emails, $subject, $body, $headers );
-
-	if ( $result ) {
-		wp_send_json_success( array( 'message' => __( 'Email resent successfully.', 'swifttrap-for-mailtrap' ) ) );
-	} else {
-		wp_send_json_error( array( 'message' => __( 'Failed to resend email.', 'swifttrap-for-mailtrap' ) ) );
-	}
-}
-add_action( 'wp_ajax_swifttrap_resend_email', 'swifttrap_mailtrap_ajax_resend_email' );
