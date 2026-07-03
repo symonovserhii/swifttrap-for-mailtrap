@@ -10,6 +10,7 @@
 /.idea
 /AGENTS.md
 /skills-lock.json
+/glotpress
 /tests
 /composer.json
 /composer.lock
