@@ -1,18 +1,20 @@
-# Copyright (C) 2026 simmotorlp
-# This file is distributed under the GPL-2.0-or-later.
+# French translation for SwiftTrap for Mailtrap
+# Copyright (C) 2026
+# This file is distributed under the same license as the plugin.
 msgid ""
 msgstr ""
 "Project-Id-Version: SwiftTrap for Mailtrap 3.0.1\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/swifttrap-for-mailtrap\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
+"POT-Creation-Date: 2026-07-03T14:30:11+00:00\n"
+"PO-Revision-Date: 2026-07-03 00:00:00+0000\n"
+"Last-Translator: \n"
+"Language-Team: French\n"
+"Language: fr_FR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-07-03T14:30:11+00:00\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: swifttrap-for-mailtrap\n"
+"X-Generator: Poedit\n"
 
 #. Plugin Name of the plugin
 #: swifttrap-for-mailtrap.php
@@ -27,7 +29,7 @@ msgstr ""
 #. Description of the plugin
 #: swifttrap-for-mailtrap.php
 msgid "Routes wp_mail() through the Mailtrap HTTP API with configurable sender settings."
-msgstr ""
+msgstr "Achemine wp_mail() via l'API HTTP Mailtrap avec des réglages d'expéditeur configurables."
 
 #. Author of the plugin
 #: swifttrap-for-mailtrap.php
@@ -41,172 +43,172 @@ msgstr ""
 
 #: includes/admin.php:65
 msgid "sent"
-msgstr ""
+msgstr "envoyés"
 
 #: includes/admin.php:66
 msgid "limit"
-msgstr ""
+msgstr "limite"
 
 #: includes/admin.php:67
 msgid "Plan"
-msgstr ""
+msgstr "Forfait"
 
 #: includes/admin.php:68
 msgid "Team"
-msgstr ""
+msgstr "Équipe"
 
 #: includes/admin.php:69
 msgid "Unable to load usage data."
-msgstr ""
+msgstr "Impossible de charger les données d'utilisation."
 
 #: includes/admin.php:70
 msgid "No sending domains found."
-msgstr ""
+msgstr "Aucun domaine d'envoi trouvé."
 
 #: includes/admin.php:71
 msgid "Verified"
-msgstr ""
+msgstr "Vérifié"
 
 #: includes/admin.php:72
 msgid "Pending"
-msgstr ""
+msgstr "En attente"
 
 #: includes/admin.php:73
 msgid "Unable to load domains."
-msgstr ""
+msgstr "Impossible de charger les domaines."
 
 #: includes/admin.php:74
 msgid "Bounce"
-msgstr ""
+msgstr "Rebond"
 
 #: includes/admin.php:75
 msgid "Complaint"
-msgstr ""
+msgstr "Réclamation"
 
 #: includes/admin.php:76
 msgid "Unsub"
-msgstr ""
+msgstr "Désabonnement"
 
 #: includes/admin.php:77
 msgid "Manual"
-msgstr ""
+msgstr "Manuel"
 
 #: includes/admin.php:78
 msgid "No suppressions found."
-msgstr ""
+msgstr "Aucune suppression trouvée."
 
 #: includes/admin.php:79
 msgid "Unable to load suppressions."
-msgstr ""
+msgstr "Impossible de charger les suppressions."
 
 #: includes/admin.php:80
 msgid "Failed to load data. Please refresh the page."
-msgstr ""
+msgstr "Échec du chargement des données. Veuillez actualiser la page."
 
 #: includes/admin.php:81
 msgid "Remove"
-msgstr ""
+msgstr "Retirer"
 
 #: includes/admin.php:82
 #: includes/admin.php:735
 msgid "Email Logs"
-msgstr ""
+msgstr "Journal des e-mails"
 
 #: includes/admin.php:83
 msgid "From"
-msgstr ""
+msgstr "De"
 
 #: includes/admin.php:84
 msgid "To"
-msgstr ""
+msgstr "À"
 
 #: includes/admin.php:85
 msgid "Subject"
-msgstr ""
+msgstr "Objet"
 
 #: includes/admin.php:86
 #: includes/admin.php:630
 msgid "Category"
-msgstr ""
+msgstr "Catégorie"
 
 #: includes/admin.php:87
 #: includes/admin.php:481
 msgid "Status"
-msgstr ""
+msgstr "Statut"
 
 #: includes/admin.php:88
 msgid "Date"
-msgstr ""
+msgstr "Date"
 
 #: includes/admin.php:89
 msgid "No emails found."
-msgstr ""
+msgstr "Aucun e-mail trouvé."
 
 #: includes/admin.php:90
 msgid "Unable to load email logs."
-msgstr ""
+msgstr "Impossible de charger le journal des e-mails."
 
 #: includes/admin.php:91
 msgid "&laquo; Prev"
-msgstr ""
+msgstr "&laquo; Précédent"
 
 #: includes/admin.php:92
 msgid "Next &raquo;"
-msgstr ""
+msgstr "Suivant &raquo;"
 
 #: includes/admin.php:93
 msgid "Search..."
-msgstr ""
+msgstr "Rechercher…"
 
 #: includes/admin.php:94
 #: includes/admin.php:739
 msgid "All statuses"
-msgstr ""
+msgstr "Tous les statuts"
 
 #: includes/admin.php:95
 #, php-format
 msgid "Page %1$s of %2$s"
-msgstr ""
+msgstr "Page %1$s sur %2$s"
 
 #: includes/admin.php:104
 msgid "Sending..."
-msgstr ""
+msgstr "Envoi en cours…"
 
 #: includes/admin.php:107
 #: includes/admin.php:114
 #: includes/admin.php:676
 msgid "Send Test Email"
-msgstr ""
+msgstr "Envoyer un e-mail de test"
 
 #: includes/admin.php:115
 #: includes/admin.php:133
 #: includes/admin.php:161
 #: includes/admin.php:184
 msgid "Request failed."
-msgstr ""
+msgstr "Échec de la requête."
 
 #: includes/admin.php:122
 msgid "Verifying..."
-msgstr ""
+msgstr "Vérification en cours…"
 
 #: includes/admin.php:125
 #: includes/admin.php:132
 #: includes/admin.php:551
 msgid "Verify Token"
-msgstr ""
+msgstr "Vérifier le jeton"
 
 #: includes/admin.php:144
 msgid "Adding..."
-msgstr ""
+msgstr "Ajout en cours…"
 
 #: includes/admin.php:152
 #: includes/admin.php:160
 msgid "Add Suppression"
-msgstr ""
+msgstr "Ajouter une suppression"
 
 #: includes/admin.php:168
 msgid "Are you sure you want to remove this suppression?"
-msgstr ""
+msgstr "Voulez-vous vraiment retirer cette suppression ?"
 
 #: includes/admin.php:428
 #: includes/admin.php:429
@@ -214,241 +216,241 @@ msgstr ""
 #: includes/admin.php:708
 #: includes/swifttrap-site-health.php:41
 msgid "Mailtrap"
-msgstr ""
+msgstr "Mailtrap"
 
 #: includes/admin.php:439
 #: includes/admin.php:440
 msgid "Stats"
-msgstr ""
+msgstr "Statistiques"
 
 #: includes/admin.php:448
 #: includes/admin.php:449
 #: includes/admin.php:506
 msgid "Settings"
-msgstr ""
+msgstr "Réglages"
 
 #: includes/admin.php:485
 msgid "Enabled"
-msgstr ""
+msgstr "Activé"
 
 #: includes/admin.php:487
 msgid "Disabled"
-msgstr ""
+msgstr "Désactivé"
 
 #: includes/admin.php:489
 msgid "Token missing"
-msgstr ""
+msgstr "Jeton manquant"
 
 #: includes/admin.php:495
 msgid "Sender"
-msgstr ""
+msgstr "Expéditeur"
 
 #: includes/admin.php:503
 msgid "View Stats"
-msgstr ""
+msgstr "Voir les statistiques"
 
 #: includes/admin.php:525
 msgid "Mailtrap Settings"
-msgstr ""
+msgstr "Réglages Mailtrap"
 
 #: includes/admin.php:533
 msgid "Mailtrap Delivery"
-msgstr ""
+msgstr "Envoi via Mailtrap"
 
 #: includes/admin.php:534
 msgid "Send all site emails through the Mailtrap Send API. Provide an API token from your Mailtrap project."
-msgstr ""
+msgstr "Envoyez tous les e-mails du site via l'API d'envoi Mailtrap. Indiquez un jeton API de votre projet Mailtrap."
 
 #: includes/admin.php:540
 msgid "Route wp_mail() through Mailtrap"
-msgstr ""
+msgstr "Acheminer wp_mail() via Mailtrap"
 
 #: includes/admin.php:546
 msgid "API Token"
-msgstr ""
+msgstr "Jeton API"
 
 #: includes/admin.php:548
 msgid "Use the \"Send API token\" from your Mailtrap inbox or project."
-msgstr ""
+msgstr "Utilisez le jeton « Send API token » de votre boîte de réception ou projet Mailtrap."
 
 #: includes/admin.php:559
 msgid "Sender email"
-msgstr ""
+msgstr "E-mail de l'expéditeur"
 
 #: includes/admin.php:561
 msgid "Address shown in the From header. Defaults to the site admin email."
-msgstr ""
+msgstr "Adresse affichée dans l'en-tête From. Par défaut, il s'agit de l'e-mail de l'administrateur du site."
 
 #: includes/admin.php:566
 msgid "Sender name"
-msgstr ""
+msgstr "Nom de l'expéditeur"
 
 #: includes/admin.php:568
 msgid "Display name for the From header. Defaults to the site title."
-msgstr ""
+msgstr "Nom affiché dans l'en-tête From. Par défaut, il s'agit du titre du site."
 
 #: includes/admin.php:575
 msgid "Attachments"
-msgstr ""
+msgstr "Pièces jointes"
 
 #: includes/admin.php:577
 msgid "Max attachment size (MB)"
-msgstr ""
+msgstr "Taille maximale des pièces jointes (Mo)"
 
 #: includes/admin.php:579
 msgid "Maximum size permitted for individual email attachments (1 to 25 MB)."
-msgstr ""
+msgstr "Taille maximale autorisée pour chaque pièce jointe (de 1 à 25 Mo)."
 
 #: includes/admin.php:585
 msgid "Advanced Settings"
-msgstr ""
+msgstr "Réglages avancés"
 
 #: includes/admin.php:586
 msgid "Advanced email delivery options for more control over Mailtrap streams."
-msgstr ""
+msgstr "Options avancées d'envoi des e-mails pour un meilleur contrôle des flux Mailtrap."
 
 #: includes/admin.php:592
 msgid "Add category tags to emails in Mailtrap"
-msgstr ""
+msgstr "Ajouter des étiquettes de catégorie aux e-mails dans Mailtrap"
 
 #: includes/admin.php:594
 msgid "Categories help organize emails in Mailtrap dashboard (welcome, password-reset, notification, etc.)."
-msgstr ""
+msgstr "Les catégories permettent d'organiser les e-mails dans le tableau de bord Mailtrap (bienvenue, réinitialisation du mot de passe, notification, etc.)."
 
 #: includes/admin.php:601
 msgid "Automatically detect email type from subject line"
-msgstr ""
+msgstr "Détecter automatiquement le type d'e-mail à partir de l'objet"
 
 #: includes/admin.php:603
 msgid "When enabled, emails are categorized by keywords in subject: \"reset\" → password-reset, \"confirm\" → verification, \"welcome\" → welcome, etc."
-msgstr ""
+msgstr "Lorsque cette option est activée, les e-mails sont catégorisés selon des mots-clés présents dans l'objet : « reset » → password-reset, « confirm » → verification, « welcome » → welcome, etc."
 
 #: includes/admin.php:608
 msgid "Webhook URL"
-msgstr ""
+msgstr "URL du webhook"
 
 #: includes/admin.php:610
 msgid "Register this URL in your Mailtrap settings under Integration Webhooks. Select delivered, bounce, spam, open, and click events."
-msgstr ""
+msgstr "Enregistrez cette URL dans vos réglages Mailtrap, sous Integration Webhooks. Sélectionnez les événements delivered, bounce, spam, open et click."
 
 #: includes/admin.php:614
 msgid "Webhook Secret"
-msgstr ""
+msgstr "Secret du webhook"
 
 #: includes/admin.php:616
 msgid "Paste the signing secret Mailtrap shows you when you create this webhook integration. Used to verify the Mailtrap-Signature header (HMAC-SHA256) on incoming events."
-msgstr ""
+msgstr "Collez le secret de signature que Mailtrap vous affiche lors de la création de cette intégration webhook. Il sert à vérifier l'en-tête Mailtrap-Signature (HMAC-SHA256) des événements entrants."
 
 #: includes/admin.php:624
 msgid "Category Stream Mapping & Sender Override"
-msgstr ""
+msgstr "Association catégorie/flux et remplacement de l'expéditeur"
 
 #: includes/admin.php:625
 msgid "Map auto-detected categories to sending streams or override From identities per category."
-msgstr ""
+msgstr "Associez les catégories détectées automatiquement à des flux d'envoi, ou remplacez l'identité d'expéditeur (From) par catégorie."
 
 #: includes/admin.php:631
 msgid "Sending Stream"
-msgstr ""
+msgstr "Flux d'envoi"
 
 #: includes/admin.php:632
 msgid "Custom From Name"
-msgstr ""
+msgstr "Nom d'expéditeur personnalisé"
 
 #: includes/admin.php:633
 msgid "Custom From Email"
-msgstr ""
+msgstr "E-mail d'expéditeur personnalisé"
 
 #: includes/admin.php:650
 msgid "Transactional"
-msgstr ""
+msgstr "Transactionnel"
 
 #: includes/admin.php:651
 msgid "Bulk"
-msgstr ""
+msgstr "En masse"
 
 #: includes/admin.php:655
 msgid "e.g. Support Team"
-msgstr ""
+msgstr "ex. Équipe support"
 
 #: includes/admin.php:658
 msgid "e.g. support@domain.com"
-msgstr ""
+msgstr "ex. support@domain.com"
 
 #: includes/admin.php:673
 msgid "Test Email"
-msgstr ""
+msgstr "E-mail de test"
 
 #: includes/admin.php:674
 msgid "Send a test email to the configured sender address to verify your setup."
-msgstr ""
+msgstr "Envoyez un e-mail de test à l'adresse d'expéditeur configurée pour vérifier votre configuration."
 
 #: includes/admin.php:697
 msgid "Mailtrap Stats"
-msgstr ""
+msgstr "Statistiques Mailtrap"
 
 #: includes/admin.php:702
 msgid "Usage"
-msgstr ""
+msgstr "Utilisation"
 
 #: includes/admin.php:704
 #: includes/admin.php:719
 #: includes/admin.php:728
 #: includes/admin.php:750
 msgid "Loading..."
-msgstr ""
+msgstr "Chargement…"
 
 #: includes/admin.php:709
 msgid "For full logs, events, and deliverability reports open Mailtrap."
-msgstr ""
+msgstr "Pour consulter les journaux complets, les événements et les rapports de délivrabilité, ouvrez Mailtrap."
 
 #: includes/admin.php:710
 msgid "Open Mailtrap"
-msgstr ""
+msgstr "Ouvrir Mailtrap"
 
 #: includes/admin.php:717
 msgid "Sending Domains"
-msgstr ""
+msgstr "Domaines d'envoi"
 
 #: includes/admin.php:724
 msgid "Suppressions"
-msgstr ""
+msgstr "Suppressions"
 
 #: includes/admin.php:725
 msgid "View all in Mailtrap"
-msgstr ""
+msgstr "Tout voir dans Mailtrap"
 
 #: includes/admin.php:737
 msgid "Search by recipient email..."
-msgstr ""
+msgstr "Rechercher par e-mail du destinataire…"
 
 #: includes/admin.php:740
 msgid "Delivered"
-msgstr ""
+msgstr "Distribué"
 
 #: includes/admin.php:741
 msgid "Not Delivered"
-msgstr ""
+msgstr "Non distribué"
 
 #: includes/admin.php:742
 msgid "Enqueued"
-msgstr ""
+msgstr "En file d'attente"
 
 #: includes/admin.php:743
 msgid "Opted Out"
-msgstr ""
+msgstr "Désinscrit"
 
 #: includes/admin.php:745
 msgid "From date"
-msgstr ""
+msgstr "Date de début"
 
 #: includes/admin.php:746
 msgid "To date"
-msgstr ""
+msgstr "Date de fin"
 
 #: includes/admin.php:747
 msgid "Filter"
-msgstr ""
+msgstr "Filtrer"
 
 #: includes/admin.php:818
 #: includes/swifttrap-api.php:475
@@ -457,33 +459,33 @@ msgstr ""
 #: includes/swifttrap-api.php:701
 #: includes/swifttrap-api.php:734
 msgid "Permission denied."
-msgstr ""
+msgstr "Permission refusée."
 
 #: includes/admin.php:824
 msgid "Please enter an API token."
-msgstr ""
+msgstr "Veuillez saisir un jeton API."
 
 #: includes/admin.php:833
 #, php-format
 msgid "Verification failed: %s"
-msgstr ""
+msgstr "Échec de la vérification : %s"
 
 #: includes/admin.php:836
 #, php-format
 msgid "Token verified successfully. Account: %s"
-msgstr ""
+msgstr "Jeton vérifié avec succès. Compte : %s"
 
 #: includes/swifttrap-api.php:41
 msgid "Mailtrap API token is not set."
-msgstr ""
+msgstr "Le jeton API Mailtrap n'est pas défini."
 
 #: includes/swifttrap-api.php:67
 msgid "Unable to retrieve Mailtrap account info."
-msgstr ""
+msgstr "Impossible de récupérer les informations du compte Mailtrap."
 
 #: includes/swifttrap-api.php:73
 msgid "Mailtrap account ID not found."
-msgstr ""
+msgstr "ID de compte Mailtrap introuvable."
 
 #. translators: %d: HTTP status code returned by the Mailtrap API
 #: includes/swifttrap-api.php:201
@@ -494,199 +496,199 @@ msgstr ""
 #: swifttrap-for-mailtrap.php:580
 #, php-format
 msgid "Mailtrap API returned HTTP %d"
-msgstr ""
+msgstr "L'API Mailtrap a renvoyé le code HTTP %d"
 
 #: includes/swifttrap-api.php:206
 #: includes/swifttrap-api.php:211
 msgid "Invalid domains response."
-msgstr ""
+msgstr "Réponse de domaines invalide."
 
 #: includes/swifttrap-api.php:283
 msgid "Invalid suppressions response."
-msgstr ""
+msgstr "Réponse de suppressions invalide."
 
 #. translators: %s: raw API response snippet for debugging
 #: includes/swifttrap-api.php:454
 #, php-format
 msgid "Invalid emails response: %s"
-msgstr ""
+msgstr "Réponse d'e-mails invalide : %s"
 
 #: includes/swifttrap-api.php:481
 msgid "Mailtrap is not enabled or API token is missing."
-msgstr ""
+msgstr "Mailtrap n'est pas activé ou le jeton API est manquant."
 
 #. translators: %s: current date and time
 #: includes/swifttrap-api.php:486
 #, php-format
 msgid "Mailtrap Test Email — %s"
-msgstr ""
+msgstr "E-mail de test Mailtrap — %s"
 
 #: includes/swifttrap-api.php:487
 msgid "This is a test email sent from the SwiftTrap for Mailtrap plugin. If you received this, your configuration is working correctly."
-msgstr ""
+msgstr "Ceci est un e-mail de test envoyé par l'extension SwiftTrap for Mailtrap. Si vous l'avez reçu, votre configuration fonctionne correctement."
 
 #. translators: %s: recipient email address
 #: includes/swifttrap-api.php:493
 #, php-format
 msgid "Test email sent to %s"
-msgstr ""
+msgstr "E-mail de test envoyé à %s"
 
 #: includes/swifttrap-api.php:495
 msgid "Failed to send test email. Check your settings."
-msgstr ""
+msgstr "Échec de l'envoi de l'e-mail de test. Vérifiez vos réglages."
 
 #: includes/swifttrap-api.php:709
 msgid "Invalid email address."
-msgstr ""
+msgstr "Adresse e-mail invalide."
 
 #: includes/swifttrap-api.php:713
 msgid "Invalid domain ID."
-msgstr ""
+msgstr "ID de domaine invalide."
 
 #: includes/swifttrap-api.php:723
 msgid "Suppression added successfully."
-msgstr ""
+msgstr "Suppression ajoutée avec succès."
 
 #: includes/swifttrap-api.php:740
 msgid "Invalid suppression ID."
-msgstr ""
+msgstr "ID de suppression invalide."
 
 #: includes/swifttrap-api.php:750
 msgid "Suppression removed successfully."
-msgstr ""
+msgstr "Suppression retirée avec succès."
 
 #: includes/swifttrap-site-health.php:24
 msgid "SwiftTrap for Mailtrap Status"
-msgstr ""
+msgstr "État de SwiftTrap for Mailtrap"
 
 #: includes/swifttrap-site-health.php:38
 msgid "SwiftTrap for Mailtrap is configured correctly"
-msgstr ""
+msgstr "SwiftTrap for Mailtrap est configuré correctement"
 
 #: includes/swifttrap-site-health.php:44
 msgid "SwiftTrap for Mailtrap routes your WordPress emails through the Mailtrap Send API."
-msgstr ""
+msgstr "SwiftTrap for Mailtrap achemine les e-mails de votre WordPress via l'API d'envoi Mailtrap."
 
 #: includes/swifttrap-site-health.php:50
 msgid "SwiftTrap for Mailtrap is disabled"
-msgstr ""
+msgstr "SwiftTrap for Mailtrap est désactivé"
 
 #: includes/swifttrap-site-health.php:51
 msgid "Mailtrap routing is currently disabled. Emails are sent using the default WordPress mail handler."
-msgstr ""
+msgstr "L'acheminement via Mailtrap est actuellement désactivé. Les e-mails sont envoyés via le gestionnaire de messagerie par défaut de WordPress."
 
 #: includes/swifttrap-site-health.php:57
 msgid "Mailtrap API token is missing"
-msgstr ""
+msgstr "Le jeton API Mailtrap est manquant"
 
 #: includes/swifttrap-site-health.php:58
 msgid "You must provide a Mailtrap API token in settings to route emails."
-msgstr ""
+msgstr "Vous devez indiquer un jeton API Mailtrap dans les réglages pour acheminer les e-mails."
 
 #: includes/swifttrap-site-health.php:66
 msgid "Mailtrap API connection failed"
-msgstr ""
+msgstr "Échec de la connexion à l'API Mailtrap"
 
 #: includes/swifttrap-site-health.php:67
 #, php-format
 msgid "Failed to connect to Mailtrap API: %s"
-msgstr ""
+msgstr "Échec de la connexion à l'API Mailtrap : %s"
 
 #: includes/swifttrap-site-health.php:79
 msgid "Unable to verify Mailtrap sending domains"
-msgstr ""
+msgstr "Impossible de vérifier les domaines d'envoi Mailtrap"
 
 #: includes/swifttrap-site-health.php:80
 #, php-format
 msgid "Connected to Mailtrap, but could not retrieve domains list: %s"
-msgstr ""
+msgstr "Connecté à Mailtrap, mais impossible de récupérer la liste des domaines : %s"
 
 #: includes/swifttrap-site-health.php:98
 #, php-format
 msgid "Sender domain \"%s\" is not registered in Mailtrap"
-msgstr ""
+msgstr "Le domaine d'expéditeur « %s » n'est pas enregistré dans Mailtrap"
 
 #: includes/swifttrap-site-health.php:99
 #, php-format
 msgid "The sender email address domain (%s) must be added to your Sending Domains in Mailtrap."
-msgstr ""
+msgstr "Le domaine de l'adresse e-mail de l'expéditeur (%s) doit être ajouté à vos domaines d'envoi dans Mailtrap."
 
 #: includes/swifttrap-site-health.php:102
 #, php-format
 msgid "Sender domain \"%s\" is unverified in Mailtrap"
-msgstr ""
+msgstr "Le domaine d'expéditeur « %s » n'est pas vérifié dans Mailtrap"
 
 #: includes/swifttrap-site-health.php:103
 #, php-format
 msgid "The sender email address domain (%s) is registered but has pending DNS verification in Mailtrap."
-msgstr ""
+msgstr "Le domaine de l'adresse e-mail de l'expéditeur (%s) est enregistré, mais sa vérification DNS est en attente dans Mailtrap."
 
 #: includes/swifttrap-site-health.php:105
 msgid "SwiftTrap for Mailtrap is routing emails correctly"
-msgstr ""
+msgstr "SwiftTrap for Mailtrap achemine les e-mails correctement"
 
 #: includes/swifttrap-site-health.php:106
 #, php-format
 msgid "API token is valid and sender domain \"%s\" is verified."
-msgstr ""
+msgstr "Le jeton API est valide et le domaine d'expéditeur « %s » est vérifié."
 
 #: includes/swifttrap-webhook.php:42
 msgid "Webhook secret is not configured."
-msgstr ""
+msgstr "Le secret du webhook n'est pas configuré."
 
 #: includes/swifttrap-webhook.php:49
 msgid "Missing webhook signature."
-msgstr ""
+msgstr "Signature du webhook manquante."
 
 #: includes/swifttrap-webhook.php:57
 msgid "Invalid webhook signature."
-msgstr ""
+msgstr "Signature du webhook invalide."
 
 #: includes/swifttrap-webhook.php:62
 msgid "Invalid JSON payload."
-msgstr ""
+msgstr "Charge utile JSON invalide."
 
 #: swifttrap-for-mailtrap.php:107
 #, php-format
 msgid "All recipients skipped due to suppression: %s"
-msgstr ""
+msgstr "Tous les destinataires ont été ignorés en raison d'une suppression : %s"
 
 #: swifttrap-for-mailtrap.php:218
 msgid "No valid recipients."
-msgstr ""
+msgstr "Aucun destinataire valide."
 
 #: swifttrap-for-mailtrap.php:326
 msgid "Sender email is invalid."
-msgstr ""
+msgstr "L'e-mail de l'expéditeur est invalide."
 
 #. translators: %s: the invalid email address
 #: swifttrap-for-mailtrap.php:406
 #, php-format
 msgid "Invalid email address: %s"
-msgstr ""
+msgstr "Adresse e-mail invalide : %s"
 
 #. translators: %s: file path of the missing attachment
 #: swifttrap-for-mailtrap.php:450
 #, php-format
 msgid "Attachment not found or unreadable: %s"
-msgstr ""
+msgstr "Pièce jointe introuvable ou illisible : %s"
 
 #. translators: %1$s: file name, %2$s: file size, %3$d: max size MB
 #: swifttrap-for-mailtrap.php:462
 #, php-format
 msgid "Attachment exceeds %3$d MB limit: %1$s (%2$s)"
-msgstr ""
+msgstr "La pièce jointe dépasse la limite de %3$d Mo : %1$s (%2$s)"
 
 #: swifttrap-for-mailtrap.php:472
 msgid "WordPress filesystem is not available."
-msgstr ""
+msgstr "Le système de fichiers WordPress n'est pas disponible."
 
 #. translators: %s: file path of the unreadable attachment
 #: swifttrap-for-mailtrap.php:479
 #, php-format
 msgid "Unable to read attachment: %s"
-msgstr ""
+msgstr "Impossible de lire la pièce jointe : %s"
 
 #: swifttrap-for-mailtrap.php:515
 msgid "Bulk/promotional emails are blocked on this environment."
-msgstr ""
+msgstr "Les e-mails groupés/promotionnels sont bloqués sur cet environnement."
