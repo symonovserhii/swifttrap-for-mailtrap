@@ -613,7 +613,7 @@ function swifttrap_mailtrap_settings_page(): void {
 					<div class="swifttrap-field-group">
 						<label class="swifttrap-field-label"><?php esc_html_e( 'Webhook Secret', 'swifttrap-for-mailtrap' ); ?></label>
 						<input type="text" name="<?php echo esc_attr( SWIFTTRAP_MAILTRAP_OPTION_KEY ); ?>[webhook_secret]" value="<?php echo esc_attr( $settings['webhook_secret'] ?? '' ); ?>" class="swifttrap-input-full" />
-						<p class="swifttrap-field-help"><?php esc_html_e( 'Verification key for incoming webhook events. Configure it in Mailtrap Webhook settings as the X-Mailtrap-Secret HTTP header.', 'swifttrap-for-mailtrap' ); ?></p>
+						<p class="swifttrap-field-help"><?php esc_html_e( 'Paste the signing secret Mailtrap shows you when you create this webhook integration. Used to verify the Mailtrap-Signature header (HMAC-SHA256) on incoming events.', 'swifttrap-for-mailtrap' ); ?></p>
 					</div>
 				</div>
 			</div>

@@ -352,14 +352,18 @@ class PluginTest extends TestCase {
 				'webhook_secret' => 'super_secret_webhook_token',
 			) );
 
+		$body = json_encode( array(
+			'events' => array(
+				array(
+					'message_id' => 'msg-uuid-456',
+					'event'      => 'delivered',
+				),
+			),
+		) );
+
 		$request = new \WP_REST_Request( 'POST', '/swifttrap/v1/webhook' );
-		$request->set_header( 'X-Mailtrap-Secret', 'super_secret_webhook_token' );
-		$request->set_body( json_encode( array(
-			array(
-				'message_id' => 'msg-uuid-456',
-				'event'      => 'delivered',
-			)
-		) ) );
+		$request->set_header( 'Mailtrap-Signature', hash_hmac( 'sha256', $body, 'super_secret_webhook_token' ) );
+		$request->set_body( $body );
 
 		Monkey\Actions\expectDone( 'swifttrap_mailtrap_webhook_event' )
 			->once()
@@ -373,7 +377,7 @@ class PluginTest extends TestCase {
 	}
 
 	/**
-	 * Test webhook endpoint denies access with an invalid secret.
+	 * Test webhook endpoint denies access with an invalid signature.
 	 */
 	public function test_webhook_status_update_unauthorized() {
 		Monkey\Functions\expect( 'swifttrap_mailtrap_get_settings' )
@@ -382,7 +386,26 @@ class PluginTest extends TestCase {
 			) );
 
 		$request = new \WP_REST_Request( 'POST', '/swifttrap/v1/webhook' );
-		$request->set_header( 'X-Mailtrap-Secret', 'wrong_secret' );
+		$request->set_header( 'Mailtrap-Signature', 'not_a_valid_signature' );
+		$request->set_body( json_encode( array( 'events' => array() ) ) );
+
+		$response = swifttrap_mailtrap_handle_webhook_request( $request );
+
+		$this->assertInstanceOf( WP_Error::class, $response );
+		$this->assertEquals( 'swifttrap_webhook_unauthorized', $response->get_error_code() );
+	}
+
+	/**
+	 * Test webhook endpoint rejects a request with no signature header at all.
+	 */
+	public function test_webhook_status_update_missing_signature() {
+		Monkey\Functions\expect( 'swifttrap_mailtrap_get_settings' )
+			->andReturn( array(
+				'webhook_secret' => 'super_secret_webhook_token',
+			) );
+
+		$request = new \WP_REST_Request( 'POST', '/swifttrap/v1/webhook' );
+		$request->set_body( json_encode( array( 'events' => array() ) ) );
 
 		$response = swifttrap_mailtrap_handle_webhook_request( $request );
 

@@ -42,19 +42,29 @@ function swifttrap_mailtrap_handle_webhook_request( WP_REST_Request $request ): 
 		return new WP_Error( 'swifttrap_webhook_disabled', __( 'Webhook secret is not configured.', 'swifttrap-for-mailtrap' ), array( 'status' => 403 ) );
 	}
 
-	$header_secret = $request->get_header( 'X-Mailtrap-Secret' );
+	$signature_header = $request->get_header( 'Mailtrap-Signature' );
+	$raw_body         = $request->get_body();
 
-	if ( ! hash_equals( $configured_secret, (string) $header_secret ) ) {
-		return new WP_Error( 'swifttrap_webhook_unauthorized', __( 'Unauthorized secret token.', 'swifttrap-for-mailtrap' ), array( 'status' => 401 ) );
+	if ( empty( $signature_header ) ) {
+		return new WP_Error( 'swifttrap_webhook_unauthorized', __( 'Missing webhook signature.', 'swifttrap-for-mailtrap' ), array( 'status' => 401 ) );
 	}
 
-	$payload = json_decode( $request->get_body(), true );
+	// Mailtrap signs webhooks with HMAC-SHA256 over the raw request body, sent as a
+	// hex-encoded Mailtrap-Signature header — not a bare shared-secret header.
+	$computed_signature = hash_hmac( 'sha256', $raw_body, $configured_secret );
+
+	if ( ! hash_equals( $computed_signature, $signature_header ) ) {
+		return new WP_Error( 'swifttrap_webhook_unauthorized', __( 'Invalid webhook signature.', 'swifttrap-for-mailtrap' ), array( 'status' => 401 ) );
+	}
+
+	$payload = json_decode( $raw_body, true );
 	if ( ! is_array( $payload ) ) {
 		return new WP_Error( 'swifttrap_webhook_invalid_payload', __( 'Invalid JSON payload.', 'swifttrap-for-mailtrap' ), array( 'status' => 400 ) );
 	}
 
-	// Webhook payload can be an array of events or a single event.
-	$events = isset( $payload[0] ) ? $payload : array( $payload );
+	// Mailtrap wraps events as { "events": [ ... ] }; fall back to treating the payload
+	// itself as a single event for forward-compatibility with alternate delivery formats.
+	$events = isset( $payload['events'] ) && is_array( $payload['events'] ) ? $payload['events'] : array( $payload );
 
 	foreach ( $events as $event ) {
 		if ( empty( $event['message_id'] ) || empty( $event['event'] ) ) {

@@ -120,12 +120,11 @@ function swifttrap_mailtrap_fetch_stats( array $settings ): array|WP_Error {
 		return $account_data;
 	}
 
-	$account_id = $account_data['id'];
-	$team_name  = $account_data['name'];
+	$team_name = $account_data['name'];
 
 	$billing          = array();
 	$billing_response = wp_remote_get(
-		sprintf( 'https://mailtrap.io/api/accounts/%d/billing/usage', $account_id ),
+		'https://mailtrap.io/api/billing/usage',
 		array(
 			'headers' => array(
 				'Authorization' => 'Bearer ' . $settings['token'],
@@ -412,7 +411,7 @@ function swifttrap_mailtrap_fetch_emails( array $settings, string $cursor = '', 
 	$filter_parts = array();
 	if ( ! empty( $filters['search'] ) ) {
 		$v = rawurlencode( sanitize_text_field( $filters['search'] ) );
-		$filter_parts[] = 'filters%5Bto%5D%5Boperator%5D=contain&filters%5Bto%5D%5Bvalue%5D=' . $v;
+		$filter_parts[] = 'filters%5Bto%5D%5Boperator%5D=contain&filters%5Bto%5D%5Bvalue%5D%5B%5D=' . $v;
 	}
 	if ( ! empty( $filters['status'] ) ) {
 		$v = rawurlencode( sanitize_key( $filters['status'] ) );
@@ -432,8 +431,8 @@ function swifttrap_mailtrap_fetch_emails( array $settings, string $cursor = '', 
 
 	$response = wp_remote_get( $url, array(
 		'headers' => array(
-			'Api-Token'    => $settings['token'],
-			'Content-Type' => 'application/json',
+			'Authorization' => 'Bearer ' . $settings['token'],
+			'Content-Type'  => 'application/json',
 		),
 		'timeout' => 15,
 	) );
