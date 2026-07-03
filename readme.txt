@@ -3,7 +3,7 @@ Contributors: simmotorlp
 Tags: mailtrap, transactional-email, email-api, wp-mail, email-log
 Requires at least: 6.0
 Tested up to: 7.0
-Stable tag: 3.0.0
+Stable tag: 3.0.1
 Requires PHP: 8.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -107,6 +107,13 @@ Yes — 25 MB per email (matches Mailtrap's API limit).
 
 == Changelog ==
 
+= 3.0.1 =
+* Fixed: Webhook receiver now verifies Mailtrap's actual `Mailtrap-Signature` HMAC-SHA256 header instead of a header Mailtrap never sends. Every real delivery-tracking webhook call was being rejected outright since the feature shipped in 2.4.0.
+* Fixed: Webhook payload parsing now unwraps Mailtrap's `{"events": [...]}` envelope correctly, so verified events reach `do_action('swifttrap_mailtrap_webhook_event', ...)`.
+* Fixed: Usage card on the Stats page now calls Mailtrap's current `/api/billing/usage` endpoint instead of a stale account-scoped path that returned no data.
+* Fixed: Uninstalling the plugin now clears the actual cached transients instead of pre-2.3.0 key names that no longer match.
+* Improved: Email Logs recipient search and account API calls now consistently use bracketed filter syntax and Bearer-token authentication.
+
 = 3.0.0 =
 * Breaking: Removed all local file-based email logging. No more log files written to disk — eliminates OOM/disk-full risk on high-volume sites.
 * New: Email Logs panel on the Stats page pulls live data directly from the Mailtrap API (`GET /api/email_logs`).
@@ -185,6 +192,9 @@ Yes — 25 MB per email (matches Mailtrap's API limit).
 * Improved log file locking
 
 == Upgrade Notice ==
+
+= 3.0.1 =
+Important fix: webhook delivery-tracking events from Mailtrap were being rejected due to a signature-verification mismatch and have never been processed since 2.4.0. Update if you use the webhook integration.
 
 = 2.4.0 =
 Upgrades WordPress plugin to 2.4.0, introducing delivery tracking webhooks, suppression management, graceful native fallback, enhanced logs UI with CSV export, WP-CLI commands, and a WordPress Site Health check.

@@ -8,7 +8,7 @@ SwiftTrap short-circuits WordPress's `wp_mail()` and delivers every message via 
 
 Target user: any WordPress site owner who already sends through Mailtrap and wants API-grade deliverability, real delivery status, and suppression hygiene instead of SMTP round-trips. Works transparently with Contact Form 7, WooCommerce, Gravity Forms, and anything that calls `wp_mail()`.
 
-Current version: **3.0.0** (published on wordpress.org, slug `swifttrap-for-mailtrap`).
+Current version: **3.0.1** (published on wordpress.org, slug `swifttrap-for-mailtrap`).
 
 ## Core Features (implemented)
 
