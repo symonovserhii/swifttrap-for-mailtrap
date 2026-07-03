@@ -11,6 +11,12 @@ Thumbs.db
 # SVN directory
 .svn/
 
+# Claude Code
+.claude/
+
+# WordPress test artifacts
+.phpunit.result.cache
+
 # Dependencies (none used, but just in case)
 node_modules/
 vendor/

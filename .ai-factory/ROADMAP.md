@@ -1,34 +1,36 @@
 # Roadmap — SwiftTrap for Mailtrap
 
-> **Status:** all items below are scheduled in `plans/m2-functional-features.md` (release 2.4.0), to run
-> after `plans/m1-php8-wp7-hardening.md` (release 2.3.0) ships. This file is the rationale/source for each.
+> Ship the most Mailtrap-native `wp_mail()` replacement for WordPress: HTTP API delivery with real
+> delivery status, suppression hygiene, and zero local email storage.
 
-Functional improvement backlog (what to add/improve), grounded in current capabilities:
-drop-in `wp_mail()` → Mailtrap API, categories, bulk/transactional streams, file-based email log,
-stats page (domain verification + suppression list), test email, templates, dashboard widget.
+## Milestones
+
+- [x] **M1 — PHP 8.0 / WP 7.0 hardening (2.3.0)** — code-style cleanup, JSON error handling, token-versioned cache, deterministic log-retention cron, send retry/backoff, multisite-safe settings, verify-token button, PHPUnit + Brain Monkey test harness. See `archive/plans/m1-php8-wp7-hardening.md`.
+- [x] **M2 — Functional feature expansion (2.4.0)** — Mailtrap webhook receiver, suppression management (add/remove + auto-skip pre-send), graceful fallback to native `wp_mail()`, Site Health test, category→stream & sender mapping UI, WP-CLI commands, attachment-size guard. See `archive/plans/m2-functional-features.md`.
+- [x] **2.4.1 / 2.4.2 — Suppression & email-log fixes** — suppression edge-case fixes and a fix for an email-log write race that dropped entries under concurrent sends.
+- [x] **3.0.0 — Live API-based email log** — replaced local file-based email logging entirely with a live view backed by Mailtrap's `/api/email_logs` endpoint (search/filter/pagination), removing the local write-race class of bugs at the source.
+- [ ] **Email log detail & resend** — "view payload" modal and a **resend** action for a failed log entry, built on the existing `swifttrap_mailtrap_fetch_emails` live-log view.
+- [ ] **Sends-per-day analytics widget** — a simple chart on the Stats page (by category/status), built on the same live `email_logs` data instead of a local aggregate.
+- [ ] **CSV export** of the current (filtered) email log view.
+
+## Completed
+
+| Milestone | Date |
+|-----------|------|
+| M1 — PHP 8.0 / WP 7.0 hardening | 2.3.0 |
+| M2 — Functional feature expansion | 2.4.0 |
+| Suppression & email-log fixes | 2.4.1 / 2.4.2 |
+| Live API-based email log | 3.0.0 |
+
+## Remaining backlog
 
 Priority: **H** high value / clear demand · **M** solid · **L** nice-to-have.
-"(in harden plan)" = already scheduled in `plans/harden-php8-wp7-functional.md`, not repeated here.
 
-## Delivery tracking & events — the biggest gap
-- **H — Mailtrap webhook receiver.** Today the log records only the *send attempt*, not the final outcome. Register a REST endpoint to receive Mailtrap delivery events (delivered / bounce / spam / open / click) and write the real status back onto the log row. Turns the log from "we tried" into "what actually happened." *Touches:* new `includes/` REST handler + log schema (`swifttrap-api.php` logging).
-- **M — Suppression list management.** Stats page shows suppressions read-only (`swifttrap-api.php:244`). Add add/remove actions (Mailtrap API supports it) so admins can clear a bounce without leaving WP.
+- **M — Email log detail & resend.** The live log table (`admin.php` Email Logs card) shows list rows only; there's no payload/detail view and no way to resend a `not_delivered` message without leaving WP. *Touches:* `admin.php` (modal + resend AJAX), `swifttrap-api.php` (resend needs the original send payload, which Mailtrap's read API may not return in full — check `email_logs` response fields before committing to inline resend vs. a simpler "send a fresh test to this recipient").
+- **M — Sends-per-day analytics widget.** Stats page has usage/domains/suppressions but no time-series view. Aggregate client-side from paginated `email_logs` responses, or add a dedicated summarized fetch if Mailtrap's API supports date-bucketed counts.
+- **L — CSV export** of the email log, respecting the current search/status/date filters.
+- **L — Multiple sender identities beyond category mapping.** Today `category_senders` covers per-category From override; a per-site or ad-hoc identity picker is not implemented.
 
-## Reliability & deliverability
-- **H — Graceful fallback to native `wp_mail()`** when the API is unreachable after retries (in harden plan adds retry/backoff; this adds the final fallback so mail isn't simply lost during an outage). *Touches:* `swifttrap-for-mailtrap.php` send pipeline.
-- **M — Site Health test.** Add a `site_status_tests` check validating token + sender-domain verification, surfaced in Tools → Site Health. Reuses `swifttrap_mailtrap_get_account_data` / `fetch_domains`.
-- **M — Auto-skip suppressed recipients** before send (short-circuit known bounces/complaints) to protect sender reputation.
+## Superseded (kept only as history)
 
-## Admin UX & reporting
-- **M — Email log UI upgrade.** Search/filter by recipient, category, status, date; "view payload" and **resend** for a failed entry. Builds on `read_email_logs` / `format_log_entry` (`admin.php:435`).
-- **M — Analytics widget.** Sends-per-day by category/status chart on the Stats page (extend `compute_log_stats`, `swifttrap-api.php:587`).
-- **L — CSV export** of the email log.
-- **L — Category→stream rules UI.** Routing is filter-only today (`swifttrap_mailtrap_use_bulk_stream`); expose a simple per-category mapping table in settings.
-
-## Power users
-- **M — WP-CLI commands:** `wp swifttrap test`, `wp swifttrap stats`, `wp swifttrap prune-logs`. Wraps existing functions; great for staging/CI.
-- **L — Multiple sender identities** (per-category or per-site From) beyond the single sender in settings.
-- **L — Attachment guardrails:** warn/skip when total attachment size exceeds a configurable cap (current code reads `filesize()` per attachment at `swifttrap-for-mailtrap.php:368`).
-
-## Already covered by the harden plan
-Verify-token button, deterministic log retention (cron), token-versioned cache, multisite-safe settings, JSON-error handling, send retry/backoff, unit tests.
+Everything from the original functional backlog — webhook delivery tracking, suppression list management, graceful fallback, Site Health, deterministic log retention, WP-CLI, attachment guardrails, category→stream rules UI, retry/backoff — shipped between 2.3.0 and 3.0.0. See `archive/plans/` for the original scoping documents.
