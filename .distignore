@@ -7,6 +7,9 @@
 /.ai-factory
 /.ai-factory.json
 /.claude
+/.idea
+/AGENTS.md
+/skills-lock.json
 /tests
 /composer.json
 /composer.lock
