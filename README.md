@@ -2,7 +2,7 @@
 
 [![Version](https://img.shields.io/wordpress/plugin/v/swifttrap-for-mailtrap)](https://wordpress.org/plugins/swifttrap-for-mailtrap/) [![Rating](https://img.shields.io/wordpress/plugin/stars/swifttrap-for-mailtrap)](https://wordpress.org/plugins/swifttrap-for-mailtrap/) [![Active installs](https://img.shields.io/wordpress/plugin/installs/swifttrap-for-mailtrap)](https://wordpress.org/plugins/swifttrap-for-mailtrap/) [![License: GPL v2](https://img.shields.io/badge/License-GPLv2-blue.svg)](https://www.gnu.org/licenses/gpl-2.0.html)
 
-Requires at least: **6.0** · Tested up to: **7.0** · Requires PHP: **8.0** · Stable tag: **2.4.2**
+Requires at least: **6.0** · Tested up to: **7.0** · Requires PHP: **8.0** · Stable tag: **3.0.1**
 
 Send WordPress emails through the Mailtrap Email API (not SMTP). Bulk and transactional streams, categories, suppression list, email log.
 
@@ -28,8 +28,7 @@ Send WordPress emails through the Mailtrap Email API (not SMTP). Bulk and transa
 * Suppression Management — CRUD panel for Mailtrap suppression lists with pre-send recipient suppression checks.
 * Reliability Fallback — Graceful failover back to WordPress native `wp_mail()` if the Mailtrap API call fails.
 * Site Health integration — Verification test checking Mailtrap token status and sending domain verification.
-* Advanced Admin Log — Search and filter logs, view rendered HTML/text bodies in modals, and manual email resend capability.
-* CSV Export — Download complete email logs directly from the dashboard.
+* Live Email Log — Browse and filter delivery data pulled directly from the Mailtrap API; search by recipient address, status, or date range with automatic pagination.
 * WP-CLI commands — Command-line management via `wp swifttrap` (test, stats, prune-logs, send-suppression-sync).
 * Attachment size guard — Configurable limits to prevent oversized files from rejecting at the API gateway.
 * Test email button on the settings page.
@@ -43,7 +42,7 @@ Send WordPress emails through the Mailtrap Email API (not SMTP). Bulk and transa
 * `swifttrap_mailtrap_custom_variables` — attach tracking metadata to outgoing emails.
 
 ### Privacy
-This plugin sends email payloads (recipients, subject, body, attachments) to the Mailtrap API at `send.api.mailtrap.io` and `bulk.api.mailtrap.io`. Account stats are fetched from `mailtrap.io/api/accounts`. See the [Mailtrap Privacy Policy](https://mailtrap.io/privacy-policy). No data is sent anywhere else.
+This plugin sends email payloads (recipients, subject, body, attachments) to the Mailtrap API at `send.api.mailtrap.io` and `bulk.api.mailtrap.io`. Account stats and email logs are fetched from `mailtrap.io/api/accounts` and `mailtrap.io/api/email_logs`. See the [Mailtrap Privacy Policy](https://mailtrap.io/privacy-policy). No data is sent anywhere else.
 
 ## Installation
 1. Install from **Plugins → Add New** and search for *SwiftTrap for Mailtrap*, or upload the `swifttrap-for-mailtrap` folder to `/wp-content/plugins/`.
@@ -81,11 +80,27 @@ Yes — 25 MB per email (matches Mailtrap's API limit).
 ## Screenshots
 1. Settings page — API token, verified sender, stream routing.
 2. Stats page — sending domain verification status and suppression list (bounces, complaints, unsubscribes).
-3. Email log with retention controls.
+3. Email log — live Mailtrap API data with filters and pagination.
 4. Dashboard widget showing integration status, sender, and quick links to Stats and Settings.
 5. Test email confirmation.
 
 ## Changelog
+### 3.0.1
+* Fixed: Webhook receiver now verifies Mailtrap's actual `Mailtrap-Signature` HMAC-SHA256 header instead of a header Mailtrap never sends. Every real delivery-tracking webhook call was being rejected outright since the feature shipped in 2.4.0.
+* Fixed: Webhook payload parsing now unwraps Mailtrap's `{"events": [...]}` envelope correctly, so verified events reach `do_action('swifttrap_mailtrap_webhook_event', ...)`.
+* Fixed: Usage card on the Stats page now calls Mailtrap's current `/api/billing/usage` endpoint instead of a stale account-scoped path that returned no data.
+* Fixed: Uninstalling the plugin now clears the actual cached transients instead of pre-2.3.0 key names that no longer match.
+* Improved: Email Logs recipient search and account API calls now consistently use bracketed filter syntax and Bearer-token authentication.
+
+### 3.0.0
+* Breaking: Removed all local file-based email logging. No more log files written to disk — eliminates OOM/disk-full risk on high-volume sites.
+* New: Email Logs panel on the Stats page pulls live data directly from the Mailtrap API (`GET /api/email_logs`).
+* New: Email Logs support filtering by recipient email address, delivery status, and date range.
+* New: Client-side pagination — buffers up to 1,000 entries from Mailtrap per API call, displays 20 rows at a time with Prev/Next navigation. Automatically fetches the next batch when the buffer is exhausted.
+* New: Webhook handler now fires `do_action('swifttrap_mailtrap_webhook_event', $event)` for every delivery event, allowing third-party integrations without modifying the plugin.
+* Removed: CSV export, log file clear, log detail modal, log resend, per-page logs setting, and cron-based log cleanup. All replaced by the live API view.
+* Fixed: Stats page no longer creates a redundant nonce attribute on the wrapper element.
+
 ### 2.4.2
 * Fixed: The email log dropped most entries during high-volume or concurrent sends. Each write re-read and rewrote the whole log file, so parallel processes overwrote each other's lines. Writes now use an atomic, exclusively-locked append, so the Stats dashboard (sends-per-day, categories, totals) reflects the real number of sent emails.
 * Improved: Logging no longer slows down large mailings — appends are O(1) instead of re-reading and rewriting the entire file on every email.
@@ -155,6 +170,9 @@ Yes — 25 MB per email (matches Mailtrap's API limit).
 * Improved log file locking
 
 ## Upgrade Notice
+### 3.0.1
+Important fix: webhook delivery-tracking events from Mailtrap were being rejected due to a signature-verification mismatch and have never been processed since 2.4.0. Update if you use the webhook integration.
+
 ### 2.4.0
 Upgrades WordPress plugin to 2.4.0, introducing delivery tracking webhooks, suppression management, graceful native fallback, enhanced logs UI with CSV export, WP-CLI commands, and a WordPress Site Health check.
 
