@@ -28,6 +28,10 @@ if ( ! defined( 'MINUTE_IN_SECONDS' ) ) {
 }
 
 // Load Composer autoloader.
+if ( ! defined( 'WEEK_IN_SECONDS' ) ) {
+	define( 'WEEK_IN_SECONDS', 604800 );
+}
+
 require_once dirname( __DIR__ ) . '/vendor/autoload.php';
 
 // Stub core WordPress classes (they don't need Patchwork redefinition as they aren't functions).

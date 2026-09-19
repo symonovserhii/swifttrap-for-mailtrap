@@ -3,7 +3,7 @@ Contributors: simmotorlp
 Tags: mailtrap, transactional-email, email-api, wp-mail, email-log
 Requires at least: 6.0
 Tested up to: 7.1
-Stable tag: 3.0.2
+Stable tag: 3.0.3
 Requires PHP: 8.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -107,6 +107,9 @@ Yes — 25 MB per email (matches Mailtrap's API limit).
 
 == Changelog ==
 
+= 3.0.3 =
+* New: a one-time, dismissible request to leave a review on WordPress.org. It appears only a week after your first email goes out through Mailtrap, only to administrators and only on the plugin's own screens. "Maybe later" snoozes it for 30 days, "Don't ask again" hides it for good. Nothing is sent anywhere.
+
 = 3.0.2 =
 * Tested with WordPress 7.1 (verified on 7.1.1). No functional changes.
 
@@ -195,6 +198,9 @@ Yes — 25 MB per email (matches Mailtrap's API limit).
 * Improved log file locking
 
 == Upgrade Notice ==
+
+= 3.0.3 =
+Adds a one-time, dismissible review request (shown a week after your first email is sent). No changes to email delivery.
 
 = 3.0.2 =
 Compatibility release: tested with WordPress 7.1. No functional changes.
