@@ -2,7 +2,7 @@
 
 [![Version](https://img.shields.io/wordpress/plugin/v/swifttrap-for-mailtrap)](https://wordpress.org/plugins/swifttrap-for-mailtrap/) [![Rating](https://img.shields.io/wordpress/plugin/stars/swifttrap-for-mailtrap)](https://wordpress.org/plugins/swifttrap-for-mailtrap/) [![Active installs](https://img.shields.io/wordpress/plugin/installs/swifttrap-for-mailtrap)](https://wordpress.org/plugins/swifttrap-for-mailtrap/) [![License: GPL v2](https://img.shields.io/badge/License-GPLv2-blue.svg)](https://www.gnu.org/licenses/gpl-2.0.html)
 
-Requires at least: **6.0** · Tested up to: **7.0** · Requires PHP: **8.0** · Stable tag: **3.0.1**
+Requires at least: **6.0** · Tested up to: **7.1** · Requires PHP: **8.0** · Stable tag: **3.0.2**
 
 Send WordPress emails through the Mailtrap Email API (not SMTP). Bulk and transactional streams, categories, suppression list, email log.
 
@@ -85,6 +85,9 @@ Yes — 25 MB per email (matches Mailtrap's API limit).
 5. Test email confirmation.
 
 ## Changelog
+### 3.0.2
+* Tested with WordPress 7.1 (verified on 7.1.1). No functional changes.
+
 ### 3.0.1
 * Fixed: Webhook receiver now verifies Mailtrap's actual `Mailtrap-Signature` HMAC-SHA256 header instead of a header Mailtrap never sends. Every real delivery-tracking webhook call was being rejected outright since the feature shipped in 2.4.0.
 * Fixed: Webhook payload parsing now unwraps Mailtrap's `{"events": [...]}` envelope correctly, so verified events reach `do_action('swifttrap_mailtrap_webhook_event', ...)`.
@@ -170,6 +173,9 @@ Yes — 25 MB per email (matches Mailtrap's API limit).
 * Improved log file locking
 
 ## Upgrade Notice
+### 3.0.2
+Compatibility release: tested with WordPress 7.1. No functional changes.
+
 ### 3.0.1
 Important fix: webhook delivery-tracking events from Mailtrap were being rejected due to a signature-verification mismatch and have never been processed since 2.4.0. Update if you use the webhook integration.
 

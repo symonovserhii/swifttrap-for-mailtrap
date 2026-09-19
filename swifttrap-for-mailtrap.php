@@ -3,7 +3,7 @@
  * Plugin Name: SwiftTrap for Mailtrap
  * Plugin URI: https://plugins.symonov.com/swifttrap-for-mailtrap/
  * Description: Routes wp_mail() through the Mailtrap HTTP API with configurable sender settings.
- * Version: 3.0.1
+ * Version: 3.0.2
  * Author: simmotorlp
  * Author URI: https://profiles.wordpress.org/simmotorlp/
  * License: GPL-2.0-or-later
@@ -11,7 +11,7 @@
  * Text Domain: swifttrap-for-mailtrap
  * Domain Path: /languages
  * Requires at least: 6.0
- * Tested up to: 7.0
+ * Tested up to: 7.1
  * Requires PHP: 8.0
  */
 
@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'SWIFTTRAP_MAILTRAP_VERSION', '3.0.1' );
+define( 'SWIFTTRAP_MAILTRAP_VERSION', '3.0.2' );
 define( 'SWIFTTRAP_MAILTRAP_OPTION_KEY', 'swifttrap_mailtrap_settings' );
 
 require_once __DIR__ . '/includes/admin.php';
