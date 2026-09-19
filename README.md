@@ -2,7 +2,7 @@
 
 [![Version](https://img.shields.io/wordpress/plugin/v/swifttrap-for-mailtrap)](https://wordpress.org/plugins/swifttrap-for-mailtrap/) [![Rating](https://img.shields.io/wordpress/plugin/stars/swifttrap-for-mailtrap)](https://wordpress.org/plugins/swifttrap-for-mailtrap/) [![Active installs](https://img.shields.io/wordpress/plugin/installs/swifttrap-for-mailtrap)](https://wordpress.org/plugins/swifttrap-for-mailtrap/) [![License: GPL v2](https://img.shields.io/badge/License-GPLv2-blue.svg)](https://www.gnu.org/licenses/gpl-2.0.html)
 
-Requires at least: **6.0** · Tested up to: **7.1** · Requires PHP: **8.0** · Stable tag: **3.0.2**
+Requires at least: **6.0** · Tested up to: **7.1** · Requires PHP: **8.0** · Stable tag: **3.0.3**
 
 Send WordPress emails through the Mailtrap Email API (not SMTP). Bulk and transactional streams, categories, suppression list, email log.
 
@@ -85,6 +85,9 @@ Yes — 25 MB per email (matches Mailtrap's API limit).
 5. Test email confirmation.
 
 ## Changelog
+### 3.0.3
+* New: a one-time, dismissible request to leave a review on WordPress.org. It appears only a week after your first email goes out through Mailtrap, only to administrators and only on the plugin's own screens. "Maybe later" snoozes it for 30 days, "Don't ask again" hides it for good. Nothing is sent anywhere.
+
 ### 3.0.2
 * Tested with WordPress 7.1 (verified on 7.1.1). No functional changes.
 
@@ -173,6 +176,9 @@ Yes — 25 MB per email (matches Mailtrap's API limit).
 * Improved log file locking
 
 ## Upgrade Notice
+### 3.0.3
+Adds a one-time, dismissible review request (shown a week after your first email is sent). No changes to email delivery.
+
 ### 3.0.2
 Compatibility release: tested with WordPress 7.1. No functional changes.
 

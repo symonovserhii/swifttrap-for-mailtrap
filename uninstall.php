@@ -25,6 +25,7 @@ if ( '' !== $swifttrap_token ) {
 }
 
 delete_option( 'swifttrap_mailtrap_settings' );
+delete_option( 'swifttrap_mailtrap_review_state' );
 
 // Remove a legacy log directory left behind by installs upgraded from pre-3.0.0
 // (file-based email logging was replaced by the live Mailtrap API log in 3.0.0).
