@@ -100,10 +100,7 @@ class PluginTest extends TestCase {
 			'from_name'    => 'From User',
 		];
 
-		Monkey\Functions\expect( 'wp_strip_all_tags' )
-			->once()
-			->with( '<p>Hello HTML</p>' )
-			->andReturn( 'Hello HTML' );
+		Monkey\Functions\when( 'wp_strip_all_tags' )->alias( 'strip_tags' );
 
 		$payload = swifttrap_mailtrap_build_payload( $normalized, 'welcome' );
 
@@ -116,6 +113,20 @@ class PluginTest extends TestCase {
 		$this->assertEquals( 'cc@example.com', $payload['cc'][0]['email'] );
 		$this->assertEquals( 'Reply <reply@example.com>', $payload['headers']['Reply-To'] );
 		$this->assertEquals( 'Value', $payload['headers']['X-Custom'] );
+	}
+
+	/**
+	 * The text part decodes entities and keeps one line per <br>.
+	 */
+	public function test_html_to_text_decodes_entities_and_keeps_lines() {
+		Monkey\Functions\when( 'wp_strip_all_tags' )->alias( 'strip_tags' );
+
+		$html = "Evidence: <a href=\"https://ex.com/?a=1&amp;b=2&amp;para=3\">https://ex.com/?a=1&amp;b=2&amp;para=3</a><br>\nField: status<br>Reset: <a href=\"https://ex.com/?action=rp&#038;key=k\">address</a><br><p>Done</p>";
+
+		$this->assertSame(
+			"Evidence: https://ex.com/?a=1&b=2&para=3\nField: status\nReset: address (https://ex.com/?action=rp&key=k)\nDone",
+			swifttrap_mailtrap_html_to_text( $html )
+		);
 	}
 
 	/**

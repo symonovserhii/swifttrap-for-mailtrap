@@ -3,7 +3,7 @@ Contributors: simmotorlp
 Tags: mailtrap, transactional-email, email-api, wp-mail, email-log
 Requires at least: 6.0
 Tested up to: 7.1
-Stable tag: 3.0.3
+Stable tag: 3.0.4
 Requires PHP: 8.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -107,6 +107,9 @@ Yes — 25 MB per email (matches Mailtrap's API limit).
 
 == Changelog ==
 
+= 3.0.4 =
+* Fix: the plain-text part of HTML emails now decodes entities, so a link with query parameters reads `?a=1&b=2` instead of `?a=1&amp;b=2`, and a link whose text is not its URL keeps the URL in brackets (password reset emails used to show only "address"). Line breaks follow `<br>` and block ends.
+
 = 3.0.3 =
 * New: a one-time, dismissible request to leave a review on WordPress.org. It appears only a week after your first email goes out through Mailtrap, only to administrators and only on the plugin's own screens. "Maybe later" snoozes it for 30 days, "Don't ask again" hides it for good. Nothing is sent anywhere.
 
@@ -198,6 +201,9 @@ Yes — 25 MB per email (matches Mailtrap's API limit).
 * Improved log file locking
 
 == Upgrade Notice ==
+
+= 3.0.4 =
+Fixes the plain-text part of HTML emails: links with parameters no longer break, and link URLs are kept. Recommended.
 
 = 3.0.3 =
 Adds a one-time, dismissible review request (shown a week after your first email is sent). No changes to email delivery.
