@@ -3,7 +3,7 @@
  * Plugin Name: SwiftTrap for Mailtrap
  * Plugin URI: https://plugins.symonov.com/swifttrap-for-mailtrap/
  * Description: Routes wp_mail() through the Mailtrap HTTP API with configurable sender settings.
- * Version: 3.0.3
+ * Version: 3.0.4
  * Author: simmotorlp
  * Author URI: https://profiles.wordpress.org/simmotorlp/
  * License: GPL-2.0-or-later
@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'SWIFTTRAP_MAILTRAP_VERSION', '3.0.3' );
+define( 'SWIFTTRAP_MAILTRAP_VERSION', '3.0.4' );
 define( 'SWIFTTRAP_MAILTRAP_OPTION_KEY', 'swifttrap_mailtrap_settings' );
 
 require_once __DIR__ . '/includes/admin.php';
@@ -589,6 +589,42 @@ function swifttrap_mailtrap_send( array $normalized, array $settings ): bool|WP_
 }
 
 /**
+ * Plain-text alternative of an HTML message.
+ *
+ * Line breaks follow <br> and block ends, a link whose label is not its URL
+ * keeps the URL in brackets, and entities are decoded, so a link written as
+ * `?a=1&amp;b=2` in the HTML reads `?a=1&b=2` in the text part.
+ *
+ * @since 3.0.4
+ *
+ * @param string $html HTML message.
+ *
+ * @return string Plain text.
+ */
+function swifttrap_mailtrap_html_to_text( string $html ): string {
+	$text = preg_replace_callback(
+		'#<a\s[^>]*href\s*=\s*(["\'])(.*?)\1[^>]*>(.*?)</a>#is',
+		static function ( array $m ): string {
+			$href  = trim( html_entity_decode( $m[2], ENT_QUOTES | ENT_HTML5, 'UTF-8' ) );
+			$label = trim( html_entity_decode( wp_strip_all_tags( $m[3] ), ENT_QUOTES | ENT_HTML5, 'UTF-8' ) );
+
+			if ( '' === $href || $label === $href || str_starts_with( $href, 'mailto:' ) ) {
+				return $m[3];
+			}
+
+			return $m[3] . ' (' . htmlspecialchars( $href, ENT_NOQUOTES, 'UTF-8' ) . ')';
+		},
+		$html
+	);
+	$text = preg_replace( '#<br\s*/?>\r?\n?#i', "\n", (string) $text );
+	$text = preg_replace( '#</(p|div|li|tr|h[1-6])>\r?\n?#i', "\n", (string) $text );
+	$text = wp_strip_all_tags( (string) $text );
+	$text = html_entity_decode( $text, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+
+	return trim( (string) preg_replace( "/\n{3,}/", "\n\n", $text ) );
+}
+
+/**
  * Build Mailtrap API payload from normalized email data.
  *
  * @param array  $normalized Normalized email data.
@@ -605,7 +641,7 @@ function swifttrap_mailtrap_build_payload( array $normalized, string $category )
 
 	if ( false !== stripos( $normalized['content_type'], 'text/html' ) ) {
 		$payload['html'] = $normalized['message'];
-		$payload['text'] = wp_strip_all_tags( $normalized['message'] );
+		$payload['text'] = swifttrap_mailtrap_html_to_text( $normalized['message'] );
 	} else {
 		$payload['text'] = $normalized['message'];
 	}
