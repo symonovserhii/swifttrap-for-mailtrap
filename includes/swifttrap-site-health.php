@@ -64,6 +64,7 @@ function swifttrap_mailtrap_perform_site_health_test(): array {
 	if ( is_wp_error( $account ) ) {
 		$result['status']      = 'critical';
 		$result['label']       = __( 'Mailtrap API connection failed', 'swifttrap-for-mailtrap' );
+		/* translators: %s: the error message */
 		$result['description'] = sprintf( __( 'Failed to connect to Mailtrap API: %s', 'swifttrap-for-mailtrap' ), $account->get_error_message() );
 		return $result;
 	}
@@ -77,6 +78,7 @@ function swifttrap_mailtrap_perform_site_health_test(): array {
 	if ( is_wp_error( $domains ) ) {
 		$result['status']      = 'recommended';
 		$result['label']       = __( 'Unable to verify Mailtrap sending domains', 'swifttrap-for-mailtrap' );
+		/* translators: %s: the error message */
 		$result['description'] = sprintf( __( 'Connected to Mailtrap, but could not retrieve domains list: %s', 'swifttrap-for-mailtrap' ), $domains->get_error_message() );
 		return $result;
 	}
@@ -95,14 +97,19 @@ function swifttrap_mailtrap_perform_site_health_test(): array {
 
 	if ( ! $domain_found ) {
 		$result['status']      = 'critical';
+		/* translators: %s: the sender email domain */
 		$result['label']       = sprintf( __( 'Sender domain "%s" is not registered in Mailtrap', 'swifttrap-for-mailtrap' ), $sender_domain );
+		/* translators: %s: the sender email domain */
 		$result['description'] = sprintf( __( 'The sender email address domain (%s) must be added to your Sending Domains in Mailtrap.', 'swifttrap-for-mailtrap' ), $sender_domain );
 	} elseif ( ! $domain_verified ) {
 		$result['status']      = 'critical';
+		/* translators: %s: the sender email domain */
 		$result['label']       = sprintf( __( 'Sender domain "%s" is unverified in Mailtrap', 'swifttrap-for-mailtrap' ), $sender_domain );
+		/* translators: %s: the sender email domain */
 		$result['description'] = sprintf( __( 'The sender email address domain (%s) is registered but has pending DNS verification in Mailtrap.', 'swifttrap-for-mailtrap' ), $sender_domain );
 	} else {
 		$result['label']       = __( 'SwiftTrap for Mailtrap is routing emails correctly', 'swifttrap-for-mailtrap' );
+		/* translators: %s: the sender email domain */
 		$result['description'] = sprintf( __( 'API token is valid and sender domain "%s" is verified.', 'swifttrap-for-mailtrap' ), $sender_domain );
 	}
 

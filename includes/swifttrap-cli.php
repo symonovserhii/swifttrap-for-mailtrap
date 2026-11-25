@@ -38,13 +38,13 @@ class SwiftTrap_CLI {
 		}
 
 		WP_CLI::log( sprintf( 'Sending test email to %s...', $to ) );
-		$result = wp_mail( $to, 'SwiftTrap Test Email', 'This is a test email sent from WP-CLI.' );
+		$result = swifttrap_mailtrap_send_test_email( (string) $to );
 
-		if ( $result ) {
-			WP_CLI::success( 'Test email sent successfully.' );
-		} else {
-			WP_CLI::error( 'Failed to send test email.' );
+		if ( is_wp_error( $result ) ) {
+			WP_CLI::error( 'Mailtrap did not accept the test email: ' . $result->get_error_message() );
 		}
+
+		WP_CLI::success( 'Test email accepted by Mailtrap.' );
 	}
 
 	/**

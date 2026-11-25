@@ -13,21 +13,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Determine if email should use bulk stream.
- *
- * @param string $category Email category.
- * @param array  $settings Plugin settings.
- *
- * @return bool Whether to use bulk stream.
- */
-function swifttrap_mailtrap_should_use_bulk_stream( string $category, array $settings ): bool {
-	$streams  = $settings['category_streams'] ?? array( 'promotional' => 'bulk' );
-	$use_bulk = isset( $streams[ $category ] ) && 'bulk' === $streams[ $category ];
-
-	return (bool) apply_filters( 'swifttrap_mailtrap_use_bulk_stream', $use_bulk, $category, $settings );
-}
-
-/**
  * Get Mailtrap account data (ID and name) with caching.
  *
  * @since 2.2.0
@@ -58,6 +43,17 @@ function swifttrap_mailtrap_get_account_data( array $settings ): array|WP_Error 
 
 	if ( is_wp_error( $response ) ) {
 		return new WP_Error( 'swifttrap_account_failed', $response->get_error_message() );
+	}
+
+	$status_code = (int) wp_remote_retrieve_response_code( $response );
+
+	if ( 401 === $status_code || 403 === $status_code ) {
+		return new WP_Error( 'swifttrap_account_unauthorized', __( 'Mailtrap did not accept this API token. Check that you copied the whole token and that it has not been deleted in Mailtrap.', 'swifttrap-for-mailtrap' ) );
+	}
+
+	if ( $status_code >= 400 ) {
+		/* translators: %d: HTTP status code returned by the Mailtrap API */
+		return new WP_Error( 'swifttrap_account_failed', sprintf( __( 'Mailtrap API returned HTTP %d', 'swifttrap-for-mailtrap' ), $status_code ) );
 	}
 
 	$body     = wp_remote_retrieve_body( $response );
@@ -293,6 +289,9 @@ function swifttrap_mailtrap_fetch_suppressions( array $settings ): array|WP_Erro
 
 	$items = array();
 	foreach ( $data as $item ) {
+		if ( ! is_array( $item ) ) {
+			continue;
+		}
 		$type_map = array(
 			'hard bounce'    => 'bounce',
 			'spam complaint' => 'complaint',
@@ -310,6 +309,7 @@ function swifttrap_mailtrap_fetch_suppressions( array $settings ): array|WP_Erro
 		$items[] = array(
 			'id'              => $item['id'] ?? '',
 			'email'           => $item['email'] ?? '',
+			'stream'          => is_string( $item['sending_stream'] ?? null ) ? strtolower( $item['sending_stream'] ) : '',
 			'reason'          => $reason,
 			'bounce_category' => $item['message_bounce_category'] ?? '',
 			'created_at'      => $created_at,
@@ -336,8 +336,8 @@ function swifttrap_mailtrap_fetch_suppressions( array $settings ): array|WP_Erro
  * @return string Email category for Mailtrap.
  */
 function swifttrap_mailtrap_detect_email_category( array $normalized ): string {
-	$subject = strtolower( $normalized['subject'] );
-	$message = strtolower( $normalized['message'] );
+	$subject = strtolower( (string) ( $normalized['subject'] ?? '' ) );
+	$message = strtolower( (string) ( $normalized['message'] ?? '' ) );
 
 	// Detect common email types.
 	if ( str_contains( $subject, 'confirm' ) || str_contains( $subject, 'verification' ) ) {
@@ -378,7 +378,9 @@ function swifttrap_mailtrap_get_email_category( array $normalized ): string {
 	$settings = swifttrap_mailtrap_get_settings();
 
 	if ( empty( $settings['enable_categories'] ) ) {
-		return apply_filters( 'swifttrap_mailtrap_email_category', '', $normalized );
+		$category = apply_filters( 'swifttrap_mailtrap_email_category', '', $normalized );
+
+		return is_string( $category ) ? substr( $category, 0, 255 ) : '';
 	}
 
 	$category = '';
@@ -389,7 +391,9 @@ function swifttrap_mailtrap_get_email_category( array $normalized ): string {
 		$category = 'general';
 	}
 
-	return apply_filters( 'swifttrap_mailtrap_email_category', $category, $normalized );
+	$category = apply_filters( 'swifttrap_mailtrap_email_category', $category, $normalized );
+
+	return is_string( $category ) ? substr( $category, 0, 255 ) : '';
 }
 
 /**
@@ -472,28 +476,38 @@ function swifttrap_mailtrap_ajax_send_test_email(): void {
 	check_ajax_referer( 'swifttrap_send_test_email', '_nonce' );
 
 	if ( ! current_user_can( 'manage_options' ) ) {
-		wp_send_json_error( array( 'message' => __( 'Permission denied.', 'swifttrap-for-mailtrap' ) ) );
+		wp_send_json_error( array( 'message' => __( 'Permission denied.', 'swifttrap-for-mailtrap' ) ), 403 );
 	}
 
 	$settings = swifttrap_mailtrap_get_settings();
+	$to       = isset( $_POST['to'] ) ? sanitize_email( wp_unslash( $_POST['to'] ) ) : '';
 
-	if ( empty( $settings['enabled'] ) || empty( $settings['token'] ) ) {
-		wp_send_json_error( array( 'message' => __( 'Mailtrap is not enabled or API token is missing.', 'swifttrap-for-mailtrap' ) ) );
+	if ( '' === $to ) {
+		// No address typed: an empty field means "send it to me".
+		if ( isset( $_POST['to'] ) && '' !== trim( (string) wp_unslash( $_POST['to'] ) ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- only compared with an empty string.
+			wp_send_json_error( array( 'message' => __( 'Invalid email address.', 'swifttrap-for-mailtrap' ) ) );
+		}
+		$user = wp_get_current_user();
+		$to   = ( $user && ! empty( $user->user_email ) ) ? $user->user_email : $settings['sender_email'];
 	}
 
-	$to      = $settings['sender_email'];
-	/* translators: %s: current date and time */
-	$subject = sprintf( __( 'Mailtrap Test Email — %s', 'swifttrap-for-mailtrap' ), wp_date( 'Y-m-d H:i:s' ) );
-	$message = __( 'This is a test email sent from the SwiftTrap for Mailtrap plugin. If you received this, your configuration is working correctly.', 'swifttrap-for-mailtrap' );
+	$result = swifttrap_mailtrap_send_test_email( $to );
 
-	$result = wp_mail( $to, $subject, $message );
-
-	if ( $result ) {
-		/* translators: %s: recipient email address */
-		wp_send_json_success( array( 'message' => sprintf( __( 'Test email sent to %s', 'swifttrap-for-mailtrap' ), $to ) ) );
-	} else {
-		wp_send_json_error( array( 'message' => __( 'Failed to send test email. Check your settings.', 'swifttrap-for-mailtrap' ) ) );
+	if ( is_wp_error( $result ) ) {
+		wp_send_json_error(
+			array(
+				/* translators: %s: the reason reported by Mailtrap */
+				'message' => sprintf( __( 'Mailtrap did not accept the test email: %s', 'swifttrap-for-mailtrap' ), $result->get_error_message() ),
+			)
+		);
 	}
+
+	wp_send_json_success(
+		array(
+			/* translators: %s: recipient email address */
+			'message' => sprintf( __( 'Test email sent to %s. Check that inbox (and the spam folder).', 'swifttrap-for-mailtrap' ), $to ),
+		)
+	);
 }
 add_action( 'wp_ajax_swifttrap_send_test_email', 'swifttrap_mailtrap_ajax_send_test_email' );
 
@@ -510,7 +524,7 @@ function swifttrap_mailtrap_ajax_load_api_data(): void {
 	check_ajax_referer( 'swifttrap_load_api_data', '_nonce' );
 
 	if ( ! current_user_can( 'manage_options' ) ) {
-		wp_send_json_error( array( 'message' => __( 'Permission denied.', 'swifttrap-for-mailtrap' ) ) );
+		wp_send_json_error( array( 'message' => __( 'Permission denied.', 'swifttrap-for-mailtrap' ) ), 403 );
 	}
 
 	$settings = swifttrap_mailtrap_get_settings();
@@ -551,8 +565,7 @@ function swifttrap_mailtrap_ajax_load_emails(): void {
 	check_ajax_referer( 'swifttrap_load_emails', '_nonce' );
 
 	if ( ! current_user_can( 'manage_options' ) ) {
-		wp_send_json_error( array( 'message' => __( 'Permission denied.', 'swifttrap-for-mailtrap' ) ) );
-		return;
+		wp_send_json_error( array( 'message' => __( 'Permission denied.', 'swifttrap-for-mailtrap' ) ), 403 );
 	}
 
 	$settings = swifttrap_mailtrap_get_settings();
@@ -560,10 +573,21 @@ function swifttrap_mailtrap_ajax_load_emails(): void {
 
 	$filters = array(
 		'search'    => sanitize_text_field( wp_unslash( $_POST['search'] ?? '' ) ),
-		'status'    => sanitize_key( $_POST['status'] ?? '' ),
+		'status'    => sanitize_key( wp_unslash( $_POST['status'] ?? '' ) ),
 		'date_from' => sanitize_text_field( wp_unslash( $_POST['date_from'] ?? '' ) ),
 		'date_to'   => sanitize_text_field( wp_unslash( $_POST['date_to'] ?? '' ) ),
 	);
+
+	// Dates come from <input type="date">; anything else is dropped instead of being sent to the API.
+	foreach ( array( 'date_from', 'date_to' ) as $date_key ) {
+		if ( ! preg_match( '/^\d{4}-\d{2}-\d{2}$/', $filters[ $date_key ] ) ) {
+			$filters[ $date_key ] = '';
+		}
+	}
+
+	if ( ! in_array( $filters['status'], array( '', 'delivered', 'not_delivered', 'enqueued', 'opted_out' ), true ) ) {
+		$filters['status'] = '';
+	}
 
 	$result = swifttrap_mailtrap_fetch_emails( $settings, $cursor, $filters );
 
@@ -615,6 +639,7 @@ function swifttrap_mailtrap_add_suppression( array $settings, string $email, int
 
 	$status_code = wp_remote_retrieve_response_code( $response );
 	if ( $status_code < 200 || $status_code >= 300 ) {
+		/* translators: %d: HTTP status code returned by the Mailtrap API */
 		return new WP_Error( 'swifttrap_add_suppression_failed', sprintf( __( 'Mailtrap API returned HTTP %d', 'swifttrap-for-mailtrap' ), $status_code ) );
 	}
 
@@ -640,7 +665,7 @@ function swifttrap_mailtrap_delete_suppression( array $settings, string $suppres
 	}
 
 	$response = wp_remote_request(
-		sprintf( 'https://mailtrap.io/api/accounts/%d/suppressions/%s', $account_id, $suppression_id ),
+		sprintf( 'https://mailtrap.io/api/accounts/%d/suppressions/%s', $account_id, rawurlencode( $suppression_id ) ),
 		array(
 			'method'  => 'DELETE',
 			'headers' => array(
@@ -657,6 +682,7 @@ function swifttrap_mailtrap_delete_suppression( array $settings, string $suppres
 
 	$status_code = wp_remote_retrieve_response_code( $response );
 	if ( $status_code < 200 || $status_code >= 300 ) {
+		/* translators: %d: HTTP status code returned by the Mailtrap API */
 		return new WP_Error( 'swifttrap_delete_suppression_failed', sprintf( __( 'Mailtrap API returned HTTP %d', 'swifttrap-for-mailtrap' ), $status_code ) );
 	}
 
@@ -670,19 +696,46 @@ function swifttrap_mailtrap_delete_suppression( array $settings, string $suppres
 /**
  * Check if a recipient's email is in the suppressions list.
  *
+ * Mailtrap keeps suppressions per sending stream: somebody who unsubscribed
+ * from a newsletter (bulk) must still get a password reset (transactional).
+ * A suppression with no stream, or "any", applies to both.
+ *
+ * When the list cannot be loaded the check is skipped for five minutes, so a
+ * Mailtrap outage does not add two slow HTTP calls to every recipient.
+ *
  * @param string $email    Recipient email.
  * @param array  $settings Plugin settings.
+ * @param string $stream   Stream the message is about to use: 'transactional', 'bulk', or '' for any.
  *
  * @return bool
  */
-function swifttrap_mailtrap_is_recipient_suppressed( string $email, array $settings ): bool {
+function swifttrap_mailtrap_is_recipient_suppressed( string $email, array $settings, string $stream = '' ): bool {
+	$down_key = 'swifttrap_suppressions_down_' . substr( md5( $settings['token'] ?? '' ), 0, 8 );
+
+	if ( get_transient( $down_key ) ) {
+		return false;
+	}
+
 	$suppressions_data = swifttrap_mailtrap_fetch_suppressions( $settings );
-	if ( is_wp_error( $suppressions_data ) || empty( $suppressions_data['items'] ) ) {
+
+	if ( is_wp_error( $suppressions_data ) ) {
+		set_transient( $down_key, 1, 5 * MINUTE_IN_SECONDS );
+
+		return false;
+	}
+
+	if ( empty( $suppressions_data['items'] ) || ! is_array( $suppressions_data['items'] ) ) {
 		return false;
 	}
 
 	foreach ( $suppressions_data['items'] as $item ) {
-		if ( strcasecmp( $item['email'], $email ) === 0 ) {
+		if ( ! is_string( $item['email'] ?? null ) || 0 !== strcasecmp( $item['email'], $email ) ) {
+			continue;
+		}
+
+		$item_stream = $item['stream'] ?? '';
+
+		if ( '' === $stream || '' === $item_stream || 'any' === $item_stream || $item_stream === $stream ) {
 			return true;
 		}
 	}
@@ -698,12 +751,16 @@ function swifttrap_mailtrap_ajax_add_suppression(): void {
 	check_ajax_referer( 'swifttrap_add_suppression', '_nonce' );
 
 	if ( ! current_user_can( 'manage_options' ) ) {
-		wp_send_json_error( array( 'message' => __( 'Permission denied.', 'swifttrap-for-mailtrap' ) ) );
+		wp_send_json_error( array( 'message' => __( 'Permission denied.', 'swifttrap-for-mailtrap' ) ), 403 );
 	}
 
 	$email          = isset( $_POST['email'] ) ? sanitize_email( wp_unslash( $_POST['email'] ) ) : '';
 	$domain_id      = isset( $_POST['domain_id'] ) ? (int) $_POST['domain_id'] : 0;
 	$sending_stream = isset( $_POST['sending_stream'] ) ? sanitize_key( wp_unslash( $_POST['sending_stream'] ) ) : 'transactional';
+
+	if ( ! in_array( $sending_stream, array( 'transactional', 'bulk' ), true ) ) {
+		$sending_stream = 'transactional';
+	}
 
 	if ( empty( $email ) || ! is_email( $email ) ) {
 		wp_send_json_error( array( 'message' => __( 'Invalid email address.', 'swifttrap-for-mailtrap' ) ) );
@@ -731,12 +788,13 @@ function swifttrap_mailtrap_ajax_delete_suppression(): void {
 	check_ajax_referer( 'swifttrap_delete_suppression', '_nonce' );
 
 	if ( ! current_user_can( 'manage_options' ) ) {
-		wp_send_json_error( array( 'message' => __( 'Permission denied.', 'swifttrap-for-mailtrap' ) ) );
+		wp_send_json_error( array( 'message' => __( 'Permission denied.', 'swifttrap-for-mailtrap' ) ), 403 );
 	}
 
 	$suppression_id = isset( $_POST['id'] ) ? sanitize_text_field( wp_unslash( $_POST['id'] ) ) : '';
 
-	if ( empty( $suppression_id ) ) {
+	// The ID becomes part of an API URL: accept only what a Mailtrap ID looks like.
+	if ( empty( $suppression_id ) || ! preg_match( '/^[A-Za-z0-9-]{1,64}$/', $suppression_id ) ) {
 		wp_send_json_error( array( 'message' => __( 'Invalid suppression ID.', 'swifttrap-for-mailtrap' ) ) );
 	}
 
