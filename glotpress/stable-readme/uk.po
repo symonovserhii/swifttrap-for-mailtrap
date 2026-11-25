@@ -2,12 +2,12 @@
 # This file is distributed under the same license as the Plugins - SwiftTrap for Mailtrap - Stable Readme (latest release) package.
 msgid ""
 msgstr ""
-"PO-Revision-Date: 2026-07-03 00:00:00+0000\n"
+"PO-Revision-Date: 2026-11-25 00:00:00+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n % 10 == 1 && n % 100 != 11) ? 0 : ((n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14)) ? 1 : 2);\n"
-"X-Generator: GlotPress/4.0.3\n"
+"X-Generator: GlotPress/4.1.0\n"
 "Language: uk\n"
 "Project-Id-Version: Plugins - SwiftTrap for Mailtrap - Stable Readme (latest release)\n"
 
@@ -20,6 +20,102 @@ msgstr "Надсилайте листи WordPress через Email API Mailtrap 
 #, gp-priority: high
 msgid "SwiftTrap for Mailtrap"
 msgstr "SwiftTrap for Mailtrap"
+
+#. Found in faq paragraph.
+msgid "The plugin refuses attachments above the size you set (1–25 MB per file, 25 by default). Mailtrap itself limits the whole message, attachments included, to 10 MB by default (more on request on higher plans), so lower the setting if your plan has the default limit."
+msgstr "Плагін не приймає вкладення, більші за встановлений вами розмір (1–25 МБ на файл, за замовчуванням 25). Сам Mailtrap за замовчуванням обмежує весь лист разом із вкладеннями до 10 МБ (на старших тарифах ліміт можна збільшити на запит), тож зменште значення, якщо ваш тариф має стандартний ліміт."
+
+#. Found in faq paragraph.
+msgid "The plugin retries briefly, then reports the failure to WordPress (<code>wp_mail_failed</code>, with the reason Mailtrap gave). With <strong>Use the default WordPress mailer as a backup</strong> ticked (the default) the message is then handed to the default mailer; untick it if email must never leave through your web host — <code>wp_mail()</code> then returns <code>false</code>."
+msgstr "Плагін робить кілька швидких повторних спроб, а потім повідомляє WordPress про помилку (<code>wp_mail_failed</code> із причиною, яку вказав Mailtrap). Якщо ввімкнено <strong>Використовувати стандартне надсилання WordPress як резерв</strong> (за замовчуванням), лист передається стандартному надсиланню WordPress; зніміть позначку, якщо пошта за жодних умов не повинна йти через ваш хостинг, — тоді <code>wp_mail()</code> поверне <code>false</code>."
+
+#. Found in faq paragraph.
+msgid "Log in to <a href=\"https://mailtrap.io\">mailtrap.io</a>, open your sending domain, go to <strong>API Tokens</strong>, and create a token with sending permissions. After saving, the token is never displayed again. To keep it out of the database, add <code>define( 'SWIFTTRAP_MAILTRAP_TOKEN', 'your-token' );</code> to <code>wp-config.php</code> instead."
+msgstr "Увійдіть на <a href=\"https://mailtrap.io\">mailtrap.io</a>, відкрийте свій домен відправки, перейдіть до розділу <strong>API Tokens</strong> і створіть токен із правами на надсилання. Після збереження токен більше не показується. Щоб не зберігати його в базі даних, натомість додайте до <code>wp-config.php</code> рядок <code>define( 'SWIFTTRAP_MAILTRAP_TOKEN', 'your-token' );</code>."
+
+#. Found in faq paragraph.
+msgid "Mailtrap keeps unsubscribes and bounces separately for each stream, and so does the plugin: somebody who unsubscribed from your newsletter still receives a password reset."
+msgstr "Mailtrap веде відписки й відмови окремо для кожного потоку, і плагін робить так само: людина, яка відписалася від вашої розсилки, усе одно отримає лист для скидання пароля."
+
+#. Found in faq paragraph.
+msgid "Strongest first: the <code>swifttrap_mailtrap_use_bulk_stream</code> filter; the <code>X-SwiftTrap-Stream: bulk</code> (or <code>transactional</code>) header on a <code>wp_mail()</code> call; newsletter plugin detection (when switched on); the category table on the settings screen, where the <code>promotional</code> category goes to the bulk stream by default. Everything else goes to <code>send.api.mailtrap.io</code>."
+msgstr "За спаданням пріоритету: фільтр <code>swifttrap_mailtrap_use_bulk_stream</code>; заголовок <code>X-SwiftTrap-Stream: bulk</code> (або <code>transactional</code>) у виклику <code>wp_mail()</code>; розпізнавання плагінів розсилок (якщо ввімкнено); таблиця категорій на екрані налаштувань, де категорія <code>promotional</code> за замовчуванням іде в масовий потік. Усе інше надсилається на <code>send.api.mailtrap.io</code>."
+
+#. Found in faq paragraph.
+msgid "MailPoet is the exception: it sends with its own mailer and never passes through <code>wp_mail()</code>, so no <code>wp_mail()</code> plugin can route it."
+msgstr "Виняток — MailPoet: він надсилає пошту власним механізмом і ніколи не проходить через <code>wp_mail()</code>, тому жоден плагін на основі <code>wp_mail()</code> не може його перенаправити."
+
+#. Found in faq paragraph.
+msgid "Go to <strong>Mailtrap → Settings</strong> and tick <strong>Send newsletters through the bulk stream</strong>. Campaign emails sent by Newsletter (The Newsletter Plugin), FluentCRM, Icegram Express and Groundhogg are then recognized and sent through <code>bulk.api.mailtrap.io</code>; password resets, orders, form notifications, signup confirmations and all other email keep using <code>send.api.mailtrap.io</code>. Nothing has to be configured in the newsletter plugin — leave it on its default \"send through WordPress\" delivery. The same API token is used for both streams."
+msgstr "Перейдіть до <strong>Mailtrap → Налаштування</strong> і ввімкніть <strong>Надсилати розсилки через масовий потік</strong>. Після цього листи кампаній із Newsletter (The Newsletter Plugin), FluentCRM, Icegram Express і Groundhogg розпізнаються та надсилаються через <code>bulk.api.mailtrap.io</code>; скидання пароля, замовлення, сповіщення форм, підтвердження підписки та вся інша пошта й далі йдуть через <code>send.api.mailtrap.io</code>. У самому плагіні розсилок нічого налаштовувати не потрібно — залиште стандартний спосіб доставки «надсилати через WordPress». Для обох потоків використовується той самий API-токен."
+
+#. Found in faq paragraph.
+msgid "Generic mailer plugins treat Mailtrap as one provider among many: through SMTP credentials, or through the transactional API only. SwiftTrap is built for Mailtrap alone and uses what is specific to it: bulk vs transactional stream routing (including automatic routing of newsletters), categories, custom tracking variables, template UUIDs, and live suppression-list visibility. Use SwiftTrap if you want Mailtrap-native behavior; use a generic SMTP plugin if you want a one-config-fits-all-providers setup."
+msgstr "Універсальні поштові плагіни вважають Mailtrap одним із багатьох провайдерів: підключають його через облікові дані SMTP або лише через транзакційний API. SwiftTrap створено виключно для Mailtrap, і він використовує його особливості: розподіл між масовим і транзакційним потоками (зокрема автоматичну маршрутизацію розсилок), категорії, власні змінні для відстеження, UUID шаблонів і перегляд списку блокувань у реальному часі. Обирайте SwiftTrap, якщо вам потрібна нативна робота з Mailtrap, і універсальний SMTP-плагін, якщо потрібне одне налаштування для будь-яких провайдерів."
+
+#. Found in faq header.
+msgid "What happens if Mailtrap refuses a message or cannot be reached?"
+msgstr "Що станеться, якщо Mailtrap відхилить лист або буде недоступний?"
+
+#. Found in faq header.
+msgid "How do I send my newsletter through the bulk stream and everything else through the transactional stream?"
+msgstr "Як надсилати розсилку через масовий потік, а все інше — через транзакційний?"
+
+#. Found in installation list item.
+msgid "Sending a newsletter from this site? Tick <strong>Send newsletters through the bulk stream</strong>."
+msgstr "Надсилаєте розсилку з цього сайту? Увімкніть <strong>Надсилати розсилки через масовий потік</strong>."
+
+#. Found in installation list item.
+msgid "Set the From email (an address on a domain you verified in Mailtrap) and the From name. Save."
+msgstr "Укажіть email відправника (адресу на домені, підтвердженому в Mailtrap) та ім'я відправника. Збережіть."
+
+#. Found in installation list item.
+msgid "Paste your Mailtrap <strong>API token</strong> (Mailtrap → Settings → API Tokens) and click <strong>Check connection</strong>."
+msgstr "Вставте свій <strong>API-токен</strong> Mailtrap (Mailtrap → Settings → API Tokens) і натисніть <strong>Перевірити підключення</strong>."
+
+#. Found in description list item.
+msgid "Header <code>X-SwiftTrap-Stream: bulk</code> (or <code>transactional</code>) on any <code>wp_mail()</code> call picks the stream for that message; the header is never forwarded to the recipient."
+msgstr "Заголовок <code>X-SwiftTrap-Stream: bulk</code> (або <code>transactional</code>) у будь-якому виклику <code>wp_mail()</code> вибирає потік для цього листа; одержувачу заголовок не передається."
+
+#. Found in description list item.
+msgid "<code>swifttrap_mailtrap_fallback_to_wp_mail</code> — decide per message whether a refused email may go out through the default mailer."
+msgstr "<code>swifttrap_mailtrap_fallback_to_wp_mail</code> — вирішує для кожного листа, чи можна надіслати відхилений лист через стандартне надсилання WordPress."
+
+#. Found in description list item.
+msgid "<code>swifttrap_mailtrap_bulk_source</code> — tell the plugin that an email comes from your own newsletter tool."
+msgstr "<code>swifttrap_mailtrap_bulk_source</code> — повідомляє плагіну, що лист надійшов із вашого власного інструмента розсилок."
+
+#. Found in description list item.
+msgid "<code>swifttrap_mailtrap_use_bulk_stream</code> — force a message into the bulk or transactional stream (receives the category, the settings and the email itself)."
+msgstr "<code>swifttrap_mailtrap_use_bulk_stream</code> — примусово спрямовує лист у масовий або транзакційний потік (отримує категорію, налаштування і сам лист)."
+
+#. Found in description list item.
+msgid "Test email to any address from the settings page, with the exact reason shown if Mailtrap refuses it."
+msgstr "Тестовий лист на будь-яку адресу просто зі сторінки налаштувань — із точною причиною, якщо Mailtrap його відхилить."
+
+#. Found in description list item.
+msgid "API token is never shown again after saving, and can be kept out of the database with the <code>SWIFTTRAP_MAILTRAP_TOKEN</code> constant in <code>wp-config.php</code>."
+msgstr "Після збереження API-токен більше не показується, а за допомогою константи <code>SWIFTTRAP_MAILTRAP_TOKEN</code> у <code>wp-config.php</code> його можна взагалі не зберігати в базі даних."
+
+#. Found in description list item.
+msgid "Backup delivery — if Mailtrap does not accept a message, WordPress can send it with its default mailer instead (on by default, can be switched off)."
+msgstr "Резервна доставка — якщо Mailtrap не прийняв лист, WordPress може надіслати його стандартним способом (увімкнено за замовчуванням, можна вимкнути)."
+
+#. Found in description list item.
+msgid "<strong>Newsletters through the bulk stream</strong> — one checkbox: campaign emails from Newsletter, FluentCRM, Icegram Express and Groundhogg go through Mailtrap's bulk stream, everything else stays transactional. No setup in the newsletter plugin."
+msgstr "<strong>Розсилки через масовий потік</strong> — один прапорець: листи кампаній із Newsletter, FluentCRM, Icegram Express і Groundhogg ідуть через масовий потік Mailtrap, усе інше залишається транзакційним. У плагіні розсилок нічого налаштовувати не потрібно."
+
+#. Found in description list item.
+msgid "SwiftTrap calls <code>send.api.mailtrap.io</code> for transactional mail and <code>bulk.api.mailtrap.io</code> for bulk mail — automatically: newsletters from Newsletter, FluentCRM, Icegram Express and Groundhogg are recognized, and anything else can be routed by category, header or filter."
+msgstr "SwiftTrap звертається до <code>send.api.mailtrap.io</code> для транзакційної пошти та до <code>bulk.api.mailtrap.io</code> для масової — автоматично: розсилки з Newsletter, FluentCRM, Icegram Express і Groundhogg розпізнаються самі, а все інше можна спрямувати за категорією, заголовком або фільтром."
+
+#. Found in description list item.
+msgid "Most generic mailer plugins treat Mailtrap as one provider among many and send everything through a single stream."
+msgstr "Більшість універсальних поштових плагінів вважають Mailtrap одним із багатьох провайдерів і надсилають усе через один потік."
+
+#. Screenshot description.
+msgid "Settings page — connection, newsletters and bulk email, stream routing."
+msgstr "Сторінка налаштувань — підключення, розсилки та масові листи, маршрутизація за потоками."
 
 #. Found in description list item.
 msgid "Live Email Log — Browse and filter delivery data pulled directly from the Mailtrap API; search by recipient address, status, or date range with automatic pagination."
@@ -42,10 +138,6 @@ msgid "Site Health integration — Verification test checking Mailtrap token sta
 msgstr "Інтеграція зі Site Health — тест перевірки статусу токена Mailtrap і верифікації домену відправки."
 
 #. Found in description list item.
-msgid "Reliability Fallback — Graceful failover back to WordPress native <code>wp_mail()</code> if the Mailtrap API call fails."
-msgstr "Надійний резервний варіант — плавне перемикання на нативний <code>wp_mail()</code> WordPress, якщо виклик API Mailtrap не вдається."
-
-#. Found in description list item.
 msgid "Suppression Management — CRUD panel for Mailtrap suppression lists with pre-send recipient suppression checks."
 msgstr "Управління блокуваннями — панель CRUD для списків блокувань Mailtrap із перевіркою отримувачів на блокування перед відправкою."
 
@@ -62,10 +154,6 @@ msgid "This plugin sends email payloads (recipients, subject, body, attachments)
 msgstr "Цей плагін надсилає вміст листів (отримувачі, тема, тіло, вкладення) до API Mailtrap за адресами <code>send.api.mailtrap.io</code> та <code>bulk.api.mailtrap.io</code>. Статистика облікового запису та журнали листів отримуються з <code>mailtrap.io/api/accounts</code> і <code>mailtrap.io/api/email_logs</code>. Див. <a href=\"https://mailtrap.io/privacy-policy\">Політику конфіденційності Mailtrap</a>. Жодні дані нікуди більше не надсилаються."
 
 #. Found in faq paragraph.
-msgid "Yes — 25 MB per email (matches Mailtrap's API limit)."
-msgstr "Так — 25 МБ на лист (відповідає ліміту API Mailtrap)."
-
-#. Found in faq paragraph.
 msgid "No. SwiftTrap calls the Mailtrap REST API directly via the WordPress HTTP API. Total plugin size is around 30 KB."
 msgstr "Ні. SwiftTrap звертається до REST API Mailtrap напряму через HTTP API WordPress. Загальний розмір плагіна — близько 30 КБ."
 
@@ -74,20 +162,8 @@ msgid "WordPress falls back to its default <code>wp_mail()</code> handler. No em
 msgstr "WordPress повертається до свого стандартного обробника <code>wp_mail()</code>. Жоден лист не втрачається непомітно."
 
 #. Found in faq paragraph.
-msgid "Log in to <a href=\"https://mailtrap.io\">mailtrap.io</a>, open your sending domain, go to <strong>API Tokens</strong>, and create a token with sending permissions."
-msgstr "Увійдіть на <a href=\"https://mailtrap.io\">mailtrap.io</a>, відкрийте свій домен відправки, перейдіть до <strong>API Tokens</strong> і створіть токен із дозволами на відправку."
-
-#. Found in faq paragraph.
-msgid "By default, marketing/promotional categories are routed to <code>bulk.api.mailtrap.io</code> and everything else to <code>send.api.mailtrap.io</code>. Override per-message with the <code>swifttrap_mailtrap_use_bulk_stream</code> filter — useful for batch newsletters from a custom plugin."
-msgstr "За замовчуванням маркетингові/рекламні категорії спрямовуються до <code>bulk.api.mailtrap.io</code>, а все інше — до <code>send.api.mailtrap.io</code>. Перевизначайте це для окремого повідомлення за допомогою фільтра <code>swifttrap_mailtrap_use_bulk_stream</code> — корисно для масових розсилок зі стороннього плагіна."
-
-#. Found in faq paragraph.
 msgid "Yes — use the <code>swifttrap_mailtrap_template</code> filter to send via a <code>template_uuid</code>. The template variables can be passed through Mailtrap's standard template-variables payload."
 msgstr "Так — використовуйте фільтр <code>swifttrap_mailtrap_template</code>, щоб надсилати через <code>template_uuid</code>. Змінні шаблону можна передавати через стандартний набір template-variables Mailtrap."
-
-#. Found in faq paragraph.
-msgid "WP Mail SMTP and Post SMTP route through Mailtrap's SMTP gateway and treat Mailtrap as just another SMTP host. SwiftTrap uses Mailtrap's HTTP Send API, which exposes features SMTP cannot: bulk vs transactional stream routing, categories, custom tracking variables, template UUIDs, and live suppression-list visibility. Use SwiftTrap if you want Mailtrap-native behavior; use a generic SMTP plugin if you want a one-config-fits-all-providers setup."
-msgstr "WP Mail SMTP та Post SMTP працюють через SMTP-шлюз Mailtrap і сприймають Mailtrap просто як ще один SMTP-хост. SwiftTrap використовує HTTP Send API Mailtrap, який відкриває можливості, недоступні через SMTP: маршрутизацію між масовим і транзакційним потоками, категорії, власні змінні трекінгу, UUID шаблонів і живий перегляд списку блокувань. Обирайте SwiftTrap, якщо хочете нативної поведінки Mailtrap; обирайте універсальний SMTP-плагін, якщо потрібне одне налаштування для всіх провайдерів."
 
 #. Found in faq header.
 msgid "Is there an attachment size limit?"
@@ -114,16 +190,8 @@ msgid "Why use SwiftTrap instead of WP Mail SMTP or Post SMTP with Mailtrap cred
 msgstr "Чому варто використовувати SwiftTrap замість WP Mail SMTP чи Post SMTP з обліковими даними Mailtrap?"
 
 #. Found in installation list item.
-msgid "Click <strong>Send test email</strong> to verify delivery."
+msgid "Click <strong>Send Test Email</strong> to verify delivery."
 msgstr "Натисніть <strong>Надіслати тестовий лист</strong>, щоб перевірити доставку."
-
-#. Found in installation list item.
-msgid "Set your verified sender email and name."
-msgstr "Вкажіть свій перевірений email і ім'я відправника."
-
-#. Found in installation list item.
-msgid "Paste your Mailtrap <strong>Send API token</strong> (Mailtrap dashboard → Sending Domains → API Tokens)."
-msgstr "Вставте свій <strong>Send API token</strong> Mailtrap (панель Mailtrap → Sending Domains → API Tokens)."
 
 #. Found in installation list item.
 msgid "Go to <strong>Mailtrap → Settings</strong>."
@@ -142,10 +210,6 @@ msgid "<code>swifttrap_mailtrap_template</code> — send via a Mailtrap template
 msgstr "<code>swifttrap_mailtrap_template</code> — надсилає через шаблон Mailtrap за <code>template_uuid</code>."
 
 #. Found in description list item.
-msgid "<code>swifttrap_mailtrap_use_bulk_stream</code> — force a message into the bulk or transactional stream."
-msgstr "<code>swifttrap_mailtrap_use_bulk_stream</code> — примусово спрямовує повідомлення в масовий або транзакційний потік."
-
-#. Found in description list item.
 msgid "<code>swifttrap_mailtrap_email_category</code> — override the auto-detected email category."
 msgstr "<code>swifttrap_mailtrap_email_category</code> — перевизначає автоматично визначену категорію листа."
 
@@ -158,10 +222,6 @@ msgid "Mailtrap template support via <code>template_uuid</code>."
 msgstr "Підтримка шаблонів Mailtrap через <code>template_uuid</code>."
 
 #. Found in description list item.
-msgid "Test email button on the settings page."
-msgstr "Кнопка тестового листа на сторінці налаштувань."
-
-#. Found in description list item.
 msgid "Drop-in replacement for <code>wp_mail()</code> — works with WooCommerce, Contact Form 7, Gravity Forms, and any plugin that uses WordPress mail."
 msgstr "Пряма заміна <code>wp_mail()</code> — працює з WooCommerce, Contact Form 7, Gravity Forms та будь-яким плагіном, що використовує пошту WordPress."
 
@@ -172,14 +232,6 @@ msgstr "Сторінка статистики показує статус пер
 #. Found in description list item.
 msgid "No Mailtrap PHP SDK required. Plugin is <strong>~30 KB total</strong> and uses only the WordPress HTTP API (<code>wp_remote_post</code>)."
 msgstr "Не потребує PHP SDK Mailtrap. Плагін важить <strong>приблизно 30 КБ загалом</strong> і використовує лише HTTP API WordPress (<code>wp_remote_post</code>)."
-
-#. Found in description list item.
-msgid "SwiftTrap calls <code>send.api.mailtrap.io</code> for transactional mail and <code>bulk.api.mailtrap.io</code> for bulk mail — automatically, based on category or via filter."
-msgstr "SwiftTrap звертається до <code>send.api.mailtrap.io</code> для транзакційної пошти та до <code>bulk.api.mailtrap.io</code> для масової — автоматично, на основі категорії або через фільтр."
-
-#. Found in description list item.
-msgid "Generic SMTP plugins use Mailtrap's SMTP credentials and lose every Mailtrap-only feature."
-msgstr "Універсальні SMTP-плагіни використовують SMTP-облікові дані Mailtrap і втрачають усі функції, доступні лише через Mailtrap."
 
 #. Found in description list item.
 msgid "<strong>No firewall headaches</strong> — port 587/465 blocked? API works over standard HTTPS 443."
@@ -229,10 +281,6 @@ msgstr "Віджет панелі керування зі статусом ін�
 msgid "Stats page — sending domain verification status and suppression list (bounces, complaints, unsubscribes)."
 msgstr "Сторінка статистики — статус перевірки домену відправки та список блокувань (відмови, скарги, відписки)."
 
-#. Screenshot description.
-msgid "Settings page — API token, verified sender, stream routing."
-msgstr "Сторінка налаштувань — API-токен, перевірений відправник, маршрутизація потоків."
-
 #. Found in faq paragraph.
 msgid "Email data (recipients, subject, body, attachments) goes to <code>send.api.mailtrap.io</code> and <code>bulk.api.mailtrap.io</code>. Account stats are fetched from <code>mailtrap.io/api/accounts</code>. See the <a href=\"https://mailtrap.io/privacy-policy\">Mailtrap Privacy Policy</a>."
 msgstr "Дані листів (отримувачі, тема, тіло, вкладення) передаються до <code>send.api.mailtrap.io</code> та <code>bulk.api.mailtrap.io</code>. Статистика облікового запису отримується з <code>mailtrap.io/api/accounts</code>. Див. <a href=\"https://mailtrap.io/privacy-policy\">Політику конфіденційності Mailtrap</a>."
@@ -252,6 +300,101 @@ msgstr "Активуйте плагін."
 #. Found in description list item.
 msgid "<code>swifttrap_mailtrap_custom_variables</code> — attach tracking metadata to outgoing emails."
 msgstr "<code>swifttrap_mailtrap_custom_variables</code> — додає метадані трекінгу до вихідних листів."
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Fix: the plain-text part of HTML emails now decodes entities, so a link with query parameters reads <code>?a=1&amp;b=2</code> instead of <code>?a=1&amp;amp;b=2</code>, and a link whose text is not its URL keeps the URL in brackets (password reset emails used to show only \"address\"). Line breaks follow <code>&lt;br&gt;</code> and block ends."
+msgstr "Виправлено: текстова частина HTML-листів тепер декодує сутності, тож посилання з параметрами має вигляд <code>?a=1&amp;b=2</code>, а не <code>?a=1&amp;amp;b=2</code>, а посилання, текст якого не збігається з URL, зберігає URL у дужках (у листах скидання пароля раніше було видно лише «address»). Перенесення рядків ставляться за <code>&lt;br&gt;</code> і кінцями блоків."
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Improved: uninstall also cleans up every site of a multisite network."
+msgstr "Покращено: під час видалення плагін також очищає всі сайти мультисайт-мережі."
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Improved: translations for German, Spanish, French, Italian, Japanese, Polish, Portuguese (Brazil), Russian and Ukrainian."
+msgstr "Покращено: переклади німецькою, іспанською, французькою, італійською, японською, польською, португальською (Бразилія), російською та українською."
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Improved: settings screen in plain language with a helper text for every field, inline messages instead of browser pop-ups, labels for screen readers, a Settings link on the Plugins screen."
+msgstr "Покращено: екран налаштувань написано простою мовою, кожне поле має підказку, повідомлення виводяться на сторінці замість спливних вікон браузера, додано підписи для екранних читачів і посилання «Налаштування» на екрані плагінів."
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Fix: emails in a non-UTF-8 charset are converted instead of failing; API errors show Mailtrap's explanation, not only the HTTP code; \"Check connection\" explains a rejected token."
+msgstr "Виправлено: листи в кодуванні, відмінному від UTF-8, конвертуються, а не завершуються помилкою; помилки API показують пояснення від Mailtrap, а не лише HTTP-код; «Перевірити підключення» пояснює, чому токен відхилено."
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Fix: attachments work on sites where WordPress uses FTP/SSH file access; attachments named with <code>'name.pdf' =&gt; $path</code> keep their name; inline images (<code>$embeds</code>, WordPress 6.9+) are sent; error messages no longer contain server paths."
+msgstr "Виправлено: вкладення працюють на сайтах, де WordPress отримує доступ до файлів через FTP/SSH; вкладення, названі через <code>'name.pdf' =&gt; $path</code>, зберігають свою назву; вбудовані зображення (<code>$embeds</code>, WordPress 6.9+) надсилаються; повідомлення про помилки більше не містять серверних шляхів."
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Fix: emails blocked by <code>SWIFTTRAP_BLOCK_BULK</code> were still delivered by the default mailer."
+msgstr "Виправлено: листи, заблоковані <code>SWIFTTRAP_BLOCK_BULK</code>, усе одно доставлялися стандартним надсиланням WordPress."
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Fix: when the suppression list cannot be loaded, the check pauses for five minutes instead of adding slow API calls to every recipient of every email."
+msgstr "Виправлено: якщо список блокувань не вдається завантажити, перевірка призупиняється на п'ять хвилин, замість того щоб додавати повільні запити до API для кожного одержувача кожного листа."
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Fix: an address that unsubscribed from the bulk stream no longer stops transactional email (password resets, orders) to that address."
+msgstr "Виправлено: адреса, що відписалася від масового потоку, більше не блокує транзакційні листи (скидання пароля, замовлення) на цю адресу."
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Fix: <code>wp_mail_from</code> / <code>wp_mail_from_name</code> filters are applied to each message. They were read once per request, so a From address set by WooCommerce or a form plugin for its own email was ignored or leaked into other emails."
+msgstr "Виправлено: фільтри <code>wp_mail_from</code> / <code>wp_mail_from_name</code> застосовуються до кожного листа. Раніше вони зчитувалися один раз за запит, тому адреса відправника, яку WooCommerce або плагін форм задавав для своїх листів, ігнорувалася або потрапляла в інші листи."
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Fix: <code>wp_mail()</code> returned a truthy error object instead of <code>false</code> when an email had an invalid address, a missing attachment or only suppressed recipients, so the calling plugin believed it was sent."
+msgstr "Виправлено: <code>wp_mail()</code> повертала об'єкт помилки, що зводиться до true, замість <code>false</code>, коли лист мав недійсну адресу, відсутнє вкладення або лише заблокованих одержувачів, — і плагін, що її викликав, вважав лист надісланим."
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Fix: unticking \"Send this site's emails through Mailtrap\", the category options — any checkbox that is on by default — was not saved."
+msgstr "Виправлено: зняття позначки «Надсилати листи цього сайту через Mailtrap», опцій категорій — будь-якого прапорця, увімкненого за замовчуванням, — не зберігалося."
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "New: the API token can be defined in <code>wp-config.php</code> (<code>SWIFTTRAP_MAILTRAP_TOKEN</code>). A saved token is no longer printed into the settings page; leave the field empty to keep it."
+msgstr "Нове: API-токен можна задати в <code>wp-config.php</code> (<code>SWIFTTRAP_MAILTRAP_TOKEN</code>). Збережений токен більше не виводиться на сторінці налаштувань; залиште поле порожнім, щоб зберегти поточний."
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "New: \"Use the default WordPress mailer as a backup\" setting and <code>swifttrap_mailtrap_fallback_to_wp_mail</code> filter."
+msgstr "Нове: налаштування «Використовувати стандартне надсилання WordPress як резерв» і фільтр <code>swifttrap_mailtrap_fallback_to_wp_mail</code>."
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "New: the test email can be sent to any address, and shows the reason when Mailtrap refuses it. Before, a test that Mailtrap rejected could still say \"sent\" because the default mailer delivered it."
+msgstr "Нове: тестовий лист можна надіслати на будь-яку адресу, і він показує причину, якщо Mailtrap його відхилив. Раніше тест, відхилений Mailtrap, міг повідомити «надіслано», бо лист доставляло стандартне надсилання WordPress."
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "New: the <code>X-SwiftTrap-Stream: bulk</code> / <code>transactional</code> header picks the stream for one <code>wp_mail()</code> call. New <code>swifttrap_mailtrap_bulk_source</code> filter; <code>swifttrap_mailtrap_use_bulk_stream</code> now also receives the email."
+msgstr "Нове: заголовок <code>X-SwiftTrap-Stream: bulk</code> / <code>transactional</code> вибирає потік для одного виклику <code>wp_mail()</code>. Новий фільтр <code>swifttrap_mailtrap_bulk_source</code>; <code>swifttrap_mailtrap_use_bulk_stream</code> тепер також отримує сам лист."
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "New: <strong>Send newsletters through the bulk stream</strong> — one checkbox on the settings screen. Campaign emails from Newsletter (The Newsletter Plugin), FluentCRM, Icegram Express and Groundhogg are recognized by their headers and sent through Mailtrap's bulk stream; everything else, including signup confirmations, stays on the transactional stream. Off by default."
+msgstr "Нове: <strong>Надсилати розсилки через масовий потік</strong> — один прапорець на екрані налаштувань. Листи кампаній із Newsletter (The Newsletter Plugin), FluentCRM, Icegram Express і Groundhogg розпізнаються за заголовками й надсилаються через масовий потік Mailtrap; усе інше, зокрема підтвердження підписки, залишається в транзакційному потоці. За замовчуванням вимкнено."
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "New: a one-time, dismissible request to leave a review on WordPress.org. It appears only a week after your first email goes out through Mailtrap, only to administrators and only on the plugin's own screens. \"Maybe later\" snoozes it for 30 days, \"Don't ask again\" hides it for good. Nothing is sent anywhere."
+msgstr "Нове: одноразове прохання залишити відгук на WordPress.org, яке можна закрити. Воно з'являється лише через тиждень після того, як через Mailtrap пішов ваш перший лист, лише для адміністраторів і лише на екранах самого плагіна. «Можливо, пізніше» відкладає його на 30 днів, «Більше не питати» приховує назавжди. Жодні дані нікуди не надсилаються."
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Tested with WordPress 7.1 (verified on 7.1.1). No functional changes."
+msgstr "Перевірено з WordPress 7.1 (протестовано на 7.1.1). Функціональних змін немає."
 
 #. Found in changelog list item.
 #, gp-priority: low

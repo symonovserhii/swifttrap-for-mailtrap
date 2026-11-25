@@ -1,0 +1,697 @@
+# Translation of Plugins - SwiftTrap for Mailtrap - Stable Readme (latest release) in Japanese
+# This file is distributed under the same license as the Plugins - SwiftTrap for Mailtrap - Stable Readme (latest release) package.
+msgid ""
+msgstr ""
+"PO-Revision-Date: 2026-11-25 00:00:00+0000\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: GlotPress/4.1.0\n"
+"Language: ja\n"
+"Project-Id-Version: Plugins - SwiftTrap for Mailtrap - Stable Readme (latest release)\n"
+
+#. Short description.
+#, gp-priority: high
+msgid "Send WordPress emails through the Mailtrap Email API (not SMTP). Bulk and transactional streams, categories, suppression list, email log."
+msgstr "Mailtrap Email API (SMTP ではありません) で WordPress のメールを送信。バルク/トランザクションストリーム、カテゴリー、送信抑止リスト、メールログに対応。"
+
+#. Plugin name.
+#, gp-priority: high
+msgid "SwiftTrap for Mailtrap"
+msgstr "SwiftTrap for Mailtrap"
+
+#. Found in faq paragraph.
+msgid "The plugin refuses attachments above the size you set (1–25 MB per file, 25 by default). Mailtrap itself limits the whole message, attachments included, to 10 MB by default (more on request on higher plans), so lower the setting if your plan has the default limit."
+msgstr "プラグインは、設定したサイズ (1 ファイルあたり 1～25 MB、初期値は 25) を超える添付ファイルを拒否します。Mailtrap 側では、添付ファイルを含むメッセージ全体のサイズが初期設定で 10 MB までに制限されています (上位プランでは申請により引き上げ可能)。ご利用のプランが初期設定の上限のままであれば、この設定値を下げてください。"
+
+#. Found in faq paragraph.
+msgid "The plugin retries briefly, then reports the failure to WordPress (<code>wp_mail_failed</code>, with the reason Mailtrap gave). With <strong>Use the default WordPress mailer as a backup</strong> ticked (the default) the message is then handed to the default mailer; untick it if email must never leave through your web host — <code>wp_mail()</code> then returns <code>false</code>."
+msgstr "プラグインは短時間だけ再試行し、その後 WordPress に失敗を通知します (<code>wp_mail_failed</code>、Mailtrap が返した理由付き)。<strong>WordPress 標準のメール送信機能を予備として使用する</strong> にチェックが入っている場合 (初期設定)、メッセージはその後 WordPress 標準のメール送信機能に引き渡されます。メールを決して Web ホスト経由で送信したくない場合はチェックを外してください。その場合、<code>wp_mail()</code> は <code>false</code> を返します。"
+
+#. Found in faq paragraph.
+msgid "Log in to <a href=\"https://mailtrap.io\">mailtrap.io</a>, open your sending domain, go to <strong>API Tokens</strong>, and create a token with sending permissions. After saving, the token is never displayed again. To keep it out of the database, add <code>define( 'SWIFTTRAP_MAILTRAP_TOKEN', 'your-token' );</code> to <code>wp-config.php</code> instead."
+msgstr "<a href=\"https://mailtrap.io\">mailtrap.io</a> にログインし、送信ドメインを開いて <strong>API Tokens</strong> に移動し、送信権限を持つトークンを作成します。保存後、トークンが再び表示されることはありません。トークンをデータベースに保存したくない場合は、代わりに <code>wp-config.php</code> に <code>define( 'SWIFTTRAP_MAILTRAP_TOKEN', 'your-token' );</code> を追加してください。"
+
+#. Found in faq paragraph.
+msgid "Mailtrap keeps unsubscribes and bounces separately for each stream, and so does the plugin: somebody who unsubscribed from your newsletter still receives a password reset."
+msgstr "Mailtrap は配信停止とバウンスをストリームごとに別々に管理しており、このプラグインも同じ扱いをします。ニュースレターの配信を停止した人にも、パスワードリセットのメールは届きます。"
+
+#. Found in faq paragraph.
+msgid "Strongest first: the <code>swifttrap_mailtrap_use_bulk_stream</code> filter; the <code>X-SwiftTrap-Stream: bulk</code> (or <code>transactional</code>) header on a <code>wp_mail()</code> call; newsletter plugin detection (when switched on); the category table on the settings screen, where the <code>promotional</code> category goes to the bulk stream by default. Everything else goes to <code>send.api.mailtrap.io</code>."
+msgstr "優先度の高い順に: <code>swifttrap_mailtrap_use_bulk_stream</code> フィルター、<code>wp_mail()</code> 呼び出しに付けた <code>X-SwiftTrap-Stream: bulk</code> (または <code>transactional</code>) ヘッダー、ニュースレタープラグインの検出 (有効にしている場合)、設定画面のカテゴリー表 (<code>promotional</code> カテゴリーは初期設定でバルクストリームに送られます)。それ以外のメールはすべて <code>send.api.mailtrap.io</code> に送られます。"
+
+#. Found in faq paragraph.
+msgid "MailPoet is the exception: it sends with its own mailer and never passes through <code>wp_mail()</code>, so no <code>wp_mail()</code> plugin can route it."
+msgstr "MailPoet は例外です。MailPoet は独自のメール送信機能で送信し、<code>wp_mail()</code> を一切経由しないため、<code>wp_mail()</code> ベースのプラグインでは振り分けられません。"
+
+#. Found in faq paragraph.
+msgid "Go to <strong>Mailtrap → Settings</strong> and tick <strong>Send newsletters through the bulk stream</strong>. Campaign emails sent by Newsletter (The Newsletter Plugin), FluentCRM, Icegram Express and Groundhogg are then recognized and sent through <code>bulk.api.mailtrap.io</code>; password resets, orders, form notifications, signup confirmations and all other email keep using <code>send.api.mailtrap.io</code>. Nothing has to be configured in the newsletter plugin — leave it on its default \"send through WordPress\" delivery. The same API token is used for both streams."
+msgstr "<strong>Mailtrap → 設定</strong> を開き、<strong>ニュースレターをバルクストリームで送信する</strong> にチェックを入れます。これで Newsletter (The Newsletter Plugin)、FluentCRM、Icegram Express、Groundhogg から送信されるキャンペーンメールが認識され、<code>bulk.api.mailtrap.io</code> 経由で送信されます。パスワードのリセット、注文、フォームの通知、登録確認など、それ以外のメールはすべて引き続き <code>send.api.mailtrap.io</code> を使用します。ニュースレタープラグイン側で設定することは何もありません。配信方法は初期設定の「WordPress 経由で送信」のままにしておいてください。両方のストリームで同じ API トークンが使われます。"
+
+#. Found in faq paragraph.
+msgid "Generic mailer plugins treat Mailtrap as one provider among many: through SMTP credentials, or through the transactional API only. SwiftTrap is built for Mailtrap alone and uses what is specific to it: bulk vs transactional stream routing (including automatic routing of newsletters), categories, custom tracking variables, template UUIDs, and live suppression-list visibility. Use SwiftTrap if you want Mailtrap-native behavior; use a generic SMTP plugin if you want a one-config-fits-all-providers setup."
+msgstr "汎用のメール送信プラグインは、Mailtrap を数あるプロバイダーの 1 つとして扱います。SMTP の認証情報を使うか、トランザクション API だけを使うかのどちらかです。SwiftTrap は Mailtrap 専用に作られており、Mailtrap ならではの機能を活用します: バルク/トランザクションストリームの振り分け (ニュースレターの自動振り分けを含む)、カテゴリー、独自のトラッキング変数、テンプレート UUID、送信抑止リストのリアルタイム表示。Mailtrap ネイティブの動作を求めるなら SwiftTrap を、1 つの設定ですべてのプロバイダーに対応させたいなら汎用の SMTP プラグインをお使いください。"
+
+#. Found in faq header.
+msgid "What happens if Mailtrap refuses a message or cannot be reached?"
+msgstr "Mailtrap がメッセージを拒否した場合や、Mailtrap に接続できない場合はどうなりますか？"
+
+#. Found in faq header.
+msgid "How do I send my newsletter through the bulk stream and everything else through the transactional stream?"
+msgstr "ニュースレターはバルクストリームで、それ以外のメールはすべてトランザクションストリームで送信するにはどうすればよいですか？"
+
+#. Found in installation list item.
+msgid "Sending a newsletter from this site? Tick <strong>Send newsletters through the bulk stream</strong>."
+msgstr "このサイトからニュースレターを送信しますか？ <strong>ニュースレターをバルクストリームで送信する</strong> にチェックを入れてください。"
+
+#. Found in installation list item.
+msgid "Set the From email (an address on a domain you verified in Mailtrap) and the From name. Save."
+msgstr "送信元メールアドレス (Mailtrap で認証済みのドメインのアドレス) と送信者名を設定し、保存します。"
+
+#. Found in installation list item.
+msgid "Paste your Mailtrap <strong>API token</strong> (Mailtrap → Settings → API Tokens) and click <strong>Check connection</strong>."
+msgstr "Mailtrap の <strong>API トークン</strong> (Mailtrap → Settings → API Tokens) を貼り付け、<strong>接続を確認</strong> をクリックします。"
+
+#. Found in description list item.
+msgid "Header <code>X-SwiftTrap-Stream: bulk</code> (or <code>transactional</code>) on any <code>wp_mail()</code> call picks the stream for that message; the header is never forwarded to the recipient."
+msgstr "任意の <code>wp_mail()</code> 呼び出しに <code>X-SwiftTrap-Stream: bulk</code> (または <code>transactional</code>) ヘッダーを付けると、そのメッセージのストリームを指定できます。このヘッダーが受信者に転送されることはありません。"
+
+#. Found in description list item.
+msgid "<code>swifttrap_mailtrap_fallback_to_wp_mail</code> — decide per message whether a refused email may go out through the default mailer."
+msgstr "<code>swifttrap_mailtrap_fallback_to_wp_mail</code> — 拒否されたメールを WordPress 標準のメール送信機能で送信してよいかを、メッセージごとに判断します。"
+
+#. Found in description list item.
+msgid "<code>swifttrap_mailtrap_bulk_source</code> — tell the plugin that an email comes from your own newsletter tool."
+msgstr "<code>swifttrap_mailtrap_bulk_source</code> — メールが独自のニュースレターツールから送信されたものであることをプラグインに伝えます。"
+
+#. Found in description list item.
+msgid "<code>swifttrap_mailtrap_use_bulk_stream</code> — force a message into the bulk or transactional stream (receives the category, the settings and the email itself)."
+msgstr "<code>swifttrap_mailtrap_use_bulk_stream</code> — メッセージをバルクストリームまたはトランザクションストリームに強制的に振り分けます (カテゴリー、設定、メール本体を受け取ります)。"
+
+#. Found in description list item.
+msgid "Test email to any address from the settings page, with the exact reason shown if Mailtrap refuses it."
+msgstr "設定ページから任意のアドレスにテストメールを送信でき、Mailtrap が拒否した場合はその正確な理由が表示されます。"
+
+#. Found in description list item.
+msgid "API token is never shown again after saving, and can be kept out of the database with the <code>SWIFTTRAP_MAILTRAP_TOKEN</code> constant in <code>wp-config.php</code>."
+msgstr "API トークンは保存後に再び表示されることはなく、<code>wp-config.php</code> の <code>SWIFTTRAP_MAILTRAP_TOKEN</code> 定数を使えばデータベースに保存せずに済みます。"
+
+#. Found in description list item.
+msgid "Backup delivery — if Mailtrap does not accept a message, WordPress can send it with its default mailer instead (on by default, can be switched off)."
+msgstr "予備の配信 — Mailtrap がメッセージを受け付けなかった場合、代わりに WordPress 標準のメール送信機能で送信できます (初期設定で有効、無効にすることも可能)。"
+
+#. Found in description list item.
+msgid "<strong>Newsletters through the bulk stream</strong> — one checkbox: campaign emails from Newsletter, FluentCRM, Icegram Express and Groundhogg go through Mailtrap's bulk stream, everything else stays transactional. No setup in the newsletter plugin."
+msgstr "<strong>ニュースレターはバルクストリームで</strong> — チェックボックス 1 つで、Newsletter、FluentCRM、Icegram Express、Groundhogg のキャンペーンメールは Mailtrap のバルクストリームを通り、それ以外のメールはすべてトランザクションストリームのまま送信されます。ニュースレタープラグイン側の設定は不要です。"
+
+#. Found in description list item.
+msgid "SwiftTrap calls <code>send.api.mailtrap.io</code> for transactional mail and <code>bulk.api.mailtrap.io</code> for bulk mail — automatically: newsletters from Newsletter, FluentCRM, Icegram Express and Groundhogg are recognized, and anything else can be routed by category, header or filter."
+msgstr "SwiftTrap は、トランザクションメールには <code>send.api.mailtrap.io</code>、バルクメールには <code>bulk.api.mailtrap.io</code> を自動的に使い分けます。Newsletter、FluentCRM、Icegram Express、Groundhogg からのニュースレターは自動で認識され、それ以外のメールもカテゴリー、ヘッダー、フィルターで振り分けられます。"
+
+#. Found in description list item.
+msgid "Most generic mailer plugins treat Mailtrap as one provider among many and send everything through a single stream."
+msgstr "汎用のメール送信プラグインの多くは、Mailtrap を数あるプロバイダーの 1 つとして扱い、すべてのメールを 1 つのストリームで送信します。"
+
+#. Screenshot description.
+msgid "Settings page — connection, newsletters and bulk email, stream routing."
+msgstr "設定ページ — 接続、ニュースレターと一括メール、ストリームの振り分け。"
+
+#. Found in description list item.
+msgid "Live Email Log — Browse and filter delivery data pulled directly from the Mailtrap API; search by recipient address, status, or date range with automatic pagination."
+msgstr "ライブメールログ — Mailtrap API から直接取得した配信データを閲覧・絞り込みできます。受信者のアドレス、ステータス、期間で検索でき、ページ送りも自動で行われます。"
+
+#. Screenshot description.
+msgid "Email log — live Mailtrap API data with filters and pagination."
+msgstr "メールログ — フィルターとページ送りに対応した、Mailtrap API のリアルタイムデータ。"
+
+#. Found in description list item.
+msgid "Attachment size guard — Configurable limits to prevent oversized files from rejecting at the API gateway."
+msgstr "添付ファイルサイズの制限 — 上限を設定でき、大きすぎるファイルが API ゲートウェイで拒否されるのを防ぎます。"
+
+#. Found in description list item.
+msgid "WP-CLI commands — Command-line management via <code>wp swifttrap</code> (test, stats, prune-logs, send-suppression-sync)."
+msgstr "WP-CLI コマンド — <code>wp swifttrap</code> によるコマンドラインでの管理 (test、stats、prune-logs、send-suppression-sync)。"
+
+#. Found in description list item.
+msgid "Site Health integration — Verification test checking Mailtrap token status and sending domain verification."
+msgstr "サイトヘルスとの連携 — Mailtrap トークンの状態と送信ドメインの認証を確認するテスト。"
+
+#. Found in description list item.
+msgid "Suppression Management — CRUD panel for Mailtrap suppression lists with pre-send recipient suppression checks."
+msgstr "送信抑止の管理 — Mailtrap の送信抑止リストを追加・表示・編集・削除できるパネルと、送信前の受信者の送信抑止チェック。"
+
+#. Found in description list item.
+msgid "Delivery Tracking &amp; Webhooks — Real-time event tracking via custom REST route <code>swifttrap/v1/webhook</code>."
+msgstr "配信トラッキング &amp; Webhook — 独自の REST ルート <code>swifttrap/v1/webhook</code> によるリアルタイムのイベント追跡。"
+
+#. Found in description list item.
+msgid "Automatic email categorization and stream routing overrides via settings grid."
+msgstr "メールの自動カテゴリー分類と、設定グリッドによるストリーム振り分けの上書き。"
+
+#. Found in description paragraph.
+msgid "This plugin sends email payloads (recipients, subject, body, attachments) to the Mailtrap API at <code>send.api.mailtrap.io</code> and <code>bulk.api.mailtrap.io</code>. Account stats and email logs are fetched from <code>mailtrap.io/api/accounts</code> and <code>mailtrap.io/api/email_logs</code>. See the <a href=\"https://mailtrap.io/privacy-policy\">Mailtrap Privacy Policy</a>. No data is sent anywhere else."
+msgstr "このプラグインは、メールのデータ (受信者、件名、本文、添付ファイル) を <code>send.api.mailtrap.io</code> および <code>bulk.api.mailtrap.io</code> の Mailtrap API に送信します。アカウントの統計とメールログは <code>mailtrap.io/api/accounts</code> と <code>mailtrap.io/api/email_logs</code> から取得します。詳しくは <a href=\"https://mailtrap.io/privacy-policy\">Mailtrap のプライバシーポリシー</a>をご覧ください。これ以外の送信先にデータが送られることはありません。"
+
+#. Found in faq paragraph.
+msgid "No. SwiftTrap calls the Mailtrap REST API directly via the WordPress HTTP API. Total plugin size is around 30 KB."
+msgstr "いいえ。SwiftTrap は WordPress HTTP API を介して Mailtrap REST API を直接呼び出します。プラグイン全体のサイズは約 30 KB です。"
+
+#. Found in faq paragraph.
+msgid "WordPress falls back to its default <code>wp_mail()</code> handler. No emails are silently dropped."
+msgstr "WordPress は標準の <code>wp_mail()</code> ハンドラーに切り替わります。メールが知らないうちに破棄されることはありません。"
+
+#. Found in faq paragraph.
+msgid "Yes — use the <code>swifttrap_mailtrap_template</code> filter to send via a <code>template_uuid</code>. The template variables can be passed through Mailtrap's standard template-variables payload."
+msgstr "はい。<code>swifttrap_mailtrap_template</code> フィルターを使うと、<code>template_uuid</code> を指定して送信できます。テンプレート変数は、Mailtrap 標準のテンプレート変数ペイロードで渡せます。"
+
+#. Found in faq header.
+msgid "Is there an attachment size limit?"
+msgstr "添付ファイルのサイズに上限はありますか？"
+
+#. Found in faq header.
+msgid "Does the plugin require the Mailtrap PHP SDK?"
+msgstr "このプラグインには Mailtrap PHP SDK が必要ですか？"
+
+#. Found in faq header.
+msgid "What happens if I disable the plugin or remove the token?"
+msgstr "プラグインを無効化したり、トークンを削除したりするとどうなりますか？"
+
+#. Found in faq header.
+msgid "How does bulk stream routing work?"
+msgstr "バルクストリームへの振り分けはどのように動作しますか？"
+
+#. Found in faq header.
+msgid "Does it support Mailtrap email templates?"
+msgstr "Mailtrap のメールテンプレートに対応していますか？"
+
+#. Found in faq header.
+msgid "Why use SwiftTrap instead of WP Mail SMTP or Post SMTP with Mailtrap credentials?"
+msgstr "Mailtrap の認証情報を設定した WP Mail SMTP や Post SMTP ではなく、SwiftTrap を使う理由は？"
+
+#. Found in installation list item.
+msgid "Click <strong>Send Test Email</strong> to verify delivery."
+msgstr "<strong>テストメールを送信</strong> をクリックして、配信を確認します。"
+
+#. Found in installation list item.
+msgid "Go to <strong>Mailtrap → Settings</strong>."
+msgstr "<strong>Mailtrap → 設定</strong> を開きます。"
+
+#. Found in installation list item.
+msgid "Install from <strong>Plugins → Add New</strong> and search for <em>SwiftTrap for Mailtrap</em>, or upload the <code>swifttrap-for-mailtrap</code> folder to <code>/wp-content/plugins/</code>."
+msgstr "<strong>プラグイン → 新規追加</strong> から <em>SwiftTrap for Mailtrap</em> を検索してインストールするか、<code>swifttrap-for-mailtrap</code> フォルダーを <code>/wp-content/plugins/</code> にアップロードします。"
+
+#. Found in description paragraph.
+msgid "<strong>SwiftTrap</strong> is a drop-in replacement for <code>wp_mail()</code> that routes WordPress email through the <strong>Mailtrap Email Sending API</strong> instead of SMTP. It is purpose-built for Mailtrap — not a generic SMTP plugin with a Mailtrap preset — so it exposes Mailtrap-native features that SMTP cannot: bulk vs transactional stream routing, email categories, custom variables for tracking, suppression lists, and domain verification status."
+msgstr "<strong>SwiftTrap</strong> は <code>wp_mail()</code> をそのまま置き換えるプラグインで、WordPress のメールを SMTP ではなく <strong>Mailtrap Email Sending API</strong> 経由で送信します。Mailtrap 専用に作られており (Mailtrap 用のプリセットを備えた汎用 SMTP プラグインではありません)、SMTP では利用できない Mailtrap ネイティブの機能を提供します: バルク/トランザクションストリームの振り分け、メールカテゴリー、トラッキング用のカスタム変数、送信抑止リスト、ドメイン認証の状態。"
+
+#. Found in description list item.
+msgid "<code>swifttrap_mailtrap_template</code> — send via a Mailtrap template by <code>template_uuid</code>."
+msgstr "<code>swifttrap_mailtrap_template</code> — <code>template_uuid</code> を指定して Mailtrap テンプレートで送信します。"
+
+#. Found in description list item.
+msgid "<code>swifttrap_mailtrap_email_category</code> — override the auto-detected email category."
+msgstr "<code>swifttrap_mailtrap_email_category</code> — 自動判定されたメールカテゴリーを上書きします。"
+
+#. Found in description list item.
+msgid "Falls back to default WordPress mail handler when disabled or token is empty."
+msgstr "無効化されている場合やトークンが空の場合は、WordPress 標準のメールハンドラーに切り替わります。"
+
+#. Found in description list item.
+msgid "Mailtrap template support via <code>template_uuid</code>."
+msgstr "<code>template_uuid</code> による Mailtrap テンプレートに対応。"
+
+#. Found in description list item.
+msgid "Drop-in replacement for <code>wp_mail()</code> — works with WooCommerce, Contact Form 7, Gravity Forms, and any plugin that uses WordPress mail."
+msgstr "<code>wp_mail()</code> をそのまま置き換え — WooCommerce、Contact Form 7、Gravity Forms をはじめ、WordPress のメール機能を使うあらゆるプラグインで動作します。"
+
+#. Found in description list item.
+msgid "Stats page shows your sending domain verification status and the live suppression list (bounces, complaints, unsubscribes)."
+msgstr "統計ページに、送信ドメインの認証状態と送信抑止リスト (バウンス、苦情、配信停止) をリアルタイムで表示します。"
+
+#. Found in description list item.
+msgid "No Mailtrap PHP SDK required. Plugin is <strong>~30 KB total</strong> and uses only the WordPress HTTP API (<code>wp_remote_post</code>)."
+msgstr "Mailtrap PHP SDK は不要です。プラグインは <strong>全体で約 30 KB</strong> で、WordPress HTTP API (<code>wp_remote_post</code>) のみを使用します。"
+
+#. Found in description list item.
+msgid "<strong>No firewall headaches</strong> — port 587/465 blocked? API works over standard HTTPS 443."
+msgstr "<strong>ファイアウォールに悩まされない</strong> — ポート 587/465 がブロックされていても、API は標準の HTTPS (443 番ポート) で動作します。"
+
+#. Found in description list item.
+msgid "<strong>Native categories</strong> — every email is automatically categorized (welcome, password-reset, notification, marketing, etc.) so you can filter and report on them in Mailtrap."
+msgstr "<strong>ネイティブのカテゴリー</strong> — すべてのメールが自動的に分類される (welcome、password-reset、notification、marketing など) ため、Mailtrap で絞り込みやレポートができます。"
+
+#. Found in description list item.
+msgid "<strong>Better deliverability</strong> — Mailtrap routes API messages through its dedicated transactional and bulk streams; SMTP doesn't expose stream selection."
+msgstr "<strong>到達率の向上</strong> — Mailtrap は API 経由のメッセージを専用のトランザクションストリームとバルクストリームで送信します。SMTP ではストリームを選択できません。"
+
+#. Found in description list item.
+msgid "<strong>Lower latency</strong> — one HTTPS call per message, no MAIL FROM / RCPT TO / DATA round-trips."
+msgstr "<strong>低レイテンシー</strong> — 1 メッセージにつき HTTPS 呼び出しは 1 回だけ。MAIL FROM / RCPT TO / DATA の往復はありません。"
+
+#. Found in description header.
+msgid "Privacy"
+msgstr "プライバシー"
+
+#. Found in description header.
+msgid "Extensible via filters"
+msgstr "フィルターによる拡張"
+
+#. Found in description header.
+msgid "Features"
+msgstr "機能"
+
+#. Found in description header.
+msgid "Why SwiftTrap and not WP Mail SMTP / Post SMTP"
+msgstr "WP Mail SMTP / Post SMTP ではなく SwiftTrap を選ぶ理由"
+
+#. Found in description header.
+msgid "Why HTTP API instead of SMTP?"
+msgstr "SMTP ではなく HTTP API を使う理由"
+
+#. Screenshot description.
+msgid "Test email confirmation."
+msgstr "テストメールの送信確認。"
+
+#. Screenshot description.
+msgid "Dashboard widget showing integration status, sender, and quick links to Stats and Settings."
+msgstr "連携の状態、送信者、統計と設定へのクイックリンクを表示するダッシュボードウィジェット。"
+
+#. Screenshot description.
+msgid "Stats page — sending domain verification status and suppression list (bounces, complaints, unsubscribes)."
+msgstr "統計ページ — 送信ドメインの認証状態と送信抑止リスト (バウンス、苦情、配信停止)。"
+
+#. Found in faq paragraph.
+msgid "Email data (recipients, subject, body, attachments) goes to <code>send.api.mailtrap.io</code> and <code>bulk.api.mailtrap.io</code>. Account stats are fetched from <code>mailtrap.io/api/accounts</code>. See the <a href=\"https://mailtrap.io/privacy-policy\">Mailtrap Privacy Policy</a>."
+msgstr "メールのデータ (受信者、件名、本文、添付ファイル) は <code>send.api.mailtrap.io</code> と <code>bulk.api.mailtrap.io</code> に送信されます。アカウントの統計は <code>mailtrap.io/api/accounts</code> から取得します。詳しくは <a href=\"https://mailtrap.io/privacy-policy\">Mailtrap のプライバシーポリシー</a>をご覧ください。"
+
+#. Found in faq header.
+msgid "What data is sent externally?"
+msgstr "外部に送信されるデータは何ですか？"
+
+#. Found in faq header.
+msgid "Where do I get my API token?"
+msgstr "API トークンはどこで取得できますか？"
+
+#. Found in installation list item.
+msgid "Activate the plugin."
+msgstr "プラグインを有効化します。"
+
+#. Found in description list item.
+msgid "<code>swifttrap_mailtrap_custom_variables</code> — attach tracking metadata to outgoing emails."
+msgstr "<code>swifttrap_mailtrap_custom_variables</code> — 送信するメールにトラッキング用のメタデータを付加します。"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Fix: the plain-text part of HTML emails now decodes entities, so a link with query parameters reads <code>?a=1&amp;b=2</code> instead of <code>?a=1&amp;amp;b=2</code>, and a link whose text is not its URL keeps the URL in brackets (password reset emails used to show only \"address\"). Line breaks follow <code>&lt;br&gt;</code> and block ends."
+msgstr "修正: HTML メールのプレーンテキスト部分でエンティティがデコードされるようになりました。これにより、クエリパラメーター付きのリンクは <code>?a=1&amp;amp;b=2</code> ではなく <code>?a=1&amp;b=2</code> と表示され、リンクテキストが URL と異なるリンクでは URL が括弧内に残ります (以前はパスワードリセットのメールに「address」としか表示されませんでした)。改行は <code>&lt;br&gt;</code> とブロックの終わりに合わせて入ります。"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Improved: uninstall also cleans up every site of a multisite network."
+msgstr "改善: アンインストール時に、マルチサイトネットワークのすべてのサイトもクリーンアップされるようになりました。"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Improved: translations for German, Spanish, French, Italian, Japanese, Polish, Portuguese (Brazil), Russian and Ukrainian."
+msgstr "改善: ドイツ語、スペイン語、フランス語、イタリア語、日本語、ポーランド語、ポルトガル語 (ブラジル)、ロシア語、ウクライナ語の翻訳。"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Improved: settings screen in plain language with a helper text for every field, inline messages instead of browser pop-ups, labels for screen readers, a Settings link on the Plugins screen."
+msgstr "改善: 設定画面をわかりやすい言葉に改め、すべての項目に説明文を追加しました。ブラウザーのポップアップの代わりにインラインメッセージを表示し、スクリーンリーダー用のラベルを付け、プラグイン画面に「設定」リンクを追加しました。"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Fix: emails in a non-UTF-8 charset are converted instead of failing; API errors show Mailtrap's explanation, not only the HTTP code; \"Check connection\" explains a rejected token."
+msgstr "修正: UTF-8 以外の文字コードのメールは、送信に失敗せず変換されるようになりました。API エラーには HTTP コードだけでなく Mailtrap の説明が表示され、「接続を確認」ではトークンが拒否された理由が説明されます。"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Fix: attachments work on sites where WordPress uses FTP/SSH file access; attachments named with <code>'name.pdf' =&gt; $path</code> keep their name; inline images (<code>$embeds</code>, WordPress 6.9+) are sent; error messages no longer contain server paths."
+msgstr "修正: WordPress が FTP/SSH でファイルにアクセスするサイトでも添付ファイルが動作するようになりました。<code>'name.pdf' =&gt; $path</code> で名前を付けた添付ファイルはその名前が保持され、インライン画像 (<code>$embeds</code>、WordPress 6.9 以降) も送信されます。エラーメッセージにサーバーのパスが含まれることはなくなりました。"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Fix: emails blocked by <code>SWIFTTRAP_BLOCK_BULK</code> were still delivered by the default mailer."
+msgstr "修正: <code>SWIFTTRAP_BLOCK_BULK</code> でブロックされたメールが、WordPress 標準のメール送信機能で配信されてしまっていました。"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Fix: when the suppression list cannot be loaded, the check pauses for five minutes instead of adding slow API calls to every recipient of every email."
+msgstr "修正: 送信抑止リストを読み込めない場合、すべてのメールのすべての受信者に対して時間のかかる API 呼び出しを行うのではなく、チェックを 5 分間停止するようになりました。"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Fix: an address that unsubscribed from the bulk stream no longer stops transactional email (password resets, orders) to that address."
+msgstr "修正: バルクストリームで配信停止したアドレスでも、そのアドレス宛てのトランザクションメール (パスワードのリセット、注文) が止まらなくなりました。"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Fix: <code>wp_mail_from</code> / <code>wp_mail_from_name</code> filters are applied to each message. They were read once per request, so a From address set by WooCommerce or a form plugin for its own email was ignored or leaked into other emails."
+msgstr "修正: <code>wp_mail_from</code> / <code>wp_mail_from_name</code> フィルターがメッセージごとに適用されるようになりました。以前はリクエストごとに 1 回しか読み込まれなかったため、WooCommerce やフォームプラグインが自身のメール用に設定した送信元アドレスが無視されたり、他のメールに混入したりしていました。"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Fix: <code>wp_mail()</code> returned a truthy error object instead of <code>false</code> when an email had an invalid address, a missing attachment or only suppressed recipients, so the calling plugin believed it was sent."
+msgstr "修正: 無効なアドレス、存在しない添付ファイル、送信抑止された受信者のみのメールで、<code>wp_mail()</code> が <code>false</code> ではなく truthy なエラーオブジェクトを返していたため、呼び出し元のプラグインは送信済みと判断していました。"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Fix: unticking \"Send this site's emails through Mailtrap\", the category options — any checkbox that is on by default — was not saved."
+msgstr "修正: 「このサイトのメールを Mailtrap 経由で送信する」やカテゴリーのオプションなど、初期設定でオンになっているチェックボックスのチェックを外しても保存されませんでした。"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "New: the API token can be defined in <code>wp-config.php</code> (<code>SWIFTTRAP_MAILTRAP_TOKEN</code>). A saved token is no longer printed into the settings page; leave the field empty to keep it."
+msgstr "新機能: API トークンを <code>wp-config.php</code> で定義できるようになりました (<code>SWIFTTRAP_MAILTRAP_TOKEN</code>)。保存済みのトークンは設定ページに出力されなくなりました。トークンをそのまま使う場合は欄を空のままにしてください。"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "New: \"Use the default WordPress mailer as a backup\" setting and <code>swifttrap_mailtrap_fallback_to_wp_mail</code> filter."
+msgstr "新機能: 「WordPress 標準のメール送信機能を予備として使用する」設定と <code>swifttrap_mailtrap_fallback_to_wp_mail</code> フィルター。"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "New: the test email can be sent to any address, and shows the reason when Mailtrap refuses it. Before, a test that Mailtrap rejected could still say \"sent\" because the default mailer delivered it."
+msgstr "新機能: テストメールを任意のアドレスに送信でき、Mailtrap が拒否した場合はその理由が表示されます。以前は、Mailtrap が拒否したテストでも、WordPress 標準のメール送信機能が配信したために「送信しました」と表示されることがありました。"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "New: the <code>X-SwiftTrap-Stream: bulk</code> / <code>transactional</code> header picks the stream for one <code>wp_mail()</code> call. New <code>swifttrap_mailtrap_bulk_source</code> filter; <code>swifttrap_mailtrap_use_bulk_stream</code> now also receives the email."
+msgstr "新機能: <code>X-SwiftTrap-Stream: bulk</code> / <code>transactional</code> ヘッダーで、1 回の <code>wp_mail()</code> 呼び出しのストリームを指定できます。<code>swifttrap_mailtrap_bulk_source</code> フィルターを新たに追加し、<code>swifttrap_mailtrap_use_bulk_stream</code> はメール本体も受け取るようになりました。"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "New: <strong>Send newsletters through the bulk stream</strong> — one checkbox on the settings screen. Campaign emails from Newsletter (The Newsletter Plugin), FluentCRM, Icegram Express and Groundhogg are recognized by their headers and sent through Mailtrap's bulk stream; everything else, including signup confirmations, stays on the transactional stream. Off by default."
+msgstr "新機能: <strong>ニュースレターをバルクストリームで送信する</strong> — 設定画面のチェックボックス 1 つで有効にできます。Newsletter (The Newsletter Plugin)、FluentCRM、Icegram Express、Groundhogg のキャンペーンメールはヘッダーで認識され、Mailtrap のバルクストリームで送信されます。登録確認メールを含むそれ以外のメールはすべてトランザクションストリームのままです。初期設定ではオフです。"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "New: a one-time, dismissible request to leave a review on WordPress.org. It appears only a week after your first email goes out through Mailtrap, only to administrators and only on the plugin's own screens. \"Maybe later\" snoozes it for 30 days, \"Don't ask again\" hides it for good. Nothing is sent anywhere."
+msgstr "新機能: WordPress.org へのレビューをお願いする、1 回限りの閉じられるお知らせ。Mailtrap 経由で最初のメールが送信されてから 1 週間後に、管理者に対してのみ、プラグイン自身の画面でのみ表示されます。「また後で」を選ぶと 30 日間表示されなくなり、「今後表示しない」を選ぶと完全に非表示になります。どこにもデータは送信されません。"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Tested with WordPress 7.1 (verified on 7.1.1). No functional changes."
+msgstr "WordPress 7.1 でテスト済み (7.1.1 で確認)。機能の変更はありません。"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Improved: Email Logs recipient search and account API calls now consistently use bracketed filter syntax and Bearer-token authentication."
+msgstr "改善: メールログの受信者検索とアカウント API の呼び出しで、角括弧形式のフィルター構文と Bearer トークン認証を一貫して使用するようになりました。"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Fixed: Uninstalling the plugin now clears the actual cached transients instead of pre-2.3.0 key names that no longer match."
+msgstr "修正: プラグインのアンインストール時に、一致しなくなった 2.3.0 より前のキー名ではなく、実際にキャッシュされている transient を削除するようになりました。"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Fixed: Usage card on the Stats page now calls Mailtrap's current <code>/api/billing/usage</code> endpoint instead of a stale account-scoped path that returned no data."
+msgstr "修正: 統計ページの使用状況カードが、データを返さない古いアカウント単位のパスではなく、Mailtrap の現行の <code>/api/billing/usage</code> エンドポイントを呼び出すようになりました。"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Fixed: Webhook payload parsing now unwraps Mailtrap's <code>{\"events\": [...]}</code> envelope correctly, so verified events reach <code>do_action('swifttrap_mailtrap_webhook_event', ...)</code>."
+msgstr "修正: Webhook ペイロードの解析で Mailtrap の <code>{\"events\": [...]}</code> エンベロープを正しく展開するようになり、検証済みのイベントが <code>do_action('swifttrap_mailtrap_webhook_event', ...)</code> に届くようになりました。"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Fixed: Webhook receiver now verifies Mailtrap's actual <code>Mailtrap-Signature</code> HMAC-SHA256 header instead of a header Mailtrap never sends. Every real delivery-tracking webhook call was being rejected outright since the feature shipped in 2.4.0."
+msgstr "修正: Webhook の受信処理が、Mailtrap が送信することのないヘッダーではなく、Mailtrap が実際に送る <code>Mailtrap-Signature</code> HMAC-SHA256 ヘッダーを検証するようになりました。2.4.0 でこの機能が導入されて以来、実際の配信トラッキング Webhook の呼び出しはすべて拒否されていました。"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Fixed: Stats page no longer creates a redundant nonce attribute on the wrapper element."
+msgstr "修正: 統計ページでラッパー要素に不要な nonce 属性が作成されなくなりました。"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Removed: CSV export, log file clear, log detail modal, log resend, per-page logs setting, and cron-based log cleanup. All replaced by the live API view."
+msgstr "削除: CSV エクスポート、ログファイルの消去、ログ詳細のモーダル、ログからの再送信、1 ページあたりのログ件数の設定、cron によるログのクリーンアップ。すべて API のライブ表示に置き換えられました。"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "New: Webhook handler now fires <code>do_action('swifttrap_mailtrap_webhook_event', $event)</code> for every delivery event, allowing third-party integrations without modifying the plugin."
+msgstr "新機能: Webhook ハンドラーがすべての配信イベントで <code>do_action('swifttrap_mailtrap_webhook_event', $event)</code> を実行するようになり、プラグインを変更せずにサードパーティとの連携が可能になりました。"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "New: Client-side pagination — buffers up to 1,000 entries from Mailtrap per API call, displays 20 rows at a time with Prev/Next navigation. Automatically fetches the next batch when the buffer is exhausted."
+msgstr "新機能: クライアント側のページ送り — 1 回の API 呼び出しで Mailtrap から最大 1,000 件をバッファーに取り込み、前へ/次へで 20 行ずつ表示します。バッファーを使い切ると、次のまとまりを自動的に取得します。"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "New: Email Logs support filtering by recipient email address, delivery status, and date range."
+msgstr "新機能: メールログで、受信者のメールアドレス、配信ステータス、期間による絞り込みに対応。"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "New: Email Logs panel on the Stats page pulls live data directly from the Mailtrap API (<code>GET /api/email_logs</code>)."
+msgstr "新機能: 統計ページのメールログパネルで、Mailtrap API (<code>GET /api/email_logs</code>) から直接リアルタイムのデータを取得。"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Breaking: Removed all local file-based email logging. No more log files written to disk — eliminates OOM/disk-full risk on high-volume sites."
+msgstr "互換性のない変更: ローカルファイルによるメールのログ記録をすべて削除しました。ログファイルがディスクに書き込まれることはなくなり、大量送信サイトでのメモリ不足 (OOM) やディスク容量不足のリスクがなくなります。"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Improved: Logging no longer slows down large mailings — appends are O(1) instead of re-reading and rewriting the entire file on every email."
+msgstr "改善: ログ記録で大量送信が遅くならなくなりました — メールのたびにファイル全体を読み直して書き直すのではなく、O(1) で追記します。"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Fixed: The email log dropped most entries during high-volume or concurrent sends. Each write re-read and rewrote the whole log file, so parallel processes overwrote each other's lines. Writes now use an atomic, exclusively-locked append, so the Stats dashboard (sends-per-day, categories, totals) reflects the real number of sent emails."
+msgstr "修正: 大量送信や同時送信の際に、メールログのエントリーの大半が失われていました。書き込みのたびにログファイル全体を読み直して書き直していたため、並行するプロセスが互いの行を上書きしていました。現在はアトミックで排他ロックされた追記を使用するため、統計ダッシュボード (1 日あたりの送信数、カテゴリー、合計) に実際の送信メール数が反映されます。"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Improved: Email Logs header actions aligned to the right; date filter input restyled to match other fields."
+msgstr "改善: メールログのヘッダーの操作ボタンを右寄せにし、日付フィルターの入力欄を他の項目に合わせたスタイルに変更しました。"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "New: Per-page selector (10/25/50/100) on the Email Logs screen."
+msgstr "新機能: メールログ画面に 1 ページあたりの表示件数の選択 (10/25/50/100) を追加。"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "New: \"View all in Mailtrap\" link on the Suppressions card."
+msgstr "新機能: 送信抑止カードに「Mailtrap ですべて表示」リンクを追加。"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Fixed: Suppression dates are now formatted server-side using the site's date format instead of the browser locale."
+msgstr "修正: 送信抑止の日付が、ブラウザーのロケールではなくサイトの日付形式を使ってサーバー側で整形されるようになりました。"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "New: Suppression rows display the message bounce category (when provided) for hard-bounce detail."
+msgstr "新機能: 送信抑止の行に、メッセージのバウンスカテゴリー (提供されている場合) を表示し、ハードバウンスの詳細がわかるようにしました。"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Fixed: Suppression list now reads the Mailtrap <code>type</code> field, so the dashboard shows real BOUNCE / COMPLAINT / UNSUBSCRIBE / MANUAL counts instead of marking every record as manual."
+msgstr "修正: 送信抑止リストが Mailtrap の <code>type</code> フィールドを読み取るようになり、すべてのレコードを手動として扱うのではなく、実際の BOUNCE / COMPLAINT / UNSUBSCRIBE / MANUAL の件数がダッシュボードに表示されるようになりました。"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Refactored: Extracted CSV row formatter into a helper function for unit tests. Fully covered and verified by the test suite."
+msgstr "リファクタリング: CSV 行のフォーマッターを単体テスト用のヘルパー関数に切り出しました。テストスイートで完全にカバー・検証されています。"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "New: Attachment size guard setting."
+msgstr "新機能: 添付ファイルサイズの制限の設定。"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "New: WP-CLI namespace <code>wp swifttrap</code> (test, stats, prune-logs, send-suppression-sync)."
+msgstr "新機能: WP-CLI 名前空間 <code>wp swifttrap</code> (test、stats、prune-logs、send-suppression-sync)。"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "New: Category settings grid for category stream mapping rules and sender overrides."
+msgstr "新機能: カテゴリーごとのストリーム割り当てルールと送信者の上書きを設定するカテゴリー設定グリッド。"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "New: Upgraded Admin logs UI with search, filtering, CSV export, iframe payload preview modals, and resend actions."
+msgstr "新機能: 管理画面のログ UI を刷新し、検索、絞り込み、CSV エクスポート、iframe によるペイロードのプレビューモーダル、再送信の操作を追加。"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "New: Site Health connection and verified domain status test."
+msgstr "新機能: サイトヘルスに、接続と認証済みドメインの状態を確認するテストを追加。"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "New: Fallback mechanism returning <code>null</code> in <code>pre_wp_mail</code> on API failure so native <code>wp_mail</code> sends the email instead."
+msgstr "新機能: API の失敗時に <code>pre_wp_mail</code> で <code>null</code> を返すフォールバック機構を追加し、代わりにネイティブの <code>wp_mail</code> がメールを送信するようにしました。"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "New: Suppression Management CRUD in Admin Stats and pre-send recipient checks to skip suppressed emails."
+msgstr "新機能: 管理画面の統計に送信抑止の管理 (追加・表示・編集・削除) を追加し、送信前に受信者をチェックして送信抑止されたメールをスキップするようにしました。"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "New: REST Webhook Endpoint (<code>swifttrap/v1/webhook</code>) for tracking delivered, bounced, opened, and clicked statuses."
+msgstr "新機能: 配信、バウンス、開封、クリックのステータスを追跡する REST Webhook エンドポイント (<code>swifttrap/v1/webhook</code>)。"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Code modernized to PHP 8 idioms; first unit-test suite added."
+msgstr "コードを PHP 8 のイディオムに刷新し、初めての単体テストスイートを追加。"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "New: \"Verify token\" button on the settings screen."
+msgstr "新機能: 設定画面に「トークンを確認」ボタンを追加。"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Robust JSON handling for all Mailtrap API responses; multisite-safe settings cache."
+msgstr "Mailtrap API のすべてのレスポンスで JSON を堅牢に処理し、設定キャッシュをマルチサイト対応にしました。"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Account/stats/domain/suppression caches are now keyed per API token, so switching tokens no longer serves stale data."
+msgstr "アカウント/統計/ドメイン/送信抑止のキャッシュを API トークンごとに保持するようになり、トークンを切り替えても古いデータが表示されなくなりました。"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Deterministic log retention via a daily cron event (replaces the previous probabilistic cleanup)."
+msgstr "毎日の cron イベントによる確実なログ保持期間の管理 (従来の確率的なクリーンアップを置き換え)。"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Reliability: automatic retry with backoff on transient Mailtrap API errors (429/5xx, honors Retry-After)."
+msgstr "信頼性: Mailtrap API の一時的なエラー (429/5xx) の際、バックオフ付きで自動的に再試行 (Retry-After に従います)。"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "PHP 8.0 is now the minimum; tested up to WordPress 7.0."
+msgstr "PHP 8.0 が最低要件になりました。WordPress 7.0 までテスト済み。"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Tested up to WordPress 7.0"
+msgstr "WordPress 7.0 までテスト済み"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "FAQ: added comparison with WP Mail SMTP / Post SMTP, Mailtrap template support, and bulk stream routing"
+msgstr "FAQ: WP Mail SMTP / Post SMTP との比較、Mailtrap テンプレートへの対応、バルクストリームへの振り分けについて追加"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Tags: replaced <code>email</code>/<code>mail</code>/<code>smtp</code> with targeted <code>mailtrap</code>, <code>transactional-email</code>, <code>email-api</code>, <code>wp-mail</code>, <code>email-log</code>"
+msgstr "タグ: <code>email</code>/<code>mail</code>/<code>smtp</code> を、より的を絞った <code>mailtrap</code>、<code>transactional-email</code>、<code>email-api</code>、<code>wp-mail</code>、<code>email-log</code> に変更"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Readme: USP-first rewrite emphasizing Mailtrap Email API (vs SMTP) and bulk/transactional stream routing"
+msgstr "Readme: Mailtrap Email API (SMTP との違い) とバルク/トランザクションストリームの振り分けを強調し、独自の強みを前面に出して書き直し"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "No code or behavior changes"
+msgstr "コードや動作の変更はありません"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Plugin URI: now points to the dedicated landing page at https://plugins.symonov.com/swifttrap-for-mailtrap/"
+msgstr "Plugin URI: 専用のランディングページ https://plugins.symonov.com/swifttrap-for-mailtrap/ を指すようになりました"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Improved log file locking"
+msgstr "ログファイルのロックを改善"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Optimized email category computation"
+msgstr "メールカテゴリーの判定処理を最適化"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Fixed timezone handling in log display"
+msgstr "ログ表示のタイムゾーン処理を修正"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Added empty recipient validation"
+msgstr "受信者が空の場合の検証を追加"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Added attachment size validation (25 MB limit)"
+msgstr "添付ファイルサイズの検証を追加 (上限 25 MB)"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Security: protected log directory from direct web access"
+msgstr "セキュリティ: ログディレクトリを Web からの直接アクセスから保護"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Improved WP.org compliance"
+msgstr "WP.org のガイドラインへの準拠を改善"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Zero external dependencies, ~30 KB total plugin size"
+msgstr "外部依存なし、プラグイン全体で約 30 KB"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Removed Mailtrap SDK dependency — uses WordPress HTTP API directly"
+msgstr "Mailtrap SDK への依存を削除 — WordPress HTTP API を直接使用"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Extracted reusable <code>swifttrap_mailtrap_get_account_id()</code> with transient caching"
+msgstr "再利用可能な <code>swifttrap_mailtrap_get_account_id()</code> を transient キャッシュ付きで切り出し"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Added <code>swifttrap_mailtrap_custom_variables</code> filter for email tracking metadata"
+msgstr "メールのトラッキング用メタデータのための <code>swifttrap_mailtrap_custom_variables</code> フィルターを追加"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Added <code>swifttrap_mailtrap_template</code> filter for Mailtrap template support"
+msgstr "Mailtrap テンプレートに対応する <code>swifttrap_mailtrap_template</code> フィルターを追加"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Added suppression list (bounces, complaints, unsubscribes) on Stats page"
+msgstr "統計ページに送信抑止リスト (バウンス、苦情、配信停止) を追加"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Added sending domain verification status on Stats page"
+msgstr "統計ページに送信ドメインの認証状態を追加"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Better WordPress Coding Standards compliance"
+msgstr "WordPress コーディング規約への準拠を改善"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Improved PHPDoc headers across all files"
+msgstr "すべてのファイルの PHPDoc ヘッダーを改善"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Fixed $_GET sanitization with proper wp_unslash() and phpcs annotations"
+msgstr "$_GET のサニタイズを修正 (適切な wp_unslash() と phpcs アノテーション)"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Replaced all file_get_contents/file_put_contents with WP_Filesystem API"
+msgstr "file_get_contents/file_put_contents をすべて WP_Filesystem API に置き換え"
