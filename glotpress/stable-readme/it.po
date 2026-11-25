@@ -1,0 +1,697 @@
+# Translation of Plugins - SwiftTrap for Mailtrap - Stable Readme (latest release) in Italian
+# This file is distributed under the same license as the Plugins - SwiftTrap for Mailtrap - Stable Readme (latest release) package.
+msgid ""
+msgstr ""
+"PO-Revision-Date: 2026-11-25 00:00:00+0000\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: GlotPress/4.1.0\n"
+"Language: it\n"
+"Project-Id-Version: Plugins - SwiftTrap for Mailtrap - Stable Readme (latest release)\n"
+
+#. Short description.
+#, gp-priority: high
+msgid "Send WordPress emails through the Mailtrap Email API (not SMTP). Bulk and transactional streams, categories, suppression list, email log."
+msgstr "Invia le email di WordPress tramite la Mailtrap Email API (non SMTP). Flussi bulk e transazionale, categorie, elenco delle soppressioni, log delle email."
+
+#. Plugin name.
+#, gp-priority: high
+msgid "SwiftTrap for Mailtrap"
+msgstr "SwiftTrap for Mailtrap"
+
+#. Found in faq paragraph.
+msgid "The plugin refuses attachments above the size you set (1–25 MB per file, 25 by default). Mailtrap itself limits the whole message, attachments included, to 10 MB by default (more on request on higher plans), so lower the setting if your plan has the default limit."
+msgstr "Il plugin rifiuta gli allegati che superano la dimensione impostata (1–25 MB per file, 25 per impostazione predefinita). Mailtrap stesso limita l'intero messaggio, allegati compresi, a 10 MB per impostazione predefinita (di più su richiesta con i piani superiori), quindi riduci l'impostazione se il tuo piano ha il limite predefinito."
+
+#. Found in faq paragraph.
+msgid "The plugin retries briefly, then reports the failure to WordPress (<code>wp_mail_failed</code>, with the reason Mailtrap gave). With <strong>Use the default WordPress mailer as a backup</strong> ticked (the default) the message is then handed to the default mailer; untick it if email must never leave through your web host — <code>wp_mail()</code> then returns <code>false</code>."
+msgstr "Il plugin riprova per poco tempo, poi segnala l'errore a WordPress (<code>wp_mail_failed</code>, con il motivo indicato da Mailtrap). Con <strong>Usa il sistema di invio predefinito di WordPress come riserva</strong> attivo (l'impostazione predefinita) il messaggio passa poi al sistema di invio predefinito; disattivalo se le email non devono mai uscire tramite il tuo hosting — in quel caso <code>wp_mail()</code> restituisce <code>false</code>."
+
+#. Found in faq paragraph.
+msgid "Log in to <a href=\"https://mailtrap.io\">mailtrap.io</a>, open your sending domain, go to <strong>API Tokens</strong>, and create a token with sending permissions. After saving, the token is never displayed again. To keep it out of the database, add <code>define( 'SWIFTTRAP_MAILTRAP_TOKEN', 'your-token' );</code> to <code>wp-config.php</code> instead."
+msgstr "Accedi a <a href=\"https://mailtrap.io\">mailtrap.io</a>, apri il tuo dominio di invio, vai su <strong>API Tokens</strong> e crea un token con i permessi di invio. Dopo il salvataggio il token non viene più mostrato. Per tenerlo fuori dal database, aggiungi invece <code>define( 'SWIFTTRAP_MAILTRAP_TOKEN', 'your-token' );</code> a <code>wp-config.php</code>."
+
+#. Found in faq paragraph.
+msgid "Mailtrap keeps unsubscribes and bounces separately for each stream, and so does the plugin: somebody who unsubscribed from your newsletter still receives a password reset."
+msgstr "Mailtrap gestisce disiscrizioni e bounce separatamente per ciascun flusso, e lo stesso fa il plugin: chi si è disiscritto dalla tua newsletter riceve comunque l'email per reimpostare la password."
+
+#. Found in faq paragraph.
+msgid "Strongest first: the <code>swifttrap_mailtrap_use_bulk_stream</code> filter; the <code>X-SwiftTrap-Stream: bulk</code> (or <code>transactional</code>) header on a <code>wp_mail()</code> call; newsletter plugin detection (when switched on); the category table on the settings screen, where the <code>promotional</code> category goes to the bulk stream by default. Everything else goes to <code>send.api.mailtrap.io</code>."
+msgstr "In ordine di priorità: il filtro <code>swifttrap_mailtrap_use_bulk_stream</code>; l'header <code>X-SwiftTrap-Stream: bulk</code> (o <code>transactional</code>) in una chiamata a <code>wp_mail()</code>; il riconoscimento dei plugin per newsletter (se attivato); la tabella delle categorie nella schermata delle impostazioni, dove la categoria <code>promotional</code> va per impostazione predefinita al flusso bulk. Tutto il resto passa da <code>send.api.mailtrap.io</code>."
+
+#. Found in faq paragraph.
+msgid "MailPoet is the exception: it sends with its own mailer and never passes through <code>wp_mail()</code>, so no <code>wp_mail()</code> plugin can route it."
+msgstr "MailPoet è l'eccezione: invia con un proprio sistema di invio e non passa mai da <code>wp_mail()</code>, quindi nessun plugin basato su <code>wp_mail()</code> può instradarlo."
+
+#. Found in faq paragraph.
+msgid "Go to <strong>Mailtrap → Settings</strong> and tick <strong>Send newsletters through the bulk stream</strong>. Campaign emails sent by Newsletter (The Newsletter Plugin), FluentCRM, Icegram Express and Groundhogg are then recognized and sent through <code>bulk.api.mailtrap.io</code>; password resets, orders, form notifications, signup confirmations and all other email keep using <code>send.api.mailtrap.io</code>. Nothing has to be configured in the newsletter plugin — leave it on its default \"send through WordPress\" delivery. The same API token is used for both streams."
+msgstr "Vai su <strong>Mailtrap → Impostazioni</strong> e attiva <strong>Invia le newsletter tramite il flusso bulk</strong>. Le email delle campagne inviate da Newsletter (The Newsletter Plugin), FluentCRM, Icegram Express e Groundhogg vengono così riconosciute e inviate tramite <code>bulk.api.mailtrap.io</code>; reimpostazioni della password, ordini, notifiche dei moduli, conferme di iscrizione e tutte le altre email continuano a usare <code>send.api.mailtrap.io</code>. Non serve configurare nulla nel plugin per le newsletter: lascialo sulla modalità di invio predefinita \"invia tramite WordPress\". Lo stesso token API viene usato per entrambi i flussi."
+
+#. Found in faq paragraph.
+msgid "Generic mailer plugins treat Mailtrap as one provider among many: through SMTP credentials, or through the transactional API only. SwiftTrap is built for Mailtrap alone and uses what is specific to it: bulk vs transactional stream routing (including automatic routing of newsletters), categories, custom tracking variables, template UUIDs, and live suppression-list visibility. Use SwiftTrap if you want Mailtrap-native behavior; use a generic SMTP plugin if you want a one-config-fits-all-providers setup."
+msgstr "I plugin di invio generici trattano Mailtrap come un provider tra tanti: tramite credenziali SMTP, oppure solo tramite l'API transazionale. SwiftTrap è pensato esclusivamente per Mailtrap e sfrutta ciò che gli è specifico: instradamento tra flusso bulk e transazionale (compreso l'instradamento automatico delle newsletter), categorie, variabili di tracciamento personalizzate, UUID dei template e visibilità in tempo reale dell'elenco delle soppressioni. Usa SwiftTrap se vuoi un comportamento nativo di Mailtrap; usa un plugin SMTP generico se preferisci un'unica configurazione valida per tutti i provider."
+
+#. Found in faq header.
+msgid "What happens if Mailtrap refuses a message or cannot be reached?"
+msgstr "Cosa succede se Mailtrap rifiuta un messaggio o non è raggiungibile?"
+
+#. Found in faq header.
+msgid "How do I send my newsletter through the bulk stream and everything else through the transactional stream?"
+msgstr "Come invio la newsletter tramite il flusso bulk e tutto il resto tramite il flusso transazionale?"
+
+#. Found in installation list item.
+msgid "Sending a newsletter from this site? Tick <strong>Send newsletters through the bulk stream</strong>."
+msgstr "Invii una newsletter da questo sito? Attiva <strong>Invia le newsletter tramite il flusso bulk</strong>."
+
+#. Found in installation list item.
+msgid "Set the From email (an address on a domain you verified in Mailtrap) and the From name. Save."
+msgstr "Imposta l'email del mittente (un indirizzo su un dominio verificato in Mailtrap) e il nome del mittente. Salva."
+
+#. Found in installation list item.
+msgid "Paste your Mailtrap <strong>API token</strong> (Mailtrap → Settings → API Tokens) and click <strong>Check connection</strong>."
+msgstr "Incolla il tuo <strong>token API</strong> di Mailtrap (Mailtrap → Settings → API Tokens) e fai clic su <strong>Verifica la connessione</strong>."
+
+#. Found in description list item.
+msgid "Header <code>X-SwiftTrap-Stream: bulk</code> (or <code>transactional</code>) on any <code>wp_mail()</code> call picks the stream for that message; the header is never forwarded to the recipient."
+msgstr "L'header <code>X-SwiftTrap-Stream: bulk</code> (o <code>transactional</code>) in qualsiasi chiamata a <code>wp_mail()</code> sceglie il flusso per quel messaggio; l'header non viene mai inoltrato al destinatario."
+
+#. Found in description list item.
+msgid "<code>swifttrap_mailtrap_fallback_to_wp_mail</code> — decide per message whether a refused email may go out through the default mailer."
+msgstr "<code>swifttrap_mailtrap_fallback_to_wp_mail</code> — decidi per ogni messaggio se un'email rifiutata può essere inviata tramite il sistema di invio predefinito."
+
+#. Found in description list item.
+msgid "<code>swifttrap_mailtrap_bulk_source</code> — tell the plugin that an email comes from your own newsletter tool."
+msgstr "<code>swifttrap_mailtrap_bulk_source</code> — indica al plugin che un'email proviene dal tuo strumento per newsletter."
+
+#. Found in description list item.
+msgid "<code>swifttrap_mailtrap_use_bulk_stream</code> — force a message into the bulk or transactional stream (receives the category, the settings and the email itself)."
+msgstr "<code>swifttrap_mailtrap_use_bulk_stream</code> — forza un messaggio nel flusso bulk o transazionale (riceve la categoria, le impostazioni e l'email stessa)."
+
+#. Found in description list item.
+msgid "Test email to any address from the settings page, with the exact reason shown if Mailtrap refuses it."
+msgstr "Email di prova a qualsiasi indirizzo dalla pagina delle impostazioni, con il motivo esatto se Mailtrap la rifiuta."
+
+#. Found in description list item.
+msgid "API token is never shown again after saving, and can be kept out of the database with the <code>SWIFTTRAP_MAILTRAP_TOKEN</code> constant in <code>wp-config.php</code>."
+msgstr "Il token API non viene più mostrato dopo il salvataggio e può essere tenuto fuori dal database con la costante <code>SWIFTTRAP_MAILTRAP_TOKEN</code> in <code>wp-config.php</code>."
+
+#. Found in description list item.
+msgid "Backup delivery — if Mailtrap does not accept a message, WordPress can send it with its default mailer instead (on by default, can be switched off)."
+msgstr "Invio di riserva — se Mailtrap non accetta un messaggio, WordPress può inviarlo con il proprio sistema di invio predefinito (attivo per impostazione predefinita, può essere disattivato)."
+
+#. Found in description list item.
+msgid "<strong>Newsletters through the bulk stream</strong> — one checkbox: campaign emails from Newsletter, FluentCRM, Icegram Express and Groundhogg go through Mailtrap's bulk stream, everything else stays transactional. No setup in the newsletter plugin."
+msgstr "<strong>Newsletter tramite il flusso bulk</strong> — una sola casella di controllo: le email delle campagne di Newsletter, FluentCRM, Icegram Express e Groundhogg passano dal flusso bulk di Mailtrap, tutto il resto resta transazionale. Nessuna configurazione nel plugin per le newsletter."
+
+#. Found in description list item.
+msgid "SwiftTrap calls <code>send.api.mailtrap.io</code> for transactional mail and <code>bulk.api.mailtrap.io</code> for bulk mail — automatically: newsletters from Newsletter, FluentCRM, Icegram Express and Groundhogg are recognized, and anything else can be routed by category, header or filter."
+msgstr "SwiftTrap chiama <code>send.api.mailtrap.io</code> per le email transazionali e <code>bulk.api.mailtrap.io</code> per gli invii bulk, in automatico: le newsletter di Newsletter, FluentCRM, Icegram Express e Groundhogg vengono riconosciute, e qualsiasi altra email può essere instradata per categoria, header o filtro."
+
+#. Found in description list item.
+msgid "Most generic mailer plugins treat Mailtrap as one provider among many and send everything through a single stream."
+msgstr "La maggior parte dei plugin di invio generici tratta Mailtrap come un provider tra tanti e invia tutto attraverso un unico flusso."
+
+#. Screenshot description.
+msgid "Settings page — connection, newsletters and bulk email, stream routing."
+msgstr "Pagina delle impostazioni — connessione, newsletter ed email massive, instradamento dei flussi."
+
+#. Found in description list item.
+msgid "Live Email Log — Browse and filter delivery data pulled directly from the Mailtrap API; search by recipient address, status, or date range with automatic pagination."
+msgstr "Log delle email in tempo reale — consulta e filtra i dati di recapito ricavati direttamente dall'API di Mailtrap; cerca per indirizzo del destinatario, stato o intervallo di date, con paginazione automatica."
+
+#. Screenshot description.
+msgid "Email log — live Mailtrap API data with filters and pagination."
+msgstr "Log delle email — dati in tempo reale dall'API di Mailtrap, con filtri e paginazione."
+
+#. Found in description list item.
+msgid "Attachment size guard — Configurable limits to prevent oversized files from rejecting at the API gateway."
+msgstr "Controllo della dimensione degli allegati — limiti configurabili per evitare che file troppo grandi vengano respinti dal gateway dell'API."
+
+#. Found in description list item.
+msgid "WP-CLI commands — Command-line management via <code>wp swifttrap</code> (test, stats, prune-logs, send-suppression-sync)."
+msgstr "Comandi WP-CLI — gestione da riga di comando tramite <code>wp swifttrap</code> (test, stats, prune-logs, send-suppression-sync)."
+
+#. Found in description list item.
+msgid "Site Health integration — Verification test checking Mailtrap token status and sending domain verification."
+msgstr "Integrazione con Salute del sito — test che verifica lo stato del token Mailtrap e la verifica del dominio di invio."
+
+#. Found in description list item.
+msgid "Suppression Management — CRUD panel for Mailtrap suppression lists with pre-send recipient suppression checks."
+msgstr "Gestione delle soppressioni — pannello CRUD per gli elenchi delle soppressioni di Mailtrap, con controllo dei destinatari soppressi prima dell'invio."
+
+#. Found in description list item.
+msgid "Delivery Tracking &amp; Webhooks — Real-time event tracking via custom REST route <code>swifttrap/v1/webhook</code>."
+msgstr "Tracciamento del recapito &amp; webhook — tracciamento degli eventi in tempo reale tramite la route REST personalizzata <code>swifttrap/v1/webhook</code>."
+
+#. Found in description list item.
+msgid "Automatic email categorization and stream routing overrides via settings grid."
+msgstr "Categorizzazione automatica delle email e personalizzazione dell'instradamento dei flussi tramite una griglia nelle impostazioni."
+
+#. Found in description paragraph.
+msgid "This plugin sends email payloads (recipients, subject, body, attachments) to the Mailtrap API at <code>send.api.mailtrap.io</code> and <code>bulk.api.mailtrap.io</code>. Account stats and email logs are fetched from <code>mailtrap.io/api/accounts</code> and <code>mailtrap.io/api/email_logs</code>. See the <a href=\"https://mailtrap.io/privacy-policy\">Mailtrap Privacy Policy</a>. No data is sent anywhere else."
+msgstr "Questo plugin invia i dati delle email (destinatari, oggetto, corpo, allegati) all'API di Mailtrap su <code>send.api.mailtrap.io</code> e <code>bulk.api.mailtrap.io</code>. Le statistiche dell'account e i log delle email vengono recuperati da <code>mailtrap.io/api/accounts</code> e <code>mailtrap.io/api/email_logs</code>. Consulta l'<a href=\"https://mailtrap.io/privacy-policy\">informativa sulla privacy di Mailtrap</a>. Nessun dato viene inviato altrove."
+
+#. Found in faq paragraph.
+msgid "No. SwiftTrap calls the Mailtrap REST API directly via the WordPress HTTP API. Total plugin size is around 30 KB."
+msgstr "No. SwiftTrap chiama direttamente l'API REST di Mailtrap tramite la WordPress HTTP API. Il plugin pesa in tutto circa 30 KB."
+
+#. Found in faq paragraph.
+msgid "WordPress falls back to its default <code>wp_mail()</code> handler. No emails are silently dropped."
+msgstr "WordPress torna al gestore predefinito <code>wp_mail()</code>. Nessuna email viene scartata silenziosamente."
+
+#. Found in faq paragraph.
+msgid "Yes — use the <code>swifttrap_mailtrap_template</code> filter to send via a <code>template_uuid</code>. The template variables can be passed through Mailtrap's standard template-variables payload."
+msgstr "Sì: usa il filtro <code>swifttrap_mailtrap_template</code> per inviare tramite un <code>template_uuid</code>. Le variabili del template possono essere passate nel payload standard template-variables di Mailtrap."
+
+#. Found in faq header.
+msgid "Is there an attachment size limit?"
+msgstr "C'è un limite alla dimensione degli allegati?"
+
+#. Found in faq header.
+msgid "Does the plugin require the Mailtrap PHP SDK?"
+msgstr "Il plugin richiede l'SDK PHP di Mailtrap?"
+
+#. Found in faq header.
+msgid "What happens if I disable the plugin or remove the token?"
+msgstr "Cosa succede se disattivo il plugin o rimuovo il token?"
+
+#. Found in faq header.
+msgid "How does bulk stream routing work?"
+msgstr "Come funziona l'instradamento nel flusso bulk?"
+
+#. Found in faq header.
+msgid "Does it support Mailtrap email templates?"
+msgstr "Supporta i template email di Mailtrap?"
+
+#. Found in faq header.
+msgid "Why use SwiftTrap instead of WP Mail SMTP or Post SMTP with Mailtrap credentials?"
+msgstr "Perché usare SwiftTrap invece di WP Mail SMTP o Post SMTP con le credenziali di Mailtrap?"
+
+#. Found in installation list item.
+msgid "Click <strong>Send Test Email</strong> to verify delivery."
+msgstr "Fai clic su <strong>Invia email di prova</strong> per verificare il recapito."
+
+#. Found in installation list item.
+msgid "Go to <strong>Mailtrap → Settings</strong>."
+msgstr "Vai su <strong>Mailtrap → Impostazioni</strong>."
+
+#. Found in installation list item.
+msgid "Install from <strong>Plugins → Add New</strong> and search for <em>SwiftTrap for Mailtrap</em>, or upload the <code>swifttrap-for-mailtrap</code> folder to <code>/wp-content/plugins/</code>."
+msgstr "Installa da <strong>Plugin → Aggiungi nuovo</strong> cercando <em>SwiftTrap for Mailtrap</em>, oppure carica la cartella <code>swifttrap-for-mailtrap</code> in <code>/wp-content/plugins/</code>."
+
+#. Found in description paragraph.
+msgid "<strong>SwiftTrap</strong> is a drop-in replacement for <code>wp_mail()</code> that routes WordPress email through the <strong>Mailtrap Email Sending API</strong> instead of SMTP. It is purpose-built for Mailtrap — not a generic SMTP plugin with a Mailtrap preset — so it exposes Mailtrap-native features that SMTP cannot: bulk vs transactional stream routing, email categories, custom variables for tracking, suppression lists, and domain verification status."
+msgstr "<strong>SwiftTrap</strong> è un sostituto diretto di <code>wp_mail()</code> che instrada le email di WordPress attraverso la <strong>Mailtrap Email Sending API</strong> invece che via SMTP. È progettato appositamente per Mailtrap — non è un plugin SMTP generico con una preimpostazione per Mailtrap — e quindi offre funzionalità native di Mailtrap che l'SMTP non può offrire: instradamento tra flusso bulk e transazionale, categorie delle email, variabili personalizzate per il tracciamento, elenchi delle soppressioni e stato di verifica del dominio."
+
+#. Found in description list item.
+msgid "<code>swifttrap_mailtrap_template</code> — send via a Mailtrap template by <code>template_uuid</code>."
+msgstr "<code>swifttrap_mailtrap_template</code> — invia tramite un template di Mailtrap indicato con <code>template_uuid</code>."
+
+#. Found in description list item.
+msgid "<code>swifttrap_mailtrap_email_category</code> — override the auto-detected email category."
+msgstr "<code>swifttrap_mailtrap_email_category</code> — sostituisce la categoria email rilevata automaticamente."
+
+#. Found in description list item.
+msgid "Falls back to default WordPress mail handler when disabled or token is empty."
+msgstr "Torna al gestore di posta predefinito di WordPress quando il plugin è disattivato o il token è vuoto."
+
+#. Found in description list item.
+msgid "Mailtrap template support via <code>template_uuid</code>."
+msgstr "Supporto dei template di Mailtrap tramite <code>template_uuid</code>."
+
+#. Found in description list item.
+msgid "Drop-in replacement for <code>wp_mail()</code> — works with WooCommerce, Contact Form 7, Gravity Forms, and any plugin that uses WordPress mail."
+msgstr "Sostituto diretto di <code>wp_mail()</code> — funziona con WooCommerce, Contact Form 7, Gravity Forms e qualsiasi plugin che usi la posta di WordPress."
+
+#. Found in description list item.
+msgid "Stats page shows your sending domain verification status and the live suppression list (bounces, complaints, unsubscribes)."
+msgstr "La pagina delle statistiche mostra lo stato di verifica del dominio di invio e l'elenco delle soppressioni in tempo reale (bounce, segnalazioni, disiscrizioni)."
+
+#. Found in description list item.
+msgid "No Mailtrap PHP SDK required. Plugin is <strong>~30 KB total</strong> and uses only the WordPress HTTP API (<code>wp_remote_post</code>)."
+msgstr "Nessun SDK PHP di Mailtrap richiesto. Il plugin pesa <strong>~30 KB in tutto</strong> e usa solo la WordPress HTTP API (<code>wp_remote_post</code>)."
+
+#. Found in description list item.
+msgid "<strong>No firewall headaches</strong> — port 587/465 blocked? API works over standard HTTPS 443."
+msgstr "<strong>Nessun problema con il firewall</strong> — porte 587/465 bloccate? L'API funziona sulla normale porta HTTPS 443."
+
+#. Found in description list item.
+msgid "<strong>Native categories</strong> — every email is automatically categorized (welcome, password-reset, notification, marketing, etc.) so you can filter and report on them in Mailtrap."
+msgstr "<strong>Categorie native</strong> — ogni email viene categorizzata automaticamente (welcome, password-reset, notification, marketing, ecc.), così puoi filtrarle e analizzarle in Mailtrap."
+
+#. Found in description list item.
+msgid "<strong>Better deliverability</strong> — Mailtrap routes API messages through its dedicated transactional and bulk streams; SMTP doesn't expose stream selection."
+msgstr "<strong>Recapito migliore</strong> — Mailtrap instrada i messaggi API attraverso i suoi flussi dedicati transazionale e bulk; l'SMTP non permette di scegliere il flusso."
+
+#. Found in description list item.
+msgid "<strong>Lower latency</strong> — one HTTPS call per message, no MAIL FROM / RCPT TO / DATA round-trips."
+msgstr "<strong>Latenza ridotta</strong> — una sola chiamata HTTPS per messaggio, nessun round-trip MAIL FROM / RCPT TO / DATA."
+
+#. Found in description header.
+msgid "Privacy"
+msgstr "Privacy"
+
+#. Found in description header.
+msgid "Extensible via filters"
+msgstr "Estendibile tramite filtri"
+
+#. Found in description header.
+msgid "Features"
+msgstr "Funzionalità"
+
+#. Found in description header.
+msgid "Why SwiftTrap and not WP Mail SMTP / Post SMTP"
+msgstr "Perché SwiftTrap e non WP Mail SMTP / Post SMTP"
+
+#. Found in description header.
+msgid "Why HTTP API instead of SMTP?"
+msgstr "Perché l'API HTTP invece dell'SMTP?"
+
+#. Screenshot description.
+msgid "Test email confirmation."
+msgstr "Conferma dell'email di prova."
+
+#. Screenshot description.
+msgid "Dashboard widget showing integration status, sender, and quick links to Stats and Settings."
+msgstr "Widget della bacheca con lo stato dell'integrazione, il mittente e collegamenti rapidi a Statistiche e Impostazioni."
+
+#. Screenshot description.
+msgid "Stats page — sending domain verification status and suppression list (bounces, complaints, unsubscribes)."
+msgstr "Pagina delle statistiche — stato di verifica del dominio di invio ed elenco delle soppressioni (bounce, segnalazioni, disiscrizioni)."
+
+#. Found in faq paragraph.
+msgid "Email data (recipients, subject, body, attachments) goes to <code>send.api.mailtrap.io</code> and <code>bulk.api.mailtrap.io</code>. Account stats are fetched from <code>mailtrap.io/api/accounts</code>. See the <a href=\"https://mailtrap.io/privacy-policy\">Mailtrap Privacy Policy</a>."
+msgstr "I dati delle email (destinatari, oggetto, corpo, allegati) vengono inviati a <code>send.api.mailtrap.io</code> e <code>bulk.api.mailtrap.io</code>. Le statistiche dell'account vengono recuperate da <code>mailtrap.io/api/accounts</code>. Consulta l'<a href=\"https://mailtrap.io/privacy-policy\">informativa sulla privacy di Mailtrap</a>."
+
+#. Found in faq header.
+msgid "What data is sent externally?"
+msgstr "Quali dati vengono inviati all'esterno?"
+
+#. Found in faq header.
+msgid "Where do I get my API token?"
+msgstr "Dove trovo il mio token API?"
+
+#. Found in installation list item.
+msgid "Activate the plugin."
+msgstr "Attiva il plugin."
+
+#. Found in description list item.
+msgid "<code>swifttrap_mailtrap_custom_variables</code> — attach tracking metadata to outgoing emails."
+msgstr "<code>swifttrap_mailtrap_custom_variables</code> — aggiunge metadati di tracciamento alle email in uscita."
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Fix: the plain-text part of HTML emails now decodes entities, so a link with query parameters reads <code>?a=1&amp;b=2</code> instead of <code>?a=1&amp;amp;b=2</code>, and a link whose text is not its URL keeps the URL in brackets (password reset emails used to show only \"address\"). Line breaks follow <code>&lt;br&gt;</code> and block ends."
+msgstr "Correzione: la parte in testo semplice delle email HTML ora decodifica le entità, quindi un link con parametri di query appare come <code>?a=1&amp;b=2</code> invece di <code>?a=1&amp;amp;b=2</code>, e un link il cui testo non è l'URL mantiene l'URL tra parentesi (le email di reimpostazione della password mostravano solo \"address\"). Gli a capo seguono <code>&lt;br&gt;</code> e la fine dei blocchi."
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Improved: uninstall also cleans up every site of a multisite network."
+msgstr "Miglioramento: la disinstallazione pulisce anche tutti i siti di una rete multisito."
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Improved: translations for German, Spanish, French, Italian, Japanese, Polish, Portuguese (Brazil), Russian and Ukrainian."
+msgstr "Miglioramento: traduzioni in tedesco, spagnolo, francese, italiano, giapponese, polacco, portoghese (Brasile), russo e ucraino."
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Improved: settings screen in plain language with a helper text for every field, inline messages instead of browser pop-ups, labels for screen readers, a Settings link on the Plugins screen."
+msgstr "Miglioramento: schermata delle impostazioni in linguaggio semplice, con un testo di aiuto per ogni campo, messaggi in pagina invece di finestre pop-up del browser, etichette per i lettori di schermo e un link Impostazioni nella schermata Plugin."
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Fix: emails in a non-UTF-8 charset are converted instead of failing; API errors show Mailtrap's explanation, not only the HTTP code; \"Check connection\" explains a rejected token."
+msgstr "Correzione: le email con un set di caratteri diverso da UTF-8 vengono convertite invece di fallire; gli errori dell'API mostrano la spiegazione di Mailtrap e non solo il codice HTTP; \"Verifica la connessione\" spiega perché un token è stato rifiutato."
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Fix: attachments work on sites where WordPress uses FTP/SSH file access; attachments named with <code>'name.pdf' =&gt; $path</code> keep their name; inline images (<code>$embeds</code>, WordPress 6.9+) are sent; error messages no longer contain server paths."
+msgstr "Correzione: gli allegati funzionano sui siti in cui WordPress accede ai file tramite FTP/SSH; gli allegati nominati con <code>'name.pdf' =&gt; $path</code> mantengono il loro nome; le immagini incorporate (<code>$embeds</code>, WordPress 6.9+) vengono inviate; i messaggi di errore non contengono più percorsi del server."
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Fix: emails blocked by <code>SWIFTTRAP_BLOCK_BULK</code> were still delivered by the default mailer."
+msgstr "Correzione: le email bloccate da <code>SWIFTTRAP_BLOCK_BULK</code> venivano comunque recapitate dal sistema di invio predefinito."
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Fix: when the suppression list cannot be loaded, the check pauses for five minutes instead of adding slow API calls to every recipient of every email."
+msgstr "Correzione: quando l'elenco delle soppressioni non può essere caricato, il controllo si sospende per cinque minuti invece di aggiungere lente chiamate API per ogni destinatario di ogni email."
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Fix: an address that unsubscribed from the bulk stream no longer stops transactional email (password resets, orders) to that address."
+msgstr "Correzione: un indirizzo disiscritto dal flusso bulk non blocca più le email transazionali (reimpostazioni della password, ordini) verso quell'indirizzo."
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Fix: <code>wp_mail_from</code> / <code>wp_mail_from_name</code> filters are applied to each message. They were read once per request, so a From address set by WooCommerce or a form plugin for its own email was ignored or leaked into other emails."
+msgstr "Correzione: i filtri <code>wp_mail_from</code> / <code>wp_mail_from_name</code> vengono applicati a ogni messaggio. Prima venivano letti una sola volta per richiesta, quindi un indirizzo del mittente impostato da WooCommerce o da un plugin di moduli per le proprie email veniva ignorato o finiva in altre email."
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Fix: <code>wp_mail()</code> returned a truthy error object instead of <code>false</code> when an email had an invalid address, a missing attachment or only suppressed recipients, so the calling plugin believed it was sent."
+msgstr "Correzione: <code>wp_mail()</code> restituiva un oggetto di errore valutato come vero invece di <code>false</code> quando un'email aveva un indirizzo non valido, un allegato mancante o solo destinatari soppressi, così il plugin chiamante credeva che fosse stata inviata."
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Fix: unticking \"Send this site's emails through Mailtrap\", the category options — any checkbox that is on by default — was not saved."
+msgstr "Correzione: disattivando \"Invia le email di questo sito tramite Mailtrap\", le opzioni delle categorie o qualsiasi casella attiva per impostazione predefinita, la modifica non veniva salvata."
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "New: the API token can be defined in <code>wp-config.php</code> (<code>SWIFTTRAP_MAILTRAP_TOKEN</code>). A saved token is no longer printed into the settings page; leave the field empty to keep it."
+msgstr "Novità: il token API può essere definito in <code>wp-config.php</code> (<code>SWIFTTRAP_MAILTRAP_TOKEN</code>). Un token salvato non viene più stampato nella pagina delle impostazioni; lascia il campo vuoto per mantenerlo."
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "New: \"Use the default WordPress mailer as a backup\" setting and <code>swifttrap_mailtrap_fallback_to_wp_mail</code> filter."
+msgstr "Novità: impostazione \"Usa il sistema di invio predefinito di WordPress come riserva\" e filtro <code>swifttrap_mailtrap_fallback_to_wp_mail</code>."
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "New: the test email can be sent to any address, and shows the reason when Mailtrap refuses it. Before, a test that Mailtrap rejected could still say \"sent\" because the default mailer delivered it."
+msgstr "Novità: l'email di prova può essere inviata a qualsiasi indirizzo e mostra il motivo quando Mailtrap la rifiuta. Prima, una prova rifiutata da Mailtrap poteva comunque risultare \"inviata\" perché la recapitava il sistema di invio predefinito."
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "New: the <code>X-SwiftTrap-Stream: bulk</code> / <code>transactional</code> header picks the stream for one <code>wp_mail()</code> call. New <code>swifttrap_mailtrap_bulk_source</code> filter; <code>swifttrap_mailtrap_use_bulk_stream</code> now also receives the email."
+msgstr "Novità: l'header <code>X-SwiftTrap-Stream: bulk</code> / <code>transactional</code> sceglie il flusso per una singola chiamata a <code>wp_mail()</code>. Nuovo filtro <code>swifttrap_mailtrap_bulk_source</code>; <code>swifttrap_mailtrap_use_bulk_stream</code> ora riceve anche l'email."
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "New: <strong>Send newsletters through the bulk stream</strong> — one checkbox on the settings screen. Campaign emails from Newsletter (The Newsletter Plugin), FluentCRM, Icegram Express and Groundhogg are recognized by their headers and sent through Mailtrap's bulk stream; everything else, including signup confirmations, stays on the transactional stream. Off by default."
+msgstr "Novità: <strong>Invia le newsletter tramite il flusso bulk</strong> — una sola casella nella schermata delle impostazioni. Le email delle campagne di Newsletter (The Newsletter Plugin), FluentCRM, Icegram Express e Groundhogg vengono riconosciute dai loro header e inviate tramite il flusso bulk di Mailtrap; tutto il resto, comprese le conferme di iscrizione, resta sul flusso transazionale. Disattivata per impostazione predefinita."
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "New: a one-time, dismissible request to leave a review on WordPress.org. It appears only a week after your first email goes out through Mailtrap, only to administrators and only on the plugin's own screens. \"Maybe later\" snoozes it for 30 days, \"Don't ask again\" hides it for good. Nothing is sent anywhere."
+msgstr "Novità: una richiesta, mostrata una sola volta e chiudibile, di lasciare una recensione su WordPress.org. Compare solo una settimana dopo che la prima email è partita tramite Mailtrap, solo agli amministratori e solo nelle schermate del plugin. \"Magari più tardi\" la rimanda di 30 giorni, \"non chiedermelo più\" la nasconde definitivamente. Non viene inviato nulla da nessuna parte."
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Tested with WordPress 7.1 (verified on 7.1.1). No functional changes."
+msgstr "Testato con WordPress 7.1 (verificato su 7.1.1). Nessuna modifica funzionale."
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Improved: Email Logs recipient search and account API calls now consistently use bracketed filter syntax and Bearer-token authentication."
+msgstr "Miglioramento: la ricerca per destinatario nei log delle email e le chiamate API dell'account ora usano in modo coerente la sintassi dei filtri tra parentesi quadre e l'autenticazione con token Bearer."
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Fixed: Uninstalling the plugin now clears the actual cached transients instead of pre-2.3.0 key names that no longer match."
+msgstr "Correzione: la disinstallazione del plugin ora elimina i transient effettivamente in cache invece dei nomi di chiave precedenti alla 2.3.0, che non corrispondono più."
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Fixed: Usage card on the Stats page now calls Mailtrap's current <code>/api/billing/usage</code> endpoint instead of a stale account-scoped path that returned no data."
+msgstr "Correzione: la scheda Utilizzo nella pagina delle statistiche ora chiama l'endpoint attuale di Mailtrap <code>/api/billing/usage</code> invece di un vecchio percorso legato all'account che non restituiva dati."
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Fixed: Webhook payload parsing now unwraps Mailtrap's <code>{\"events\": [...]}</code> envelope correctly, so verified events reach <code>do_action('swifttrap_mailtrap_webhook_event', ...)</code>."
+msgstr "Correzione: l'analisi del payload dei webhook ora estrae correttamente l'involucro <code>{\"events\": [...]}</code> di Mailtrap, così gli eventi verificati arrivano a <code>do_action('swifttrap_mailtrap_webhook_event', ...)</code>."
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Fixed: Webhook receiver now verifies Mailtrap's actual <code>Mailtrap-Signature</code> HMAC-SHA256 header instead of a header Mailtrap never sends. Every real delivery-tracking webhook call was being rejected outright since the feature shipped in 2.4.0."
+msgstr "Correzione: il ricevitore dei webhook ora verifica l'header <code>Mailtrap-Signature</code> HMAC-SHA256 effettivamente usato da Mailtrap, invece di un header che Mailtrap non invia mai. Da quando la funzionalità è stata introdotta nella 2.4.0, ogni vera chiamata webhook di tracciamento del recapito veniva rifiutata."
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Fixed: Stats page no longer creates a redundant nonce attribute on the wrapper element."
+msgstr "Correzione: la pagina delle statistiche non crea più un attributo nonce superfluo sull'elemento contenitore."
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Removed: CSV export, log file clear, log detail modal, log resend, per-page logs setting, and cron-based log cleanup. All replaced by the live API view."
+msgstr "Rimosso: esportazione CSV, svuotamento del file di log, finestra modale dei dettagli del log, nuovo invio dal log, impostazione dei log per pagina e pulizia dei log tramite cron. Tutto sostituito dalla vista in tempo reale tramite API."
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "New: Webhook handler now fires <code>do_action('swifttrap_mailtrap_webhook_event', $event)</code> for every delivery event, allowing third-party integrations without modifying the plugin."
+msgstr "Novità: il gestore dei webhook ora esegue <code>do_action('swifttrap_mailtrap_webhook_event', $event)</code> per ogni evento di recapito, consentendo integrazioni di terze parti senza modificare il plugin."
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "New: Client-side pagination — buffers up to 1,000 entries from Mailtrap per API call, displays 20 rows at a time with Prev/Next navigation. Automatically fetches the next batch when the buffer is exhausted."
+msgstr "Novità: paginazione lato client — memorizza fino a 1.000 voci di Mailtrap per chiamata API e mostra 20 righe alla volta con navigazione Prec./Succ. Recupera automaticamente il blocco successivo quando il buffer è esaurito."
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "New: Email Logs support filtering by recipient email address, delivery status, and date range."
+msgstr "Novità: i log delle email consentono di filtrare per indirizzo email del destinatario, stato di recapito e intervallo di date."
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "New: Email Logs panel on the Stats page pulls live data directly from the Mailtrap API (<code>GET /api/email_logs</code>)."
+msgstr "Novità: il pannello Log delle email nella pagina delle statistiche recupera i dati in tempo reale direttamente dall'API di Mailtrap (<code>GET /api/email_logs</code>)."
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Breaking: Removed all local file-based email logging. No more log files written to disk — eliminates OOM/disk-full risk on high-volume sites."
+msgstr "Modifica incompatibile: rimossa tutta la registrazione locale delle email su file. Nessun file di log viene più scritto su disco — eliminato il rischio di esaurimento della memoria (OOM) o di disco pieno sui siti con volumi elevati."
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Improved: Logging no longer slows down large mailings — appends are O(1) instead of re-reading and rewriting the entire file on every email."
+msgstr "Miglioramento: la registrazione non rallenta più gli invii di grandi dimensioni — le aggiunte sono O(1) invece di rileggere e riscrivere l'intero file a ogni email."
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Fixed: The email log dropped most entries during high-volume or concurrent sends. Each write re-read and rewrote the whole log file, so parallel processes overwrote each other's lines. Writes now use an atomic, exclusively-locked append, so the Stats dashboard (sends-per-day, categories, totals) reflects the real number of sent emails."
+msgstr "Correzione: il log delle email perdeva gran parte delle voci durante invii ad alto volume o simultanei. Ogni scrittura rileggeva e riscriveva l'intero file di log, quindi i processi paralleli si sovrascrivevano a vicenda le righe. Ora le scritture usano un'aggiunta atomica con blocco esclusivo, così la bacheca delle statistiche (invii al giorno, categorie, totali) riflette il numero reale di email inviate."
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Improved: Email Logs header actions aligned to the right; date filter input restyled to match other fields."
+msgstr "Miglioramento: le azioni nell'intestazione dei log delle email sono allineate a destra; il campo del filtro per data ha ora lo stesso stile degli altri campi."
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "New: Per-page selector (10/25/50/100) on the Email Logs screen."
+msgstr "Novità: selettore delle voci per pagina (10/25/50/100) nella schermata dei log delle email."
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "New: \"View all in Mailtrap\" link on the Suppressions card."
+msgstr "Novità: link \"Vedi tutto in Mailtrap\" nella scheda Soppressioni."
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Fixed: Suppression dates are now formatted server-side using the site's date format instead of the browser locale."
+msgstr "Correzione: le date delle soppressioni ora vengono formattate lato server con il formato data del sito invece che con la lingua del browser."
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "New: Suppression rows display the message bounce category (when provided) for hard-bounce detail."
+msgstr "Novità: le righe delle soppressioni mostrano la categoria di bounce del messaggio (quando disponibile) per i dettagli degli hard bounce."
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Fixed: Suppression list now reads the Mailtrap <code>type</code> field, so the dashboard shows real BOUNCE / COMPLAINT / UNSUBSCRIBE / MANUAL counts instead of marking every record as manual."
+msgstr "Correzione: l'elenco delle soppressioni ora legge il campo <code>type</code> di Mailtrap, così la bacheca mostra i conteggi reali BOUNCE / COMPLAINT / UNSUBSCRIBE / MANUAL invece di segnare ogni voce come manuale."
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Refactored: Extracted CSV row formatter into a helper function for unit tests. Fully covered and verified by the test suite."
+msgstr "Refactoring: la formattazione delle righe CSV è stata estratta in una funzione di supporto per i test unitari. Completamente coperta e verificata dalla suite di test."
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "New: Attachment size guard setting."
+msgstr "Novità: impostazione per il controllo della dimensione degli allegati."
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "New: WP-CLI namespace <code>wp swifttrap</code> (test, stats, prune-logs, send-suppression-sync)."
+msgstr "Novità: namespace WP-CLI <code>wp swifttrap</code> (test, stats, prune-logs, send-suppression-sync)."
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "New: Category settings grid for category stream mapping rules and sender overrides."
+msgstr "Novità: griglia delle impostazioni per categoria, con regole di assegnazione dei flussi e mittenti personalizzati."
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "New: Upgraded Admin logs UI with search, filtering, CSV export, iframe payload preview modals, and resend actions."
+msgstr "Novità: interfaccia dei log nell'amministrazione migliorata, con ricerca, filtri, esportazione CSV, anteprima del payload in finestre modali con iframe e azioni di nuovo invio."
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "New: Site Health connection and verified domain status test."
+msgstr "Novità: test di Salute del sito per la connessione e lo stato del dominio verificato."
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "New: Fallback mechanism returning <code>null</code> in <code>pre_wp_mail</code> on API failure so native <code>wp_mail</code> sends the email instead."
+msgstr "Novità: meccanismo di riserva che restituisce <code>null</code> in <code>pre_wp_mail</code> in caso di errore dell'API, così l'email viene inviata dal <code>wp_mail</code> nativo."
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "New: Suppression Management CRUD in Admin Stats and pre-send recipient checks to skip suppressed emails."
+msgstr "Novità: gestione CRUD delle soppressioni nelle statistiche dell'amministrazione e controlli dei destinatari prima dell'invio per saltare le email soppresse."
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "New: REST Webhook Endpoint (<code>swifttrap/v1/webhook</code>) for tracking delivered, bounced, opened, and clicked statuses."
+msgstr "Novità: endpoint webhook REST (<code>swifttrap/v1/webhook</code>) per tracciare gli stati recapitato, bounce, aperto e cliccato."
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Code modernized to PHP 8 idioms; first unit-test suite added."
+msgstr "Codice modernizzato con gli idiomi di PHP 8; aggiunta la prima suite di test unitari."
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "New: \"Verify token\" button on the settings screen."
+msgstr "Novità: pulsante \"Verifica token\" nella schermata delle impostazioni."
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Robust JSON handling for all Mailtrap API responses; multisite-safe settings cache."
+msgstr "Gestione JSON robusta per tutte le risposte dell'API di Mailtrap; cache delle impostazioni sicura per il multisito."
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Account/stats/domain/suppression caches are now keyed per API token, so switching tokens no longer serves stale data."
+msgstr "Le cache di account, statistiche, dominio e soppressioni ora sono distinte per token API, quindi cambiando token non vengono più mostrati dati obsoleti."
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Deterministic log retention via a daily cron event (replaces the previous probabilistic cleanup)."
+msgstr "Conservazione dei log deterministica tramite un evento cron giornaliero (sostituisce la precedente pulizia probabilistica)."
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Reliability: automatic retry with backoff on transient Mailtrap API errors (429/5xx, honors Retry-After)."
+msgstr "Affidabilità: nuovo tentativo automatico con backoff in caso di errori temporanei dell'API di Mailtrap (429/5xx, rispetta Retry-After)."
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "PHP 8.0 is now the minimum; tested up to WordPress 7.0."
+msgstr "PHP 8.0 è ora la versione minima; testato fino a WordPress 7.0."
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Tested up to WordPress 7.0"
+msgstr "Testato fino a WordPress 7.0"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "FAQ: added comparison with WP Mail SMTP / Post SMTP, Mailtrap template support, and bulk stream routing"
+msgstr "FAQ: aggiunti il confronto con WP Mail SMTP / Post SMTP, il supporto dei template di Mailtrap e l'instradamento nel flusso bulk"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Tags: replaced <code>email</code>/<code>mail</code>/<code>smtp</code> with targeted <code>mailtrap</code>, <code>transactional-email</code>, <code>email-api</code>, <code>wp-mail</code>, <code>email-log</code>"
+msgstr "Tag: sostituiti <code>email</code>/<code>mail</code>/<code>smtp</code> con i più mirati <code>mailtrap</code>, <code>transactional-email</code>, <code>email-api</code>, <code>wp-mail</code>, <code>email-log</code>"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Readme: USP-first rewrite emphasizing Mailtrap Email API (vs SMTP) and bulk/transactional stream routing"
+msgstr "Readme: riscritto mettendo in primo piano i punti di forza, cioè la Mailtrap Email API (invece dell'SMTP) e l'instradamento tra flusso bulk e transazionale"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "No code or behavior changes"
+msgstr "Nessuna modifica al codice o al comportamento"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Plugin URI: now points to the dedicated landing page at https://plugins.symonov.com/swifttrap-for-mailtrap/"
+msgstr "Plugin URI: ora punta alla pagina dedicata https://plugins.symonov.com/swifttrap-for-mailtrap/"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Improved log file locking"
+msgstr "Migliorato il blocco del file di log"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Optimized email category computation"
+msgstr "Ottimizzato il calcolo delle categorie delle email"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Fixed timezone handling in log display"
+msgstr "Corretta la gestione del fuso orario nella visualizzazione dei log"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Added empty recipient validation"
+msgstr "Aggiunta la convalida dei destinatari vuoti"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Added attachment size validation (25 MB limit)"
+msgstr "Aggiunta la convalida della dimensione degli allegati (limite di 25 MB)"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Security: protected log directory from direct web access"
+msgstr "Sicurezza: la cartella dei log è protetta dall'accesso web diretto"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Improved WP.org compliance"
+msgstr "Migliorata la conformità alle linee guida di WP.org"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Zero external dependencies, ~30 KB total plugin size"
+msgstr "Nessuna dipendenza esterna, ~30 KB di dimensione totale del plugin"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Removed Mailtrap SDK dependency — uses WordPress HTTP API directly"
+msgstr "Rimossa la dipendenza dall'SDK di Mailtrap: usa direttamente la WordPress HTTP API"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Extracted reusable <code>swifttrap_mailtrap_get_account_id()</code> with transient caching"
+msgstr "Estratta la funzione riutilizzabile <code>swifttrap_mailtrap_get_account_id()</code> con cache tramite transient"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Added <code>swifttrap_mailtrap_custom_variables</code> filter for email tracking metadata"
+msgstr "Aggiunto il filtro <code>swifttrap_mailtrap_custom_variables</code> per i metadati di tracciamento delle email"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Added <code>swifttrap_mailtrap_template</code> filter for Mailtrap template support"
+msgstr "Aggiunto il filtro <code>swifttrap_mailtrap_template</code> per il supporto dei template di Mailtrap"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Added suppression list (bounces, complaints, unsubscribes) on Stats page"
+msgstr "Aggiunto l'elenco delle soppressioni (bounce, segnalazioni, disiscrizioni) nella pagina delle statistiche"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Added sending domain verification status on Stats page"
+msgstr "Aggiunto lo stato di verifica del dominio di invio nella pagina delle statistiche"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Better WordPress Coding Standards compliance"
+msgstr "Migliore conformità ai WordPress Coding Standards"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Improved PHPDoc headers across all files"
+msgstr "Migliorate le intestazioni PHPDoc in tutti i file"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Fixed $_GET sanitization with proper wp_unslash() and phpcs annotations"
+msgstr "Corretta la sanificazione di $_GET con un uso corretto di wp_unslash() e annotazioni phpcs"
+
+#. Found in changelog list item.
+#, gp-priority: low
+msgid "Replaced all file_get_contents/file_put_contents with WP_Filesystem API"
+msgstr "Sostituiti tutti i file_get_contents/file_put_contents con la WP_Filesystem API"
