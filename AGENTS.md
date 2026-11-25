@@ -22,6 +22,8 @@ swifttrap-for-mailtrap/
 ├── swifttrap-for-mailtrap.php     # Bootstrap + send pipeline: constants, requires, pre_wp_mail hook,
 │                                  # settings, normalize_atts, build_payload, send (retry/backoff)
 ├── includes/
+│   ├── swifttrap-routing.php      # Bulk vs transactional stream decision: X-SwiftTrap-Stream header,
+│   │                              # newsletter plugin detection (Newsletter, FluentCRM, Icegram, Groundhogg)
 │   ├── swifttrap-api.php          # Mailtrap account/stats/domains/suppressions/email-logs (integration
 │   │                              # layer), categorization + suppression-check (business logic), AJAX
 │   ├── admin.php                  # Settings + Stats pages, menu, dashboard widget, sanitization, admin assets
@@ -53,7 +55,8 @@ swifttrap-for-mailtrap/
 
 | File | Purpose |
 |------|---------|
-| `swifttrap-for-mailtrap.php` | Plugin header + composition root: defines constants, `require_once`s the four `includes/` modules, registers activation/deactivation hooks, hooks `pre_wp_mail` (priority 1) to short-circuit `wp_mail()`, and owns the full send pipeline (normalize → suppression filter → category → payload → send with retry/backoff → fallback to native `wp_mail()` on failure). |
+| `swifttrap-for-mailtrap.php` | Plugin header + composition root: defines constants, `require_once`s the `includes/` modules, registers activation/deactivation hooks, hooks `pre_wp_mail` (priority 1) to short-circuit `wp_mail()`, and owns the full send pipeline (normalize → suppression filter → category → payload → send with retry/backoff → fallback to native `wp_mail()` on failure). |
+| `includes/swifttrap-routing.php` | `swifttrap_mailtrap_should_use_bulk_stream()` (filter > `X-SwiftTrap-Stream` header > newsletter detection when `bulk_autodetect` is on > category mapping), `swifttrap_mailtrap_detect_bulk_source()`, and the `newsletter_message_headers` hook that keeps Newsletter's signup emails transactional. |
 | `includes/swifttrap-api.php` | All Mailtrap HTTP calls (account, stats, domains, suppressions, live email log) with token-hashed transient caching; email categorization/stream-routing logic; suppression add/remove/check; every Stats-page AJAX handler. |
 | `includes/admin.php` | Settings page (token, sender, categories, attachment cap, webhook secret, category→stream/sender mapping table) and Stats page (usage, domains, suppressions, live email log with search/filter/pagination); dashboard widget; verify-token AJAX. |
 | `includes/swifttrap-webhook.php` | REST route `swifttrap/v1/webhook` — verifies the `Mailtrap-Signature` HMAC-SHA256 header against the raw body, fires `swifttrap_mailtrap_webhook_event` per delivery event. |
@@ -89,4 +92,6 @@ swifttrap-for-mailtrap/
 - New `wp_remote_*` calls to Mailtrap go in `includes/swifttrap-api.php` next to the existing fetch functions (token-hashed transient cache pattern) — never inline in `admin.php` or another entry point.
 - Do not reintroduce local email-log storage. As of 3.0.0 the email log is read live from Mailtrap's `/api/email_logs`; new "history" features should extend that live fetch, not write local files/options.
 - Version bumps touch three places in lockstep: `swifttrap-for-mailtrap.php` (`Version:` header + `SWIFTTRAP_MAILTRAP_VERSION`), `readme.txt` (`Stable tag` + changelog), and `composer.json` is version-agnostic (no bump needed there).
+- `pre_wp_mail` must return `true`, `false` or `null` — never a `WP_Error` (it is truthy and `wp_mail()` returns it as-is).
+- Checkboxes on the settings form go through `swifttrap_mailtrap_checkbox_field()` (hidden `0` + checkbox); the saved API token is never printed into HTML.
 - New functions are prefixed `swifttrap_mailtrap_`; new options/nonce actions/transient keys follow the same prefix convention documented in `.ai-factory/rules/base.md`.

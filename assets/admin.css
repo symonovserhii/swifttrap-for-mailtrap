@@ -985,3 +985,28 @@
 .swifttrap-status--bounced   { background: #f8d7da; color: #721c24; }
 .swifttrap-status--spam      { background: #fff3cd; color: #856404; }
 .swifttrap-status--unsub     { background: #e2e3e5; color: #383d41; }
+
+/* 3.1.0 */
+.swifttrap-inline-action {
+	margin-top: 10px;
+}
+
+.wrap .swifttrap-card .swifttrap-field-group + h3,
+.wrap .swifttrap-card p + h3 {
+	margin-top: 24px;
+}
+
+.wrap .swifttrap-card h3 + .swifttrap-field-group {
+	margin-top: 10px;
+}
+
+.swifttrap-delete-suppression {
+	margin-left: 8px;
+	color: #b32d2e;
+	font-weight: 600;
+	text-decoration: none;
+}
+
+.swifttrap-delete-suppression--armed {
+	text-decoration: underline;
+}

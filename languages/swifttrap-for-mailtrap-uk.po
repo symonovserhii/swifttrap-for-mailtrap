@@ -3,28 +3,28 @@
 # This file is distributed under the same license as the plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: SwiftTrap for Mailtrap 3.0.1\n"
+"Project-Id-Version: SwiftTrap for Mailtrap 3.1.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/swifttrap-for-mailtrap\n"
-"POT-Creation-Date: 2026-07-03T14:30:11+00:00\n"
-"PO-Revision-Date: 2026-07-03 00:00:00+0000\n"
+"POT-Creation-Date: 2026-11-25T00:00:00+00:00\n"
+"PO-Revision-Date: 2026-11-25 00:00:00+0000\n"
 "Last-Translator: \n"
 "Language-Team: Ukrainian\n"
 "Language: uk\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : 2);\n"
 "X-Domain: swifttrap-for-mailtrap\n"
-"X-Generator: Poedit\n"
 
 #. Plugin Name of the plugin
 #: swifttrap-for-mailtrap.php
 msgid "SwiftTrap for Mailtrap"
-msgstr ""
+msgstr "SwiftTrap for Mailtrap"
 
 #. Plugin URI of the plugin
 #: swifttrap-for-mailtrap.php
 msgid "https://plugins.symonov.com/swifttrap-for-mailtrap/"
-msgstr ""
+msgstr "https://plugins.symonov.com/swifttrap-for-mailtrap/"
 
 #. Description of the plugin
 #: swifttrap-for-mailtrap.php
@@ -34,12 +34,12 @@ msgstr "Спрямовує wp_mail() через HTTP API Mailtrap із нала�
 #. Author of the plugin
 #: swifttrap-for-mailtrap.php
 msgid "simmotorlp"
-msgstr ""
+msgstr "simmotorlp"
 
 #. Author URI of the plugin
 #: swifttrap-for-mailtrap.php
 msgid "https://profiles.wordpress.org/simmotorlp/"
-msgstr ""
+msgstr "https://profiles.wordpress.org/simmotorlp/"
 
 #: includes/admin.php:65
 msgid "sent"
@@ -110,7 +110,7 @@ msgid "Remove"
 msgstr "Видалити"
 
 #: includes/admin.php:82
-#: includes/admin.php:735
+#: includes/admin.php:875
 msgid "Email Logs"
 msgstr "Журнал листів"
 
@@ -127,12 +127,12 @@ msgid "Subject"
 msgstr "Тема"
 
 #: includes/admin.php:86
-#: includes/admin.php:630
+#: includes/admin.php:760
 msgid "Category"
 msgstr "Категорія"
 
 #: includes/admin.php:87
-#: includes/admin.php:481
+#: includes/admin.php:508
 msgid "Status"
 msgstr "Статус"
 
@@ -161,399 +161,518 @@ msgid "Search..."
 msgstr "Пошук..."
 
 #: includes/admin.php:94
-#: includes/admin.php:739
+#: includes/admin.php:879
 msgid "All statuses"
 msgstr "Усі статуси"
 
-#: includes/admin.php:95
+#. translators: 1: current page number, 2: total number of pages
+#: includes/admin.php:96
 #, php-format
 msgid "Page %1$s of %2$s"
 msgstr "Сторінка %1$s з %2$s"
 
-#: includes/admin.php:104
-msgid "Sending..."
-msgstr "Надсилання..."
+#: includes/admin.php:97
+#: includes/admin.php:844
+#: includes/admin.php:859
+#: includes/admin.php:868
+#: includes/admin.php:890
+msgid "Loading..."
+msgstr "Завантаження..."
 
-#: includes/admin.php:107
-#: includes/admin.php:114
-#: includes/admin.php:676
-msgid "Send Test Email"
-msgstr "Надіслати тестовий лист"
-
-#: includes/admin.php:115
-#: includes/admin.php:133
-#: includes/admin.php:161
-#: includes/admin.php:184
+#: includes/admin.php:98
+#: includes/admin.php:125
+#: includes/admin.php:143
 msgid "Request failed."
 msgstr "Запит не вдався."
 
-#: includes/admin.php:122
-msgid "Verifying..."
-msgstr "Перевірка..."
+#: includes/admin.php:99
+msgid "Remove?"
+msgstr "Видалити?"
 
-#: includes/admin.php:125
-#: includes/admin.php:132
-#: includes/admin.php:551
-msgid "Verify Token"
-msgstr "Перевірити токен"
+#: includes/admin.php:100
+msgid "Email address"
+msgstr "Адреса email"
 
-#: includes/admin.php:144
-msgid "Adding..."
-msgstr "Додавання..."
+#: includes/admin.php:101
+msgid "Sending domain"
+msgstr "Домен відправки"
 
-#: includes/admin.php:152
-#: includes/admin.php:160
+#: includes/admin.php:102
+#: includes/admin.php:761
+msgid "Sending Stream"
+msgstr "Потік відправки"
+
+#: includes/admin.php:103
+#: includes/admin.php:786
+msgid "Transactional"
+msgstr "Транзакційний"
+
+#: includes/admin.php:104
+#: includes/admin.php:787
+msgid "Bulk"
+msgstr "Масовий"
+
+#: includes/admin.php:105
+#: includes/admin.php:166
+#: includes/admin.php:174
 msgid "Add Suppression"
 msgstr "Додати блокування"
 
-#: includes/admin.php:168
-msgid "Are you sure you want to remove this suppression?"
-msgstr "Ви впевнені, що хочете видалити це блокування?"
+#: includes/admin.php:114
+msgid "Sending..."
+msgstr "Надсилання..."
 
-#: includes/admin.php:428
-#: includes/admin.php:429
-#: includes/admin.php:466
-#: includes/admin.php:708
+#: includes/admin.php:117
+#: includes/admin.php:124
+#: includes/admin.php:816
+msgid "Send Test Email"
+msgstr "Надіслати тестовий лист"
+
+#: includes/admin.php:132
+msgid "Checking..."
+msgstr "Перевірка…"
+
+#: includes/admin.php:135
+#: includes/admin.php:142
+#: includes/admin.php:651
+msgid "Check connection"
+msgstr "Перевірити підключення"
+
+#: includes/admin.php:158
+msgid "Adding..."
+msgstr "Додавання..."
+
+#: includes/admin.php:455
+#: includes/admin.php:456
+#: includes/admin.php:493
+#: includes/admin.php:848
 #: includes/swifttrap-site-health.php:41
 msgid "Mailtrap"
 msgstr "Mailtrap"
 
-#: includes/admin.php:439
-#: includes/admin.php:440
+#: includes/admin.php:466
+#: includes/admin.php:467
 msgid "Stats"
 msgstr "Статистика"
 
-#: includes/admin.php:448
-#: includes/admin.php:449
-#: includes/admin.php:506
+#: includes/admin.php:475
+#: includes/admin.php:476
+#: includes/admin.php:533
+#: includes/admin.php:1054
 msgid "Settings"
 msgstr "Налаштування"
 
-#: includes/admin.php:485
+#: includes/admin.php:512
 msgid "Enabled"
 msgstr "Увімкнено"
 
-#: includes/admin.php:487
+#: includes/admin.php:514
 msgid "Disabled"
 msgstr "Вимкнено"
 
-#: includes/admin.php:489
+#: includes/admin.php:516
 msgid "Token missing"
 msgstr "Токен відсутній"
 
-#: includes/admin.php:495
+#: includes/admin.php:522
 msgid "Sender"
 msgstr "Відправник"
 
-#: includes/admin.php:503
+#: includes/admin.php:530
 msgid "View Stats"
 msgstr "Переглянути статистику"
 
-#: includes/admin.php:525
+#: includes/admin.php:606
 msgid "Mailtrap Settings"
 msgstr "Налаштування Mailtrap"
 
-#: includes/admin.php:533
-msgid "Mailtrap Delivery"
-msgstr "Доставка через Mailtrap"
+#: includes/admin.php:614
+msgid "Connection"
+msgstr "Підключення"
 
-#: includes/admin.php:534
-msgid "Send all site emails through the Mailtrap Send API. Provide an API token from your Mailtrap project."
-msgstr "Надсилайте всі листи сайту через Send API Mailtrap. Вкажіть API-токен зі свого проєкту Mailtrap."
+#: includes/admin.php:615
+msgid "Connect this site to your Mailtrap account. Once connected, every email WordPress sends goes out through Mailtrap."
+msgstr "Підключіть сайт до облікового запису Mailtrap. Після підключення всі листи, які надсилає WordPress, ідуть через Mailtrap."
 
-#: includes/admin.php:540
-msgid "Route wp_mail() through Mailtrap"
-msgstr "Спрямовувати wp_mail() через Mailtrap"
+#: includes/admin.php:621
+msgid "Send this site's emails through Mailtrap"
+msgstr "Надсилати листи цього сайту через Mailtrap"
 
-#: includes/admin.php:546
+#: includes/admin.php:622
+msgid "Untick to pause the plugin. WordPress then sends email the way it did before."
+msgstr "Зніміть прапорець, щоб призупинити плагін. WordPress надсилатиме пошту так само, як раніше."
+
+#: includes/admin.php:627
 msgid "API Token"
 msgstr "API-токен"
 
-#: includes/admin.php:548
-msgid "Use the \"Send API token\" from your Mailtrap inbox or project."
-msgstr "Використовуйте \"Send API token\" зі своєї поштової скриньки або проєкту Mailtrap."
+#: includes/admin.php:630
+msgid "The token is set in wp-config.php (SWIFTTRAP_MAILTRAP_TOKEN) and cannot be changed here."
+msgstr "Токен задано у wp-config.php (SWIFTTRAP_MAILTRAP_TOKEN), змінити його тут не можна."
 
-#: includes/admin.php:559
-msgid "Sender email"
+#: includes/admin.php:636
+msgid "A token is saved. For safety it is never shown again. Leave this field empty to keep it, or paste a new token to replace it."
+msgstr "Токен збережено. З міркувань безпеки він більше не показується. Залиште поле порожнім, щоб зберегти його, або вставте новий токен, щоб замінити."
+
+#: includes/admin.php:638
+msgid "In Mailtrap, open Settings → API Tokens, create a token that may send from your domain, and paste it here."
+msgstr "У Mailtrap відкрийте Settings → API Tokens, створіть токен із правом надсилання з вашого домену і вставте його сюди."
+
+#: includes/admin.php:645
+msgid "Remove the saved token"
+msgstr "Видалити збережений токен"
+
+#: includes/admin.php:658
+msgid "From email"
 msgstr "Email відправника"
 
-#: includes/admin.php:561
-msgid "Address shown in the From header. Defaults to the site admin email."
-msgstr "Адреса, яка показується в заголовку From. За замовчуванням використовується email адміністратора сайту."
+#: includes/admin.php:660
+msgid "The address your emails come from. It must belong to a domain you verified in Mailtrap, otherwise Mailtrap refuses the message. Leave empty to use the site admin email."
+msgstr "Адреса, з якої надходять ваші листи. Вона має належати домену, підтвердженому в Mailtrap, інакше Mailtrap відхилить лист. Залиште порожнім, щоб використовувати email адміністратора сайту."
 
-#: includes/admin.php:566
-msgid "Sender name"
+#: includes/admin.php:664
+msgid "From name"
 msgstr "Ім'я відправника"
 
-#: includes/admin.php:568
-msgid "Display name for the From header. Defaults to the site title."
-msgstr "Ім'я, яке показується в заголовку From. За замовчуванням використовується назва сайту."
+#: includes/admin.php:666
+msgid "The name people see next to the address. Leave empty to use the site title."
+msgstr "Ім'я, яке одержувачі бачать поруч з адресою. Залиште порожнім, щоб використовувати назву сайту."
 
-#: includes/admin.php:575
+#: includes/admin.php:672
+msgid "Newsletters and bulk email"
+msgstr "Розсилки та масові листи"
+
+#: includes/admin.php:673
+msgid "Mailtrap has two sending streams. The transactional stream is for one-to-one messages such as password resets, orders and contact form notifications. The bulk stream is for newsletters and campaigns. Keeping them apart protects the delivery of your important messages."
+msgstr "У Mailtrap два потоки відправки. Транзакційний потік — для листів конкретній людині: скидання пароля, замовлення, сповіщення з контактних форм. Масовий потік — для розсилок і кампаній. Розділення потоків захищає доставку важливих листів."
+
+#: includes/admin.php:679
+msgid "Send newsletters through the bulk stream"
+msgstr "Надсилати розсилки через масовий потік"
+
+#. translators: %s: comma-separated list of newsletter plugin names
+#: includes/admin.php:682
+#, php-format
+msgid "Campaign emails from these plugins are recognized automatically: %s. All other email keeps using the transactional stream."
+msgstr "Листи кампаній із цих плагінів розпізнаються автоматично: %s. Уся інша пошта й надалі йде через транзакційний потік."
+
+#: includes/admin.php:687
+msgid "Nothing to set up in the newsletter plugin itself — just let it send through WordPress (its default). Signup confirmations and welcome emails stay on the transactional stream."
+msgstr "У самому плагіні розсилок нічого налаштовувати не потрібно — нехай він надсилає через WordPress (так він працює типово). Підтвердження підписки та вітальні листи залишаються в транзакційному потоці."
+
+#. translators: %s: an email header, e.g. X-SwiftTrap-Stream: bulk
+#: includes/admin.php:692
+#, php-format
+msgid "For developers: any email sent with the header %s also goes through the bulk stream."
+msgstr "Для розробників: будь-який лист із заголовком %s також іде через масовий потік."
+
+#: includes/admin.php:698
+msgid "If Mailtrap cannot be reached"
+msgstr "Якщо Mailtrap недоступний"
+
+#: includes/admin.php:703
+msgid "Use the default WordPress mailer as a backup"
+msgstr "Використовувати стандартне надсилання WordPress як резерв"
+
+#: includes/admin.php:704
+msgid "If Mailtrap does not accept a message, WordPress tries to send it the way it did before this plugin. Untick if email must never leave through your web host."
+msgstr "Якщо Mailtrap не приймає лист, WordPress намагається надіслати його так, як робив це до встановлення плагіна. Зніміть прапорець, якщо пошта ніколи не повинна йти через ваш хостинг."
+
+#: includes/admin.php:708
 msgid "Attachments"
 msgstr "Вкладення"
 
-#: includes/admin.php:577
+#: includes/admin.php:710
 msgid "Max attachment size (MB)"
 msgstr "Максимальний розмір вкладення (МБ)"
 
-#: includes/admin.php:579
+#: includes/admin.php:712
 msgid "Maximum size permitted for individual email attachments (1 to 25 MB)."
 msgstr "Максимально допустимий розмір одного вкладення листа (від 1 до 25 МБ)."
 
-#: includes/admin.php:585
+#: includes/admin.php:718
 msgid "Advanced Settings"
 msgstr "Розширені налаштування"
 
-#: includes/admin.php:586
-msgid "Advanced email delivery options for more control over Mailtrap streams."
-msgstr "Розширені параметри доставки листів для більшого контролю над потоками Mailtrap."
+#: includes/admin.php:719
+msgid "Optional. The plugin works without changing anything here."
+msgstr "Необов'язково. Плагін працює, навіть якщо тут нічого не змінювати."
 
-#: includes/admin.php:592
+#: includes/admin.php:725
 msgid "Add category tags to emails in Mailtrap"
 msgstr "Додавати теги категорій до листів у Mailtrap"
 
-#: includes/admin.php:594
+#: includes/admin.php:726
 msgid "Categories help organize emails in Mailtrap dashboard (welcome, password-reset, notification, etc.)."
 msgstr "Категорії допомагають організовувати листи в панелі Mailtrap (welcome, password-reset, notification тощо)."
 
-#: includes/admin.php:601
+#: includes/admin.php:732
 msgid "Automatically detect email type from subject line"
 msgstr "Автоматично визначати тип листа за темою"
 
-#: includes/admin.php:603
+#: includes/admin.php:733
 msgid "When enabled, emails are categorized by keywords in subject: \"reset\" → password-reset, \"confirm\" → verification, \"welcome\" → welcome, etc."
 msgstr "Якщо увімкнено, листи категоризуються за ключовими словами в темі: \"reset\" → password-reset, \"confirm\" → verification, \"welcome\" → welcome тощо."
 
-#: includes/admin.php:608
+#: includes/admin.php:738
 msgid "Webhook URL"
 msgstr "URL вебхука"
 
-#: includes/admin.php:610
+#: includes/admin.php:740
 msgid "Register this URL in your Mailtrap settings under Integration Webhooks. Select delivered, bounce, spam, open, and click events."
 msgstr "Зареєструйте цю URL-адресу в налаштуваннях Mailtrap у розділі Integration Webhooks. Виберіть події delivered, bounce, spam, open і click."
 
-#: includes/admin.php:614
+#: includes/admin.php:744
 msgid "Webhook Secret"
 msgstr "Секрет вебхука"
 
-#: includes/admin.php:616
+#: includes/admin.php:746
 msgid "Paste the signing secret Mailtrap shows you when you create this webhook integration. Used to verify the Mailtrap-Signature header (HMAC-SHA256) on incoming events."
 msgstr "Вставте секрет підпису, який Mailtrap показує під час створення цієї вебхук-інтеграції. Він використовується для перевірки заголовка Mailtrap-Signature (HMAC-SHA256) у вхідних подіях."
 
-#: includes/admin.php:624
+#: includes/admin.php:754
 msgid "Category Stream Mapping & Sender Override"
 msgstr "Зіставлення категорій із потоками та перевизначення відправника"
 
-#: includes/admin.php:625
-msgid "Map auto-detected categories to sending streams or override From identities per category."
-msgstr "Зіставляйте автоматично визначені категорії з потоками відправки або перевизначайте дані From для кожної категорії."
+#: includes/admin.php:755
+msgid "Optional fine-tuning: choose a stream for each email category, or give a category its own From name and address. Leave the From fields empty to use the sender above."
+msgstr "Необов'язкове тонке налаштування: виберіть потік для кожної категорії листів або задайте категорії власні ім'я та адресу відправника. Залиште поля відправника порожніми, щоб використовувати відправника, вказаного вище."
 
-#: includes/admin.php:631
-msgid "Sending Stream"
-msgstr "Потік відправки"
-
-#: includes/admin.php:632
+#: includes/admin.php:762
 msgid "Custom From Name"
 msgstr "Власне ім'я From"
 
-#: includes/admin.php:633
+#: includes/admin.php:763
 msgid "Custom From Email"
 msgstr "Власний email From"
 
-#: includes/admin.php:650
-msgid "Transactional"
-msgstr "Транзакційний"
+#. translators: %s: email category, e.g. password-reset
+#: includes/admin.php:776
+#, php-format
+msgid "Sending stream for %s"
+msgstr "Потік відправки для %s"
 
-#: includes/admin.php:651
-msgid "Bulk"
-msgstr "Масовий"
+#. translators: %s: email category, e.g. password-reset
+#: includes/admin.php:778
+#, php-format
+msgid "From name for %s"
+msgstr "Ім'я відправника для %s"
 
-#: includes/admin.php:655
+#. translators: %s: email category, e.g. password-reset
+#: includes/admin.php:780
+#, php-format
+msgid "From email for %s"
+msgstr "Email відправника для %s"
+
+#: includes/admin.php:791
 msgid "e.g. Support Team"
 msgstr "напр. Служба підтримки"
 
-#: includes/admin.php:658
+#: includes/admin.php:794
 msgid "e.g. support@domain.com"
 msgstr "напр. support@domain.com"
 
-#: includes/admin.php:673
+#: includes/admin.php:809
 msgid "Test Email"
 msgstr "Тестовий лист"
 
-#: includes/admin.php:674
-msgid "Send a test email to the configured sender address to verify your setup."
-msgstr "Надішліть тестовий лист на налаштовану адресу відправника, щоб перевірити налаштування."
+#: includes/admin.php:810
+msgid "Send yourself a test message to make sure everything works. Save your settings first."
+msgstr "Надішліть собі тестовий лист і переконайтеся, що все працює. Спершу збережіть налаштування."
 
-#: includes/admin.php:697
+#: includes/admin.php:812
+msgid "Send the test to"
+msgstr "Надіслати тест на адресу"
+
+#: includes/admin.php:837
 msgid "Mailtrap Stats"
 msgstr "Статистика Mailtrap"
 
-#: includes/admin.php:702
+#: includes/admin.php:842
 msgid "Usage"
 msgstr "Використання"
 
-#: includes/admin.php:704
-#: includes/admin.php:719
-#: includes/admin.php:728
-#: includes/admin.php:750
-msgid "Loading..."
-msgstr "Завантаження..."
-
-#: includes/admin.php:709
+#: includes/admin.php:849
 msgid "For full logs, events, and deliverability reports open Mailtrap."
 msgstr "Щоб переглянути повні журнали, події та звіти про доставку, відкрийте Mailtrap."
 
-#: includes/admin.php:710
+#: includes/admin.php:850
 msgid "Open Mailtrap"
 msgstr "Відкрити Mailtrap"
 
-#: includes/admin.php:717
+#: includes/admin.php:857
 msgid "Sending Domains"
 msgstr "Домени відправки"
 
-#: includes/admin.php:724
+#: includes/admin.php:864
 msgid "Suppressions"
 msgstr "Блокування"
 
-#: includes/admin.php:725
+#: includes/admin.php:865
 msgid "View all in Mailtrap"
 msgstr "Переглянути все в Mailtrap"
 
-#: includes/admin.php:737
+#: includes/admin.php:877
 msgid "Search by recipient email..."
 msgstr "Пошук за адресою електронної пошти отримувача..."
 
-#: includes/admin.php:740
+#: includes/admin.php:880
 msgid "Delivered"
 msgstr "Доставлено"
 
-#: includes/admin.php:741
+#: includes/admin.php:881
 msgid "Not Delivered"
 msgstr "Не доставлено"
 
-#: includes/admin.php:742
+#: includes/admin.php:882
 msgid "Enqueued"
 msgstr "У черзі"
 
-#: includes/admin.php:743
+#: includes/admin.php:883
 msgid "Opted Out"
 msgstr "Відписано"
 
-#: includes/admin.php:745
+#: includes/admin.php:885
 msgid "From date"
 msgstr "Дата від"
 
-#: includes/admin.php:746
+#: includes/admin.php:886
 msgid "To date"
 msgstr "Дата до"
 
-#: includes/admin.php:747
+#: includes/admin.php:887
 msgid "Filter"
 msgstr "Фільтр"
 
-#: includes/admin.php:818
-#: includes/swifttrap-api.php:475
-#: includes/swifttrap-api.php:513
-#: includes/swifttrap-api.php:554
-#: includes/swifttrap-api.php:701
-#: includes/swifttrap-api.php:734
+#. translators: %s: the email address that was entered
+#: includes/admin.php:936
+#, php-format
+msgid "\"%s\" is not a valid email address, so the From email was not saved. The site admin email is used instead."
+msgstr "«%s» — некоректна адреса email, тому email відправника не збережено. Замість нього використовується email адміністратора сайту."
+
+#: includes/admin.php:1013
+#: includes/swifttrap-api.php:479
+#: includes/swifttrap-api.php:527
+#: includes/swifttrap-api.php:568
+#: includes/swifttrap-api.php:754
+#: includes/swifttrap-api.php:791
 msgid "Permission denied."
 msgstr "Доступ заборонено."
 
-#: includes/admin.php:824
+#: includes/admin.php:1025
 msgid "Please enter an API token."
 msgstr "Будь ласка, введіть API-токен."
 
-#: includes/admin.php:833
+#. translators: %s: the reason the connection check failed
+#: includes/admin.php:1035
 #, php-format
 msgid "Verification failed: %s"
 msgstr "Перевірка не вдалася: %s"
 
-#: includes/admin.php:836
+#. translators: %s: Mailtrap account name
+#: includes/admin.php:1039
 #, php-format
 msgid "Token verified successfully. Account: %s"
 msgstr "Токен успішно перевірено. Обліковий запис: %s"
 
-#: includes/swifttrap-api.php:41
+#: includes/review-notice.php:101
+msgid "Enjoying SwiftTrap for Mailtrap?"
+msgstr "Подобається SwiftTrap for Mailtrap?"
+
+#: includes/review-notice.php:102
+msgid "Your emails have been going out through Mailtrap. If the plugin saves you time, a short review on WordPress.org helps other sites find it."
+msgstr "Ваші листи йдуть через Mailtrap. Якщо плагін заощаджує вам час, короткий відгук на WordPress.org допоможе іншим сайтам його знайти."
+
+#: includes/review-notice.php:105
+msgid "Leave a review"
+msgstr "Залишити відгук"
+
+#: includes/review-notice.php:106
+msgid "Maybe later"
+msgstr "Можливо, пізніше"
+
+#: includes/review-notice.php:107
+msgid "Already did / don't ask again"
+msgstr "Уже залишив(-ла) / більше не питати"
+
+#: includes/review-notice.php:119
+msgid "You are not allowed to do this."
+msgstr "У вас немає прав на цю дію."
+
+#: includes/swifttrap-api.php:26
 msgid "Mailtrap API token is not set."
 msgstr "API-токен Mailtrap не встановлено."
 
-#: includes/swifttrap-api.php:67
-msgid "Unable to retrieve Mailtrap account info."
-msgstr "Не вдалося отримати інформацію про обліковий запис Mailtrap."
-
-#: includes/swifttrap-api.php:73
-msgid "Mailtrap account ID not found."
-msgstr "ID облікового запису Mailtrap не знайдено."
+#: includes/swifttrap-api.php:51
+msgid "Mailtrap did not accept this API token. Check that you copied the whole token and that it has not been deleted in Mailtrap."
+msgstr "Mailtrap не прийняв цей API-токен. Перевірте, що токен скопійовано повністю і його не видалено в Mailtrap."
 
 #. translators: %d: HTTP status code returned by the Mailtrap API
-#: includes/swifttrap-api.php:201
-#: includes/swifttrap-api.php:277
-#: includes/swifttrap-api.php:447
-#: includes/swifttrap-api.php:618
-#: includes/swifttrap-api.php:660
-#: swifttrap-for-mailtrap.php:580
+#: includes/swifttrap-api.php:56
+#: includes/swifttrap-api.php:197
+#: includes/swifttrap-api.php:273
+#: includes/swifttrap-api.php:451
+#: includes/swifttrap-api.php:643
+#: includes/swifttrap-api.php:686
+#: swifttrap-for-mailtrap.php:783
 #, php-format
 msgid "Mailtrap API returned HTTP %d"
 msgstr "Mailtrap API повернув HTTP %d"
 
-#: includes/swifttrap-api.php:206
-#: includes/swifttrap-api.php:211
+#: includes/swifttrap-api.php:63
+msgid "Unable to retrieve Mailtrap account info."
+msgstr "Не вдалося отримати інформацію про обліковий запис Mailtrap."
+
+#: includes/swifttrap-api.php:69
+msgid "Mailtrap account ID not found."
+msgstr "ID облікового запису Mailtrap не знайдено."
+
+#: includes/swifttrap-api.php:202
+#: includes/swifttrap-api.php:207
 msgid "Invalid domains response."
 msgstr "Невірна відповідь щодо доменів."
 
-#: includes/swifttrap-api.php:283
+#: includes/swifttrap-api.php:279
 msgid "Invalid suppressions response."
 msgstr "Невірна відповідь щодо блокувань."
 
 #. translators: %s: raw API response snippet for debugging
-#: includes/swifttrap-api.php:454
+#: includes/swifttrap-api.php:458
 #, php-format
 msgid "Invalid emails response: %s"
 msgstr "Невірна відповідь щодо листів: %s"
 
-#: includes/swifttrap-api.php:481
-msgid "Mailtrap is not enabled or API token is missing."
-msgstr "Mailtrap не увімкнено або відсутній API-токен."
-
-#. translators: %s: current date and time
-#: includes/swifttrap-api.php:486
-#, php-format
-msgid "Mailtrap Test Email — %s"
-msgstr "Тестовий лист Mailtrap — %s"
-
-#: includes/swifttrap-api.php:487
-msgid "This is a test email sent from the SwiftTrap for Mailtrap plugin. If you received this, your configuration is working correctly."
-msgstr "Це тестовий лист, надісланий плагіном SwiftTrap for Mailtrap. Якщо ви отримали цей лист, ваші налаштування працюють коректно."
-
-#. translators: %s: recipient email address
-#: includes/swifttrap-api.php:493
-#, php-format
-msgid "Test email sent to %s"
-msgstr "Тестовий лист надіслано на %s"
-
-#: includes/swifttrap-api.php:495
-msgid "Failed to send test email. Check your settings."
-msgstr "Не вдалося надіслати тестовий лист. Перевірте налаштування."
-
-#: includes/swifttrap-api.php:709
+#: includes/swifttrap-api.php:488
+#: includes/swifttrap-api.php:766
+#: swifttrap-for-mailtrap.php:984
 msgid "Invalid email address."
 msgstr "Невірна адреса електронної пошти."
 
-#: includes/swifttrap-api.php:713
+#. translators: %s: the reason reported by Mailtrap
+#: includes/swifttrap-api.php:500
+#, php-format
+msgid "Mailtrap did not accept the test email: %s"
+msgstr "Mailtrap не прийняв тестовий лист: %s"
+
+#. translators: %s: recipient email address
+#: includes/swifttrap-api.php:508
+#, php-format
+msgid "Test email sent to %s. Check that inbox (and the spam folder)."
+msgstr "Тестовий лист надіслано на %s. Перевірте цю скриньку (і папку «Спам»)."
+
+#: includes/swifttrap-api.php:770
 msgid "Invalid domain ID."
 msgstr "Невірний ID домену."
 
-#: includes/swifttrap-api.php:723
+#: includes/swifttrap-api.php:780
 msgid "Suppression added successfully."
 msgstr "Блокування успішно додано."
 
-#: includes/swifttrap-api.php:740
+#: includes/swifttrap-api.php:798
 msgid "Invalid suppression ID."
 msgstr "Невірний ID блокування."
 
-#: includes/swifttrap-api.php:750
+#: includes/swifttrap-api.php:808
 msgid "Suppression removed successfully."
 msgstr "Блокування успішно видалено."
 
@@ -589,45 +708,52 @@ msgstr "Щоб спрямовувати листи, вкажіть API-токе�
 msgid "Mailtrap API connection failed"
 msgstr "Не вдалося підключитися до API Mailtrap"
 
-#: includes/swifttrap-site-health.php:67
+#. translators: %s: the error message
+#: includes/swifttrap-site-health.php:68
 #, php-format
 msgid "Failed to connect to Mailtrap API: %s"
 msgstr "Не вдалося підключитися до API Mailtrap: %s"
 
-#: includes/swifttrap-site-health.php:79
+#: includes/swifttrap-site-health.php:80
 msgid "Unable to verify Mailtrap sending domains"
 msgstr "Не вдалося перевірити домени відправки Mailtrap"
 
-#: includes/swifttrap-site-health.php:80
+#. translators: %s: the error message
+#: includes/swifttrap-site-health.php:82
 #, php-format
 msgid "Connected to Mailtrap, but could not retrieve domains list: %s"
 msgstr "Підключено до Mailtrap, але не вдалося отримати список доменів: %s"
 
-#: includes/swifttrap-site-health.php:98
+#. translators: %s: the sender email domain
+#: includes/swifttrap-site-health.php:101
 #, php-format
 msgid "Sender domain \"%s\" is not registered in Mailtrap"
 msgstr "Домен відправника \"%s\" не зареєстрований у Mailtrap"
 
-#: includes/swifttrap-site-health.php:99
+#. translators: %s: the sender email domain
+#: includes/swifttrap-site-health.php:103
 #, php-format
 msgid "The sender email address domain (%s) must be added to your Sending Domains in Mailtrap."
 msgstr "Домен адреси електронної пошти відправника (%s) потрібно додати до Sending Domains у Mailtrap."
 
-#: includes/swifttrap-site-health.php:102
+#. translators: %s: the sender email domain
+#: includes/swifttrap-site-health.php:107
 #, php-format
 msgid "Sender domain \"%s\" is unverified in Mailtrap"
 msgstr "Домен відправника \"%s\" не підтверджено в Mailtrap"
 
-#: includes/swifttrap-site-health.php:103
+#. translators: %s: the sender email domain
+#: includes/swifttrap-site-health.php:109
 #, php-format
 msgid "The sender email address domain (%s) is registered but has pending DNS verification in Mailtrap."
 msgstr "Домен адреси електронної пошти відправника (%s) зареєстровано, але DNS-перевірка в Mailtrap ще не завершена."
 
-#: includes/swifttrap-site-health.php:105
+#: includes/swifttrap-site-health.php:111
 msgid "SwiftTrap for Mailtrap is routing emails correctly"
 msgstr "SwiftTrap for Mailtrap правильно спрямовує листи"
 
-#: includes/swifttrap-site-health.php:106
+#. translators: %s: the sender email domain
+#: includes/swifttrap-site-health.php:113
 #, php-format
 msgid "API token is valid and sender domain \"%s\" is verified."
 msgstr "API-токен дійсний, і домен відправника \"%s\" підтверджено."
@@ -648,47 +774,70 @@ msgstr "Невірний підпис вебхука."
 msgid "Invalid JSON payload."
 msgstr "Невірний вміст JSON-запиту."
 
-#: swifttrap-for-mailtrap.php:107
+#. translators: %s: comma-separated list of email addresses
+#: swifttrap-for-mailtrap.php:108
 #, php-format
 msgid "All recipients skipped due to suppression: %s"
 msgstr "Усіх отримувачів пропущено через блокування: %s"
 
-#: swifttrap-for-mailtrap.php:218
+#: swifttrap-for-mailtrap.php:308
 msgid "No valid recipients."
 msgstr "Немає дійсних отримувачів."
 
-#: swifttrap-for-mailtrap.php:326
+#: swifttrap-for-mailtrap.php:472
 msgid "Sender email is invalid."
 msgstr "Email відправника недійсний."
 
 #. translators: %s: the invalid email address
-#: swifttrap-for-mailtrap.php:406
+#: swifttrap-for-mailtrap.php:547
 #, php-format
 msgid "Invalid email address: %s"
 msgstr "Невірна адреса електронної пошти: %s"
 
-#. translators: %s: file path of the missing attachment
-#: swifttrap-for-mailtrap.php:450
+#. translators: %s: file name of the missing attachment
+#: swifttrap-for-mailtrap.php:606
 #, php-format
 msgid "Attachment not found or unreadable: %s"
 msgstr "Вкладення не знайдено або неможливо прочитати: %s"
 
 #. translators: %1$s: file name, %2$s: file size, %3$d: max size MB
-#: swifttrap-for-mailtrap.php:462
+#: swifttrap-for-mailtrap.php:615
 #, php-format
 msgid "Attachment exceeds %3$d MB limit: %1$s (%2$s)"
 msgstr "Вкладення перевищує ліміт %3$d МБ: %1$s (%2$s)"
 
-#: swifttrap-for-mailtrap.php:472
+#: swifttrap-for-mailtrap.php:625
 msgid "WordPress filesystem is not available."
 msgstr "Файлова система WordPress недоступна."
 
-#. translators: %s: file path of the unreadable attachment
-#: swifttrap-for-mailtrap.php:479
+#. translators: %s: file name of the unreadable attachment
+#: swifttrap-for-mailtrap.php:632
 #, php-format
 msgid "Unable to read attachment: %s"
 msgstr "Не вдалося прочитати вкладення: %s"
 
-#: swifttrap-for-mailtrap.php:515
+#: swifttrap-for-mailtrap.php:717
 msgid "Bulk/promotional emails are blocked on this environment."
 msgstr "Масові/рекламні листи заблоковано в цьому середовищі."
+
+#: swifttrap-for-mailtrap.php:728
+msgid "The email could not be prepared for the Mailtrap API (invalid characters)."
+msgstr "Не вдалося підготувати лист для API Mailtrap (неприпустимі символи)."
+
+#: swifttrap-for-mailtrap.php:980
+msgid "Mailtrap is not enabled or API token is missing."
+msgstr "Mailtrap не увімкнено або відсутній API-токен."
+
+#. translators: %s: current date and time
+#: swifttrap-for-mailtrap.php:988
+#, php-format
+msgid "Mailtrap Test Email — %s"
+msgstr "Тестовий лист Mailtrap — %s"
+
+#: swifttrap-for-mailtrap.php:989
+msgid "This is a test email sent from the SwiftTrap for Mailtrap plugin. If you received this, your configuration is working correctly."
+msgstr "Це тестовий лист, надісланий плагіном SwiftTrap for Mailtrap. Якщо ви отримали цей лист, ваші налаштування працюють коректно."
+
+#: swifttrap-for-mailtrap.php:1007
+msgid "Failed to send test email. Check your settings."
+msgstr "Не вдалося надіслати тестовий лист. Перевірте налаштування."

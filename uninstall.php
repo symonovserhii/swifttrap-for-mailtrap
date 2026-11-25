@@ -11,21 +11,42 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 	exit;
 }
 
-$swifttrap_settings = get_option( 'swifttrap_mailtrap_settings', array() );
-$swifttrap_token    = is_array( $swifttrap_settings ) ? ( $swifttrap_settings['token'] ?? '' ) : '';
+/**
+ * Remove this plugin's options and cached API data from the current site.
+ */
+function swifttrap_mailtrap_uninstall_site(): void {
+	$settings = get_option( 'swifttrap_mailtrap_settings', array() );
+	$tokens   = array( is_array( $settings ) ? (string) ( $settings['token'] ?? '' ) : '' );
 
-if ( '' !== $swifttrap_token ) {
+	if ( defined( 'SWIFTTRAP_MAILTRAP_TOKEN' ) && is_string( SWIFTTRAP_MAILTRAP_TOKEN ) ) {
+		$tokens[] = SWIFTTRAP_MAILTRAP_TOKEN;
+	}
+
 	// Cache keys are suffixed with a token hash (see includes/swifttrap-api.php); read the
 	// token before delete_option() below removes the only place it's stored.
-	$swifttrap_token_hash = substr( md5( $swifttrap_token ), 0, 8 );
-	delete_transient( 'swifttrap_mailtrap_stats_' . $swifttrap_token_hash );
-	delete_transient( 'swifttrap_account_data_' . $swifttrap_token_hash );
-	delete_transient( 'swifttrap_domains_' . $swifttrap_token_hash );
-	delete_transient( 'swifttrap_suppressions_' . $swifttrap_token_hash );
+	foreach ( array_unique( $tokens ) as $token ) {
+		$hash = substr( md5( $token ), 0, 8 );
+		delete_transient( 'swifttrap_mailtrap_stats_' . $hash );
+		delete_transient( 'swifttrap_account_data_' . $hash );
+		delete_transient( 'swifttrap_domains_' . $hash );
+		delete_transient( 'swifttrap_suppressions_' . $hash );
+		delete_transient( 'swifttrap_suppressions_down_' . $hash );
+	}
+
+	delete_option( 'swifttrap_mailtrap_settings' );
+	delete_option( 'swifttrap_mailtrap_review_state' );
+	wp_clear_scheduled_hook( 'swifttrap_mailtrap_cleanup_logs_cron' );
 }
 
-delete_option( 'swifttrap_mailtrap_settings' );
-delete_option( 'swifttrap_mailtrap_review_state' );
+if ( is_multisite() && ! wp_is_large_network() ) {
+	foreach ( get_sites( array( 'fields' => 'ids', 'number' => 0 ) ) as $swifttrap_site_id ) {
+		switch_to_blog( (int) $swifttrap_site_id );
+		swifttrap_mailtrap_uninstall_site();
+		restore_current_blog();
+	}
+} else {
+	swifttrap_mailtrap_uninstall_site();
+}
 
 // Remove a legacy log directory left behind by installs upgraded from pre-3.0.0
 // (file-based email logging was replaced by the live Mailtrap API log in 3.0.0).

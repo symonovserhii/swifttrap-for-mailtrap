@@ -92,7 +92,17 @@ function swifttrap_mailtrap_admin_assets( string $hook ): void {
 			'nextPage'       => __( 'Next &raquo;', 'swifttrap-for-mailtrap' ),
 			'search'         => __( 'Search...', 'swifttrap-for-mailtrap' ),
 			'allStatuses'    => __( 'All statuses', 'swifttrap-for-mailtrap' ),
+			/* translators: 1: current page number, 2: total number of pages */
 			'pageOf'         => __( 'Page %1$s of %2$s', 'swifttrap-for-mailtrap' ),
+			'loading'        => __( 'Loading...', 'swifttrap-for-mailtrap' ),
+			'requestFailed'  => __( 'Request failed.', 'swifttrap-for-mailtrap' ),
+			'confirmRemove'  => __( 'Remove?', 'swifttrap-for-mailtrap' ),
+			'supEmail'       => __( 'Email address', 'swifttrap-for-mailtrap' ),
+			'supDomain'      => __( 'Sending domain', 'swifttrap-for-mailtrap' ),
+			'supStream'      => __( 'Sending Stream', 'swifttrap-for-mailtrap' ),
+			'transactional'  => __( 'Transactional', 'swifttrap-for-mailtrap' ),
+			'bulk'           => __( 'Bulk', 'swifttrap-for-mailtrap' ),
+			'addSuppression' => __( 'Add Suppression', 'swifttrap-for-mailtrap' ),
 		),
 	) );
 
@@ -103,7 +113,7 @@ function swifttrap_mailtrap_admin_assets( string $hook ): void {
 				var btn = $(this), result = $("#swifttrap-test-result");
 				btn.prop("disabled",true).text("' . esc_js( __( 'Sending...', 'swifttrap-for-mailtrap' ) ) . '");
 				result.text("").removeClass("swifttrap-test-result--success swifttrap-test-result--error");
-				$.post(ajaxurl,{action:"swifttrap_send_test_email",_nonce:btn.data("nonce")},function(r){
+				$.post(ajaxurl,{action:"swifttrap_send_test_email",to:$("#swifttrap-test-to").val(),_nonce:btn.data("nonce")},function(r){
 					btn.prop("disabled",false).text("' . esc_js( __( 'Send Test Email', 'swifttrap-for-mailtrap' ) ) . '");
 					if(r.success){
 						result.addClass("swifttrap-test-result--success").text(r.data.message);
@@ -118,22 +128,26 @@ function swifttrap_mailtrap_admin_assets( string $hook ): void {
 			// Verify API Token
 			$(document).on("click","#swifttrap-verify-token",function(){
 				var btn = $(this), result = $("#swifttrap-verify-result"),
-					token = $("input[name=\"swifttrap_mailtrap_settings[token]\"]").val();
-				btn.prop("disabled",true).text("' . esc_js( __( 'Verifying...', 'swifttrap-for-mailtrap' ) ) . '");
+					token = $("input[name=\"swifttrap_mailtrap_settings[token]\"]").val() || "";
+				btn.prop("disabled",true).text("' . esc_js( __( 'Checking...', 'swifttrap-for-mailtrap' ) ) . '");
 				result.text("").removeClass("swifttrap-test-result--success swifttrap-test-result--error");
 				$.post(ajaxurl,{action:"swifttrap_verify_token",token:token,_nonce:btn.data("nonce")},function(r){
-					btn.prop("disabled",false).text("' . esc_js( __( 'Verify Token', 'swifttrap-for-mailtrap' ) ) . '");
+					btn.prop("disabled",false).text("' . esc_js( __( 'Check connection', 'swifttrap-for-mailtrap' ) ) . '");
 					if(r.success){
 						result.addClass("swifttrap-test-result--success").text(r.data.message);
 					}else{
 						result.addClass("swifttrap-test-result--error").text(r.data.message);
 					}
 				}).fail(function(){
-					btn.prop("disabled",false).text("' . esc_js( __( 'Verify Token', 'swifttrap-for-mailtrap' ) ) . '");
+					btn.prop("disabled",false).text("' . esc_js( __( 'Check connection', 'swifttrap-for-mailtrap' ) ) . '");
 					result.addClass("swifttrap-test-result--error").text("' . esc_js( __( 'Request failed.', 'swifttrap-for-mailtrap' ) ) . '");
 				});
 			});
 
+			function supMsg(text,ok){
+				$("#swifttrap-suppression-msg").removeClass("swifttrap-test-result--success swifttrap-test-result--error")
+					.addClass(ok?"swifttrap-test-result--success":"swifttrap-test-result--error").text(text);
+			}
 			// Add Suppression Form Submit
 			$(document).on("submit","#swifttrap-add-suppression-form",function(e){
 				e.preventDefault();
@@ -151,23 +165,27 @@ function swifttrap_mailtrap_admin_assets( string $hook ): void {
 				},function(r){
 					btn.prop("disabled",false).text("' . esc_js( __( 'Add Suppression', 'swifttrap-for-mailtrap' ) ) . '");
 					if(r.success){
-						alert(r.data.message);
-						location.reload();
+						supMsg(r.data.message,true);
+						setTimeout(function(){location.reload();},900);
 					}else{
-						alert(r.data.message);
+						supMsg(r.data&&r.data.message||swifttrapStats.l10n.requestFailed,false);
 					}
 				}).fail(function(){
 					btn.prop("disabled",false).text("' . esc_js( __( 'Add Suppression', 'swifttrap-for-mailtrap' ) ) . '");
-					alert("' . esc_js( __( 'Request failed.', 'swifttrap-for-mailtrap' ) ) . '");
+					supMsg(swifttrapStats.l10n.requestFailed,false);
 				});
 			});
 
 			// Delete Suppression
 			$(document).on("click",".swifttrap-delete-suppression",function(e){
 				e.preventDefault();
-				if(!confirm("' . esc_js( __( 'Are you sure you want to remove this suppression?', 'swifttrap-for-mailtrap' ) ) . '")) return;
 				var link = $(this), id = link.data("id");
-				link.css("pointer-events", "none").css("opacity", "0.5");
+				// Two-step confirmation in place: the first click asks, the second removes.
+				if(!link.data("armed")){
+					link.data("armed",true).data("label",link.text()).addClass("swifttrap-delete-suppression--armed").text(swifttrapStats.l10n.confirmRemove);
+					return;
+				}
+				link.prop("disabled",true).css("opacity", "0.5");
 				$.post(ajaxurl,{
 					action: "swifttrap_delete_suppression",
 					id: id,
@@ -176,13 +194,21 @@ function swifttrap_mailtrap_admin_assets( string $hook ): void {
 					if(r.success){
 						location.reload();
 					}else{
-						link.css("pointer-events", "auto").css("opacity", "1");
-						alert(r.data.message);
+						disarm(link);
+						supMsg(r.data&&r.data.message||swifttrapStats.l10n.requestFailed,false);
 					}
 				}).fail(function(){
-					link.css("pointer-events", "auto").css("opacity", "1");
-					alert("' . esc_js( __( 'Request failed.', 'swifttrap-for-mailtrap' ) ) . '");
+					disarm(link);
+					supMsg(swifttrapStats.l10n.requestFailed,false);
 				});
+			});
+			function disarm(link){
+				if(!link.data("armed"))return;
+				link.data("armed",false).prop("disabled",false).css("opacity","1").removeClass("swifttrap-delete-suppression--armed").text(link.data("label"));
+			}
+			$(document).on("blur",".swifttrap-delete-suppression",function(){
+				var link=$(this);
+				if(!link.prop("disabled"))disarm(link);
 			});
 		});
 	' );
@@ -269,7 +295,7 @@ function swifttrap_mailtrap_admin_assets( string $hook ): void {
 							if(it.bounce_category){sh+="<span class=\"swifttrap-suppression-bounce-cat\">"+esc(it.bounce_category)+"</span>";}
 							if(it.created_at_fmt){sh+="<span class=\"swifttrap-suppression-date\">"+esc(it.created_at_fmt)+"</span>";}
 							if(it.id){
-								sh+="<a href=\"#\" class=\"swifttrap-delete-suppression\" data-id=\""+esc(it.id)+"\" style=\"margin-left:8px;color:#a00;text-decoration:none;font-weight:bold;\" title=\""+esc(L.remove)+"\">&times;</a>";
+								sh+="<button type=\"button\" class=\"button-link swifttrap-delete-suppression\" data-id=\""+esc(it.id)+"\" aria-label=\""+esc(L.remove+": "+it.email)+"\" title=\""+esc(L.remove)+"\">&times;</button>";
 							}
 							sh+="</span></li>";
 						}
@@ -279,16 +305,17 @@ function swifttrap_mailtrap_admin_assets( string $hook ): void {
 					}
 
 					// Form to add suppression
+					sh+="<p id=\"swifttrap-suppression-msg\" class=\"swifttrap-test-result\" role=\"status\" aria-live=\"polite\" style=\"margin:8px 0 0;\"></p>";
 					sh+="<form id=\"swifttrap-add-suppression-form\" style=\"margin-top:15px;display:flex;flex-direction:column;gap:8px;\">";
-					sh+="<input type=\"email\" id=\"swifttrap-new-suppression-email\" placeholder=\"Email address\" required class=\"swifttrap-input-full\" style=\"margin:0;\" />";
+					sh+="<input type=\"email\" id=\"swifttrap-new-suppression-email\" aria-label=\""+esc(L.supEmail)+"\" placeholder=\""+esc(L.supEmail)+"\" required class=\"swifttrap-input-full\" style=\"margin:0;\" />";
 					sh+="<div style=\"display:flex;gap:8px;\">";
-					sh+="<select id=\"swifttrap-new-suppression-domain\" style=\"flex:1;margin:0;\" required></select>";
-					sh+="<select id=\"swifttrap-new-suppression-stream\" style=\"flex:1;margin:0;\" required>";
-					sh+="<option value=\"transactional\">Transactional</option>";
-					sh+="<option value=\"bulk\">Bulk</option>";
+					sh+="<select id=\"swifttrap-new-suppression-domain\" aria-label=\""+esc(L.supDomain)+"\" style=\"flex:1;margin:0;\" required></select>";
+					sh+="<select id=\"swifttrap-new-suppression-stream\" aria-label=\""+esc(L.supStream)+"\" style=\"flex:1;margin:0;\" required>";
+					sh+="<option value=\"transactional\">"+esc(L.transactional)+"</option>";
+					sh+="<option value=\"bulk\">"+esc(L.bulk)+"</option>";
 					sh+="</select>";
 					sh+="</div>";
-					sh+="<button type=\"submit\" class=\"button button-secondary\" style=\"margin:0;\">Add Suppression</button>";
+					sh+="<button type=\"submit\" class=\"button button-secondary\" style=\"margin:0;\">"+esc(L.addSuppression)+"</button>";
 					sh+="</form>";
 
 					$s.html(sh);
@@ -371,7 +398,7 @@ function swifttrap_mailtrap_admin_assets( string $hook ): void {
 
 			function fetchFromApi(cursor,onDone){
 				loading=true;
-				$et.html("<p class=\"swifttrap-loading\">Loading...</p>");$ep.html("");
+				$et.html("<p class=\"swifttrap-loading\">"+esc(L.loading)+"</p>");$ep.html("");
 				$.post(ajaxurl,{
 					action:"swifttrap_load_emails",
 					_nonce:swifttrapStats.emails_nonce,
@@ -512,6 +539,54 @@ function swifttrap_mailtrap_dashboard_widget_content(): void {
 
 
 /**
+ * Print a checkbox that also saves when it is unticked.
+ *
+ * A browser sends nothing for an unticked checkbox, and a missing key is
+ * filled from the defaults on save — so without the hidden "0" a setting that
+ * defaults to "on" could never be turned off.
+ *
+ * @since 3.1.0
+ *
+ * @param string $key      Setting key.
+ * @param array  $settings Current settings.
+ * @param string $label    Visible label (plain text).
+ * @param string $help     Helper text (plain text), optional.
+ */
+function swifttrap_mailtrap_checkbox_field( string $key, array $settings, string $label, string $help = '' ): void {
+	$name = SWIFTTRAP_MAILTRAP_OPTION_KEY . '[' . $key . ']';
+	$id   = 'swifttrap-' . str_replace( '_', '-', $key );
+	?>
+	<div class="swifttrap-field-group">
+		<input type="hidden" name="<?php echo esc_attr( $name ); ?>" value="0" />
+		<label class="swifttrap-checkbox-label" for="<?php echo esc_attr( $id ); ?>">
+			<input type="checkbox" id="<?php echo esc_attr( $id ); ?>" name="<?php echo esc_attr( $name ); ?>" value="1" <?php checked( ! empty( $settings[ $key ] ) ); ?> <?php echo '' !== $help ? 'aria-describedby="' . esc_attr( $id ) . '-help"' : ''; ?> />
+			<?php echo esc_html( $label ); ?>
+		</label>
+		<?php if ( '' !== $help ) : ?>
+			<p class="swifttrap-field-help" id="<?php echo esc_attr( $id ); ?>-help"><?php echo esc_html( $help ); ?></p>
+		<?php endif; ?>
+	</div>
+	<?php
+}
+
+/**
+ * The saved token with everything but its last four characters hidden.
+ *
+ * @since 3.1.0
+ *
+ * @param string $token API token.
+ *
+ * @return string
+ */
+function swifttrap_mailtrap_mask_token( string $token ): string {
+	if ( '' === $token ) {
+		return '';
+	}
+
+	return str_repeat( '•', 12 ) . ( strlen( $token ) > 8 ? substr( $token, -4 ) : '' );
+}
+
+/**
  * Settings page markup.
  */
 function swifttrap_mailtrap_settings_page(): void {
@@ -519,7 +594,13 @@ function swifttrap_mailtrap_settings_page(): void {
 		return;
 	}
 
-	$settings = swifttrap_mailtrap_get_settings();
+	$settings     = swifttrap_mailtrap_get_settings();
+	$option       = SWIFTTRAP_MAILTRAP_OPTION_KEY;
+	$has_token    = '' !== $settings['token'];
+	$from_config  = swifttrap_mailtrap_token_is_constant();
+	$current_user = wp_get_current_user();
+	$test_to      = ( $current_user && ! empty( $current_user->user_email ) ) ? $current_user->user_email : $settings['sender_email'];
+	$bulk_labels  = wp_list_pluck( swifttrap_mailtrap_bulk_sources(), 'label' );
 	?>
 	<div class="wrap">
 		<h1><?php esc_html_e( 'Mailtrap Settings', 'swifttrap-for-mailtrap' ); ?></h1>
@@ -528,92 +609,141 @@ function swifttrap_mailtrap_settings_page(): void {
 			<?php settings_fields( 'swifttrap_mailtrap' ); ?>
 
 			<div class="swifttrap-grid">
-				<!-- Mailtrap Delivery Section -->
+				<!-- Connection -->
 				<div class="swifttrap-card">
-					<h3><?php esc_html_e( 'Mailtrap Delivery', 'swifttrap-for-mailtrap' ); ?></h3>
-					<p><?php esc_html_e( 'Send all site emails through the Mailtrap Send API. Provide an API token from your Mailtrap project.', 'swifttrap-for-mailtrap' ); ?></p>
+					<h2><?php esc_html_e( 'Connection', 'swifttrap-for-mailtrap' ); ?></h2>
+					<p><?php esc_html_e( 'Connect this site to your Mailtrap account. Once connected, every email WordPress sends goes out through Mailtrap.', 'swifttrap-for-mailtrap' ); ?></p>
 
-					<!-- Enable Mailtrap -->
-					<div class="swifttrap-field-group">
-						<label class="swifttrap-checkbox-label">
-							<input type="checkbox" name="<?php echo esc_attr( SWIFTTRAP_MAILTRAP_OPTION_KEY ); ?>[enabled]" value="1" <?php checked( $settings['enabled'], 1 ); ?> />
-							<?php esc_html_e( 'Route wp_mail() through Mailtrap', 'swifttrap-for-mailtrap' ); ?>
-						</label>
-					</div>
+					<?php
+					swifttrap_mailtrap_checkbox_field(
+						'enabled',
+						$settings,
+						__( 'Send this site\'s emails through Mailtrap', 'swifttrap-for-mailtrap' ),
+						__( 'Untick to pause the plugin. WordPress then sends email the way it did before.', 'swifttrap-for-mailtrap' )
+					);
+					?>
 
-					<!-- API Token -->
 					<div class="swifttrap-field-group">
-						<label class="swifttrap-field-label"><?php esc_html_e( 'API Token', 'swifttrap-for-mailtrap' ); ?></label>
-						<input type="password" name="<?php echo esc_attr( SWIFTTRAP_MAILTRAP_OPTION_KEY ); ?>[token]" value="<?php echo esc_attr( $settings['token'] ); ?>" class="swifttrap-input-full" autocomplete="off" />
-						<p class="swifttrap-field-help"><?php esc_html_e( 'Use the "Send API token" from your Mailtrap inbox or project.', 'swifttrap-for-mailtrap' ); ?></p>
-						<div style="margin-top: 10px;">
+						<label class="swifttrap-field-label" for="swifttrap-token"><?php esc_html_e( 'API Token', 'swifttrap-for-mailtrap' ); ?></label>
+						<?php if ( $from_config ) : ?>
+							<input type="text" id="swifttrap-token" class="swifttrap-input-full swifttrap-input-mono" value="<?php echo esc_attr( swifttrap_mailtrap_mask_token( $settings['token'] ) ); ?>" readonly aria-describedby="swifttrap-token-help" />
+							<p class="swifttrap-field-help" id="swifttrap-token-help"><?php esc_html_e( 'The token is set in wp-config.php (SWIFTTRAP_MAILTRAP_TOKEN) and cannot be changed here.', 'swifttrap-for-mailtrap' ); ?></p>
+						<?php else : ?>
+							<input type="password" id="swifttrap-token" name="<?php echo esc_attr( $option ); ?>[token]" value="" placeholder="<?php echo esc_attr( swifttrap_mailtrap_mask_token( $settings['token'] ) ); ?>" class="swifttrap-input-full swifttrap-input-mono" autocomplete="new-password" spellcheck="false" aria-describedby="swifttrap-token-help" />
+							<p class="swifttrap-field-help" id="swifttrap-token-help">
+								<?php
+								if ( $has_token ) {
+									esc_html_e( 'A token is saved. For safety it is never shown again. Leave this field empty to keep it, or paste a new token to replace it.', 'swifttrap-for-mailtrap' );
+								} else {
+									esc_html_e( 'In Mailtrap, open Settings → API Tokens, create a token that may send from your domain, and paste it here.', 'swifttrap-for-mailtrap' );
+								}
+								?>
+							</p>
+							<?php if ( $has_token ) : ?>
+								<label class="swifttrap-checkbox-label" for="swifttrap-token-clear">
+									<input type="checkbox" id="swifttrap-token-clear" name="<?php echo esc_attr( $option ); ?>[token_clear]" value="1" />
+									<?php esc_html_e( 'Remove the saved token', 'swifttrap-for-mailtrap' ); ?>
+								</label>
+							<?php endif; ?>
+						<?php endif; ?>
+						<div class="swifttrap-inline-action">
 							<button type="button" id="swifttrap-verify-token" class="button button-secondary" data-nonce="<?php echo esc_attr( wp_create_nonce( 'swifttrap_verify_token' ) ); ?>">
-								<?php esc_html_e( 'Verify Token', 'swifttrap-for-mailtrap' ); ?>
+								<?php esc_html_e( 'Check connection', 'swifttrap-for-mailtrap' ); ?>
 							</button>
-							<span id="swifttrap-verify-result" class="swifttrap-test-result"></span>
+							<span id="swifttrap-verify-result" class="swifttrap-test-result" role="status" aria-live="polite"></span>
 						</div>
 					</div>
 
-					<!-- Sender Email -->
 					<div class="swifttrap-field-group">
-						<label class="swifttrap-field-label"><?php esc_html_e( 'Sender email', 'swifttrap-for-mailtrap' ); ?></label>
-						<input type="email" name="<?php echo esc_attr( SWIFTTRAP_MAILTRAP_OPTION_KEY ); ?>[sender_email]" value="<?php echo esc_attr( $settings['sender_email'] ); ?>" class="swifttrap-input-full" />
-						<p class="swifttrap-field-help"><?php esc_html_e( 'Address shown in the From header. Defaults to the site admin email.', 'swifttrap-for-mailtrap' ); ?></p>
+						<label class="swifttrap-field-label" for="swifttrap-sender-email"><?php esc_html_e( 'From email', 'swifttrap-for-mailtrap' ); ?></label>
+						<input type="email" id="swifttrap-sender-email" name="<?php echo esc_attr( $option ); ?>[sender_email]" value="<?php echo esc_attr( $settings['sender_email'] ); ?>" class="swifttrap-input-full" aria-describedby="swifttrap-sender-email-help" />
+						<p class="swifttrap-field-help" id="swifttrap-sender-email-help"><?php esc_html_e( 'The address your emails come from. It must belong to a domain you verified in Mailtrap, otherwise Mailtrap refuses the message. Leave empty to use the site admin email.', 'swifttrap-for-mailtrap' ); ?></p>
 					</div>
 
-					<!-- Sender Name -->
 					<div class="swifttrap-field-group">
-						<label class="swifttrap-field-label"><?php esc_html_e( 'Sender name', 'swifttrap-for-mailtrap' ); ?></label>
-						<input type="text" name="<?php echo esc_attr( SWIFTTRAP_MAILTRAP_OPTION_KEY ); ?>[sender_name]" value="<?php echo esc_attr( $settings['sender_name'] ); ?>" class="swifttrap-input-full" />
-						<p class="swifttrap-field-help"><?php esc_html_e( 'Display name for the From header. Defaults to the site title.', 'swifttrap-for-mailtrap' ); ?></p>
+						<label class="swifttrap-field-label" for="swifttrap-sender-name"><?php esc_html_e( 'From name', 'swifttrap-for-mailtrap' ); ?></label>
+						<input type="text" id="swifttrap-sender-name" name="<?php echo esc_attr( $option ); ?>[sender_name]" value="<?php echo esc_attr( $settings['sender_name'] ); ?>" class="swifttrap-input-full" aria-describedby="swifttrap-sender-name-help" />
+						<p class="swifttrap-field-help" id="swifttrap-sender-name-help"><?php esc_html_e( 'The name people see next to the address. Leave empty to use the site title.', 'swifttrap-for-mailtrap' ); ?></p>
 					</div>
-
 				</div>
 
-				<!-- Attachments Section -->
+				<!-- Newsletters and bulk email -->
 				<div class="swifttrap-card">
+					<h2><?php esc_html_e( 'Newsletters and bulk email', 'swifttrap-for-mailtrap' ); ?></h2>
+					<p><?php esc_html_e( 'Mailtrap has two sending streams. The transactional stream is for one-to-one messages such as password resets, orders and contact form notifications. The bulk stream is for newsletters and campaigns. Keeping them apart protects the delivery of your important messages.', 'swifttrap-for-mailtrap' ); ?></p>
+
+					<?php
+					swifttrap_mailtrap_checkbox_field(
+						'bulk_autodetect',
+						$settings,
+						__( 'Send newsletters through the bulk stream', 'swifttrap-for-mailtrap' ),
+						sprintf(
+							/* translators: %s: comma-separated list of newsletter plugin names */
+							__( 'Campaign emails from these plugins are recognized automatically: %s. All other email keeps using the transactional stream.', 'swifttrap-for-mailtrap' ),
+							implode( ', ', $bulk_labels )
+						)
+					);
+					?>
+					<p class="swifttrap-field-help"><?php esc_html_e( 'Nothing to set up in the newsletter plugin itself — just let it send through WordPress (its default). Signup confirmations and welcome emails stay on the transactional stream.', 'swifttrap-for-mailtrap' ); ?></p>
+					<p class="swifttrap-field-help">
+						<?php
+						printf(
+							/* translators: %s: an email header, e.g. X-SwiftTrap-Stream: bulk */
+							esc_html__( 'For developers: any email sent with the header %s also goes through the bulk stream.', 'swifttrap-for-mailtrap' ),
+							'<code>X-SwiftTrap-Stream: bulk</code>'
+						);
+						?>
+					</p>
+
+					<h3><?php esc_html_e( 'If Mailtrap cannot be reached', 'swifttrap-for-mailtrap' ); ?></h3>
+					<?php
+					swifttrap_mailtrap_checkbox_field(
+						'fallback',
+						$settings,
+						__( 'Use the default WordPress mailer as a backup', 'swifttrap-for-mailtrap' ),
+						__( 'If Mailtrap does not accept a message, WordPress tries to send it the way it did before this plugin. Untick if email must never leave through your web host.', 'swifttrap-for-mailtrap' )
+					);
+					?>
+
 					<h3><?php esc_html_e( 'Attachments', 'swifttrap-for-mailtrap' ); ?></h3>
 					<div class="swifttrap-field-group">
-						<label class="swifttrap-field-label"><?php esc_html_e( 'Max attachment size (MB)', 'swifttrap-for-mailtrap' ); ?></label>
-						<input type="number" name="<?php echo esc_attr( SWIFTTRAP_MAILTRAP_OPTION_KEY ); ?>[max_attachment_size_mb]" value="<?php echo esc_attr( $settings['max_attachment_size_mb'] ?? 25 ); ?>" class="swifttrap-input-small" min="1" max="25" />
-						<p class="swifttrap-field-help"><?php esc_html_e( 'Maximum size permitted for individual email attachments (1 to 25 MB).', 'swifttrap-for-mailtrap' ); ?></p>
+						<label class="swifttrap-field-label" for="swifttrap-max-attachment"><?php esc_html_e( 'Max attachment size (MB)', 'swifttrap-for-mailtrap' ); ?></label>
+						<input type="number" id="swifttrap-max-attachment" name="<?php echo esc_attr( $option ); ?>[max_attachment_size_mb]" value="<?php echo esc_attr( $settings['max_attachment_size_mb'] ?? 25 ); ?>" class="swifttrap-input-small" min="1" max="25" aria-describedby="swifttrap-max-attachment-help" />
+						<p class="swifttrap-field-help" id="swifttrap-max-attachment-help"><?php esc_html_e( 'Maximum size permitted for individual email attachments (1 to 25 MB).', 'swifttrap-for-mailtrap' ); ?></p>
 					</div>
 				</div>
 
-				<!-- Advanced Settings Section & Webhooks -->
+				<!-- Advanced: categories and webhooks -->
 				<div class="swifttrap-card">
-					<h3><?php esc_html_e( 'Advanced Settings', 'swifttrap-for-mailtrap' ); ?></h3>
-					<p><?php esc_html_e( 'Advanced email delivery options for more control over Mailtrap streams.', 'swifttrap-for-mailtrap' ); ?></p>
+					<h2><?php esc_html_e( 'Advanced Settings', 'swifttrap-for-mailtrap' ); ?></h2>
+					<p><?php esc_html_e( 'Optional. The plugin works without changing anything here.', 'swifttrap-for-mailtrap' ); ?></p>
 
-					<!-- Email Categories -->
-					<div class="swifttrap-field-group">
-						<label class="swifttrap-checkbox-label">
-							<input type="checkbox" name="<?php echo esc_attr( SWIFTTRAP_MAILTRAP_OPTION_KEY ); ?>[enable_categories]" value="1" <?php checked( $settings['enable_categories'], 1 ); ?> />
-							<?php esc_html_e( 'Add category tags to emails in Mailtrap', 'swifttrap-for-mailtrap' ); ?>
-						</label>
-						<p class="swifttrap-field-help"><?php esc_html_e( 'Categories help organize emails in Mailtrap dashboard (welcome, password-reset, notification, etc.).', 'swifttrap-for-mailtrap' ); ?></p>
-					</div>
+					<?php
+					swifttrap_mailtrap_checkbox_field(
+						'enable_categories',
+						$settings,
+						__( 'Add category tags to emails in Mailtrap', 'swifttrap-for-mailtrap' ),
+						__( 'Categories help organize emails in Mailtrap dashboard (welcome, password-reset, notification, etc.).', 'swifttrap-for-mailtrap' )
+					);
 
-					<!-- Auto-categorize -->
-					<div class="swifttrap-field-group">
-						<label class="swifttrap-checkbox-label">
-							<input type="checkbox" name="<?php echo esc_attr( SWIFTTRAP_MAILTRAP_OPTION_KEY ); ?>[auto_categorize]" value="1" <?php checked( $settings['auto_categorize'], 1 ); ?> />
-							<?php esc_html_e( 'Automatically detect email type from subject line', 'swifttrap-for-mailtrap' ); ?>
-						</label>
-						<p class="swifttrap-field-help"><?php esc_html_e( 'When enabled, emails are categorized by keywords in subject: "reset" → password-reset, "confirm" → verification, "welcome" → welcome, etc.', 'swifttrap-for-mailtrap' ); ?></p>
-					</div>
+					swifttrap_mailtrap_checkbox_field(
+						'auto_categorize',
+						$settings,
+						__( 'Automatically detect email type from subject line', 'swifttrap-for-mailtrap' ),
+						__( 'When enabled, emails are categorized by keywords in subject: "reset" → password-reset, "confirm" → verification, "welcome" → welcome, etc.', 'swifttrap-for-mailtrap' )
+					);
+					?>
 
-					<!-- Webhooks Config -->
 					<div class="swifttrap-field-group">
-						<label class="swifttrap-field-label"><?php esc_html_e( 'Webhook URL', 'swifttrap-for-mailtrap' ); ?></label>
-						<input type="text" class="swifttrap-input-full swifttrap-input-mono" value="<?php echo esc_url( rest_url( 'swifttrap/v1/webhook' ) ); ?>" readonly onclick="this.select();" />
-						<p class="swifttrap-field-help"><?php esc_html_e( 'Register this URL in your Mailtrap settings under Integration Webhooks. Select delivered, bounce, spam, open, and click events.', 'swifttrap-for-mailtrap' ); ?></p>
+						<label class="swifttrap-field-label" for="swifttrap-webhook-url"><?php esc_html_e( 'Webhook URL', 'swifttrap-for-mailtrap' ); ?></label>
+						<input type="text" id="swifttrap-webhook-url" class="swifttrap-input-full swifttrap-input-mono" value="<?php echo esc_url( rest_url( 'swifttrap/v1/webhook' ) ); ?>" readonly onclick="this.select();" aria-describedby="swifttrap-webhook-url-help" />
+						<p class="swifttrap-field-help" id="swifttrap-webhook-url-help"><?php esc_html_e( 'Register this URL in your Mailtrap settings under Integration Webhooks. Select delivered, bounce, spam, open, and click events.', 'swifttrap-for-mailtrap' ); ?></p>
 					</div>
 
 					<div class="swifttrap-field-group">
-						<label class="swifttrap-field-label"><?php esc_html_e( 'Webhook Secret', 'swifttrap-for-mailtrap' ); ?></label>
-						<input type="text" name="<?php echo esc_attr( SWIFTTRAP_MAILTRAP_OPTION_KEY ); ?>[webhook_secret]" value="<?php echo esc_attr( $settings['webhook_secret'] ?? '' ); ?>" class="swifttrap-input-full" />
-						<p class="swifttrap-field-help"><?php esc_html_e( 'Paste the signing secret Mailtrap shows you when you create this webhook integration. Used to verify the Mailtrap-Signature header (HMAC-SHA256) on incoming events.', 'swifttrap-for-mailtrap' ); ?></p>
+						<label class="swifttrap-field-label" for="swifttrap-webhook-secret"><?php esc_html_e( 'Webhook Secret', 'swifttrap-for-mailtrap' ); ?></label>
+						<input type="text" id="swifttrap-webhook-secret" name="<?php echo esc_attr( $option ); ?>[webhook_secret]" value="<?php echo esc_attr( $settings['webhook_secret'] ?? '' ); ?>" class="swifttrap-input-full swifttrap-input-mono" autocomplete="off" spellcheck="false" aria-describedby="swifttrap-webhook-secret-help" />
+						<p class="swifttrap-field-help" id="swifttrap-webhook-secret-help"><?php esc_html_e( 'Paste the signing secret Mailtrap shows you when you create this webhook integration. Used to verify the Mailtrap-Signature header (HMAC-SHA256) on incoming events.', 'swifttrap-for-mailtrap' ); ?></p>
 					</div>
 				</div>
 			</div>
@@ -621,16 +751,16 @@ function swifttrap_mailtrap_settings_page(): void {
 			<!-- Unified mapping table -->
 			<div class="swifttrap-grid" style="grid-template-columns: 1fr;">
 				<div class="swifttrap-card">
-					<h3><?php esc_html_e( 'Category Stream Mapping & Sender Override', 'swifttrap-for-mailtrap' ); ?></h3>
-					<p><?php esc_html_e( 'Map auto-detected categories to sending streams or override From identities per category.', 'swifttrap-for-mailtrap' ); ?></p>
+					<h2><?php esc_html_e( 'Category Stream Mapping & Sender Override', 'swifttrap-for-mailtrap' ); ?></h2>
+					<p><?php esc_html_e( 'Optional fine-tuning: choose a stream for each email category, or give a category its own From name and address. Leave the From fields empty to use the sender above.', 'swifttrap-for-mailtrap' ); ?></p>
 					<div style="overflow-x: auto;">
 						<table class="wp-list-table widefat fixed striped" style="margin-top: 10px; width: 100%;">
 							<thead>
 								<tr>
-									<th><?php esc_html_e( 'Category', 'swifttrap-for-mailtrap' ); ?></th>
-									<th><?php esc_html_e( 'Sending Stream', 'swifttrap-for-mailtrap' ); ?></th>
-									<th><?php esc_html_e( 'Custom From Name', 'swifttrap-for-mailtrap' ); ?></th>
-									<th><?php esc_html_e( 'Custom From Email', 'swifttrap-for-mailtrap' ); ?></th>
+									<th scope="col"><?php esc_html_e( 'Category', 'swifttrap-for-mailtrap' ); ?></th>
+									<th scope="col"><?php esc_html_e( 'Sending Stream', 'swifttrap-for-mailtrap' ); ?></th>
+									<th scope="col"><?php esc_html_e( 'Custom From Name', 'swifttrap-for-mailtrap' ); ?></th>
+									<th scope="col"><?php esc_html_e( 'Custom From Email', 'swifttrap-for-mailtrap' ); ?></th>
 								</tr>
 							</thead>
 							<tbody>
@@ -642,20 +772,26 @@ function swifttrap_mailtrap_settings_page(): void {
 									$stream       = $configured_streams[ $cat ] ?? 'transactional';
 									$custom_name  = $configured_senders[ $cat ]['name'] ?? '';
 									$custom_email = $configured_senders[ $cat ]['email'] ?? '';
+									/* translators: %s: email category, e.g. password-reset */
+									$stream_label = sprintf( __( 'Sending stream for %s', 'swifttrap-for-mailtrap' ), $cat );
+									/* translators: %s: email category, e.g. password-reset */
+									$name_label = sprintf( __( 'From name for %s', 'swifttrap-for-mailtrap' ), $cat );
+									/* translators: %s: email category, e.g. password-reset */
+									$email_label = sprintf( __( 'From email for %s', 'swifttrap-for-mailtrap' ), $cat );
 								?>
 									<tr>
-										<td><strong><?php echo esc_html( $cat ); ?></strong></td>
+										<th scope="row"><strong><?php echo esc_html( $cat ); ?></strong></th>
 										<td>
-											<select name="<?php echo esc_attr( SWIFTTRAP_MAILTRAP_OPTION_KEY ); ?>[category_streams][<?php echo esc_attr( $cat ); ?>]" style="max-width: 150px;">
+											<select aria-label="<?php echo esc_attr( $stream_label ); ?>" name="<?php echo esc_attr( $option ); ?>[category_streams][<?php echo esc_attr( $cat ); ?>]" style="max-width: 150px;">
 												<option value="transactional" <?php selected( $stream, 'transactional' ); ?>><?php esc_html_e( 'Transactional', 'swifttrap-for-mailtrap' ); ?></option>
 												<option value="bulk" <?php selected( $stream, 'bulk' ); ?>><?php esc_html_e( 'Bulk', 'swifttrap-for-mailtrap' ); ?></option>
 											</select>
 										</td>
 										<td>
-											<input type="text" name="<?php echo esc_attr( SWIFTTRAP_MAILTRAP_OPTION_KEY ); ?>[category_senders][<?php echo esc_attr( $cat ); ?>][name]" value="<?php echo esc_attr( $custom_name ); ?>" class="swifttrap-input-full" placeholder="<?php esc_attr_e( 'e.g. Support Team', 'swifttrap-for-mailtrap' ); ?>" style="max-width: 200px;" />
+											<input type="text" aria-label="<?php echo esc_attr( $name_label ); ?>" name="<?php echo esc_attr( $option ); ?>[category_senders][<?php echo esc_attr( $cat ); ?>][name]" value="<?php echo esc_attr( $custom_name ); ?>" class="swifttrap-input-full" placeholder="<?php esc_attr_e( 'e.g. Support Team', 'swifttrap-for-mailtrap' ); ?>" style="max-width: 200px;" />
 										</td>
 										<td>
-											<input type="email" name="<?php echo esc_attr( SWIFTTRAP_MAILTRAP_OPTION_KEY ); ?>[category_senders][<?php echo esc_attr( $cat ); ?>][email]" value="<?php echo esc_attr( $custom_email ); ?>" class="swifttrap-input-full" placeholder="<?php esc_attr_e( 'e.g. support@domain.com', 'swifttrap-for-mailtrap' ); ?>" style="max-width: 250px;" />
+											<input type="email" aria-label="<?php echo esc_attr( $email_label ); ?>" name="<?php echo esc_attr( $option ); ?>[category_senders][<?php echo esc_attr( $cat ); ?>][email]" value="<?php echo esc_attr( $custom_email ); ?>" class="swifttrap-input-full" placeholder="<?php esc_attr_e( 'e.g. support@domain.com', 'swifttrap-for-mailtrap' ); ?>" style="max-width: 250px;" />
 										</td>
 									</tr>
 								<?php endforeach; ?>
@@ -670,12 +806,16 @@ function swifttrap_mailtrap_settings_page(): void {
 
 		<div class="swifttrap-grid" style="margin-top: 20px;">
 			<div class="swifttrap-card">
-				<h3><?php esc_html_e( 'Test Email', 'swifttrap-for-mailtrap' ); ?></h3>
-				<p><?php esc_html_e( 'Send a test email to the configured sender address to verify your setup.', 'swifttrap-for-mailtrap' ); ?></p>
+				<h2><?php esc_html_e( 'Test Email', 'swifttrap-for-mailtrap' ); ?></h2>
+				<p><?php esc_html_e( 'Send yourself a test message to make sure everything works. Save your settings first.', 'swifttrap-for-mailtrap' ); ?></p>
+				<div class="swifttrap-field-group">
+					<label class="swifttrap-field-label" for="swifttrap-test-to"><?php esc_html_e( 'Send the test to', 'swifttrap-for-mailtrap' ); ?></label>
+					<input type="email" id="swifttrap-test-to" class="swifttrap-input-full" value="<?php echo esc_attr( $test_to ); ?>" autocomplete="email" />
+				</div>
 				<button type="button" id="swifttrap-send-test" class="button button-secondary" data-nonce="<?php echo esc_attr( wp_create_nonce( 'swifttrap_send_test_email' ) ); ?>">
 					<?php esc_html_e( 'Send Test Email', 'swifttrap-for-mailtrap' ); ?>
 				</button>
-				<span id="swifttrap-test-result" class="swifttrap-test-result"></span>
+				<span id="swifttrap-test-result" class="swifttrap-test-result" role="status" aria-live="polite"></span>
 			</div>
 		</div>
 
@@ -759,30 +899,51 @@ function swifttrap_mailtrap_stats_page(): void {
 /**
  * Sanitize settings before save.
  *
- * @param array $settings .
+ * @param mixed $settings Submitted settings.
  *
  * @return array
  */
 function swifttrap_mailtrap_sanitize_settings( mixed $settings ): array {
-	$settings = wp_parse_args( is_array( $settings ) ? $settings : array(), swifttrap_mailtrap_default_settings() );
+	$submitted = is_array( $settings ) ? $settings : array();
+	$defaults  = swifttrap_mailtrap_default_settings();
+	$settings  = wp_parse_args( $submitted, $defaults );
 
-	$settings['enabled'] = empty( $settings['enabled'] ) ? 0 : 1;
-	$settings['token']   = sanitize_text_field( $settings['token'] );
+	foreach ( array( 'enabled', 'enable_categories', 'auto_categorize', 'bulk_autodetect', 'fallback' ) as $flag ) {
+		$settings[ $flag ] = empty( $settings[ $flag ] ) ? 0 : 1;
+	}
 
-	$settings['sender_email'] = sanitize_email( $settings['sender_email'] );
-	$settings['sender_name']  = sanitize_text_field( $settings['sender_name'] );
+	// API token. The settings screen never prints the saved token, so an empty
+	// field means "keep what is saved"; only the explicit checkbox removes it.
+	$token = is_string( $settings['token'] ) ? trim( sanitize_text_field( $settings['token'] ) ) : '';
 
-	// Advanced settings.
-	$settings['enable_categories'] = empty( $settings['enable_categories'] ) ? 0 : 1;
-	$settings['auto_categorize'] = empty( $settings['auto_categorize'] ) ? 0 : 1;
+	if ( ! empty( $submitted['token_clear'] ) ) {
+		$token = '';
+	} elseif ( '' === $token ) {
+		$stored = get_option( SWIFTTRAP_MAILTRAP_OPTION_KEY, array() );
+		$token  = ( is_array( $stored ) && is_string( $stored['token'] ?? null ) ) ? $stored['token'] : '';
+	}
+	$settings['token'] = $token;
+
+	$raw_sender               = is_string( $settings['sender_email'] ) ? trim( $settings['sender_email'] ) : '';
+	$settings['sender_email'] = sanitize_email( $raw_sender );
+	$settings['sender_name']  = is_string( $settings['sender_name'] ) ? sanitize_text_field( $settings['sender_name'] ) : '';
+
+	if ( '' !== $raw_sender && ! is_email( $settings['sender_email'] ) ) {
+		$settings['sender_email'] = '';
+		swifttrap_mailtrap_settings_notice(
+			'invalid_sender',
+			/* translators: %s: the email address that was entered */
+			sprintf( __( '"%s" is not a valid email address, so the From email was not saved. The site admin email is used instead.', 'swifttrap-for-mailtrap' ), sanitize_text_field( $raw_sender ) )
+		);
+	}
 
 	// Webhook / attachments size.
-	$settings['webhook_secret'] = sanitize_text_field( $settings['webhook_secret'] ?? '' );
-	$max_att = (int) ( $settings['max_attachment_size_mb'] ?? 25 );
+	$settings['webhook_secret'] = is_string( $settings['webhook_secret'] ) ? sanitize_text_field( $settings['webhook_secret'] ) : '';
+	$max_att                    = (int) ( $settings['max_attachment_size_mb'] ?? 25 );
 	$settings['max_attachment_size_mb'] = max( 1, min( 25, $max_att ) );
 
 	// Mappings.
-	$category_streams = $settings['category_streams'] ?? array();
+	$category_streams  = $settings['category_streams'] ?? array();
 	$sanitized_streams = array();
 	if ( is_array( $category_streams ) ) {
 		foreach ( $category_streams as $cat => $stream ) {
@@ -791,19 +952,53 @@ function swifttrap_mailtrap_sanitize_settings( mixed $settings ): array {
 	}
 	$settings['category_streams'] = $sanitized_streams;
 
-	$category_senders = $settings['category_senders'] ?? array();
+	$category_senders  = $settings['category_senders'] ?? array();
 	$sanitized_senders = array();
 	if ( is_array( $category_senders ) ) {
 		foreach ( $category_senders as $cat => $sender ) {
+			if ( ! is_array( $sender ) ) {
+				continue;
+			}
+
+			$name  = is_string( $sender['name'] ?? null ) ? sanitize_text_field( $sender['name'] ) : '';
+			$email = is_string( $sender['email'] ?? null ) ? sanitize_email( $sender['email'] ) : '';
+
+			if ( '' === $name && '' === $email ) {
+				continue; // Nothing overridden for this category: do not store an empty row.
+			}
+
 			$sanitized_senders[ sanitize_key( $cat ) ] = array(
-				'name'  => sanitize_text_field( $sender['name'] ?? '' ),
-				'email' => sanitize_email( $sender['email'] ?? '' ),
+				'name'  => $name,
+				'email' => is_email( $email ) ? $email : '',
 			);
 		}
 	}
 	$settings['category_senders'] = $sanitized_senders;
 
-	return $settings;
+	// Store only known settings (drops the one-off "token_clear" flag and anything unexpected).
+	return array_intersect_key( $settings, $defaults );
+}
+
+/**
+ * Queue a notice for the settings screen, once per request.
+ *
+ * WordPress can run a sanitize callback twice for one save; without the guard
+ * the same notice would be printed twice.
+ *
+ * @since 3.1.0
+ *
+ * @param string $code    Notice code.
+ * @param string $message Plain-text message.
+ */
+function swifttrap_mailtrap_settings_notice( string $code, string $message ): void {
+	static $shown = array();
+
+	if ( isset( $shown[ $code ] ) || ! function_exists( 'add_settings_error' ) ) {
+		return;
+	}
+
+	$shown[ $code ] = true;
+	add_settings_error( SWIFTTRAP_MAILTRAP_OPTION_KEY, 'swifttrap_' . $code, $message, 'warning' );
 }
 
 /**
@@ -815,12 +1010,18 @@ function swifttrap_mailtrap_ajax_verify_token(): void {
 	check_ajax_referer( 'swifttrap_verify_token', '_nonce' );
 
 	if ( ! current_user_can( 'manage_options' ) ) {
-		wp_send_json_error( array( 'message' => __( 'Permission denied.', 'swifttrap-for-mailtrap' ) ) );
+		wp_send_json_error( array( 'message' => __( 'Permission denied.', 'swifttrap-for-mailtrap' ) ), 403 );
 	}
 
-	$token = isset( $_POST['token'] ) ? sanitize_text_field( wp_unslash( $_POST['token'] ) ) : '';
+	$token = isset( $_POST['token'] ) ? trim( sanitize_text_field( wp_unslash( $_POST['token'] ) ) ) : '';
 
-	if ( empty( $token ) ) {
+	// Nothing typed: check the token that is already saved.
+	if ( '' === $token ) {
+		$saved = swifttrap_mailtrap_get_settings();
+		$token = $saved['token'];
+	}
+
+	if ( '' === $token ) {
 		wp_send_json_error( array( 'message' => __( 'Please enter an API token.', 'swifttrap-for-mailtrap' ) ) );
 	}
 
@@ -830,8 +1031,29 @@ function swifttrap_mailtrap_ajax_verify_token(): void {
 	$data = swifttrap_mailtrap_get_account_data( $test_settings );
 
 	if ( is_wp_error( $data ) ) {
+		/* translators: %s: the reason the connection check failed */
 		wp_send_json_error( array( 'message' => sprintf( __( 'Verification failed: %s', 'swifttrap-for-mailtrap' ), $data->get_error_message() ) ) );
 	}
 
+	/* translators: %s: Mailtrap account name */
 	wp_send_json_success( array( 'message' => sprintf( __( 'Token verified successfully. Account: %s', 'swifttrap-for-mailtrap' ), $data['name'] ) ) );
 }
+
+/**
+ * Add a "Settings" link next to the plugin on the Plugins screen.
+ *
+ * @since 3.1.0
+ *
+ * @param array $links Existing action links.
+ *
+ * @return array
+ */
+function swifttrap_mailtrap_action_links( array $links ): array {
+	array_unshift(
+		$links,
+		'<a href="' . esc_url( admin_url( 'admin.php?page=swifttrap-for-mailtrap-settings' ) ) . '">' . esc_html__( 'Settings', 'swifttrap-for-mailtrap' ) . '</a>'
+	);
+
+	return $links;
+}
+add_filter( 'plugin_action_links_' . plugin_basename( dirname( __DIR__ ) . '/swifttrap-for-mailtrap.php' ), 'swifttrap_mailtrap_action_links' );

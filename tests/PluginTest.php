@@ -283,7 +283,7 @@ class PluginTest extends TestCase {
 
 	/**
 	 * Test that if all recipients are suppressed, sending is aborted,
-	 * a failed entry is logged, and a WP_Error is returned.
+	 * wp_mail_failed fires, and wp_mail() reports the failure (false).
 	 */
 	public function test_suppression_skip_all() {
 		Monkey\Functions\expect( 'swifttrap_mailtrap_get_settings' )
@@ -303,7 +303,7 @@ class PluginTest extends TestCase {
 		);
 
 		Monkey\Functions\expect( 'swifttrap_mailtrap_is_recipient_suppressed' )
-			->with( 'suppressed@example.com', Mockery::any() )
+			->with( 'suppressed@example.com', Mockery::any(), 'transactional' )
 			->andReturn( true );
 
 		Monkey\Functions\expect( 'swifttrap_mailtrap_trigger_failed' )
@@ -311,8 +311,8 @@ class PluginTest extends TestCase {
 
 		$res = swifttrap_mailtrap_pre_wp_mail( null, $atts );
 
-		$this->assertInstanceOf( WP_Error::class, $res );
-		$this->assertEquals( 'swifttrap_all_recipients_suppressed', $res->get_error_code() );
+		// wp_mail() returns this value as-is: it must be false, not a (truthy) WP_Error.
+		$this->assertFalse( $res );
 	}
 
 	/**
