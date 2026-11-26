@@ -3,7 +3,7 @@ Contributors: simmotorlp
 Tags: mailtrap, transactional-email, email-api, wp-mail, email-log
 Requires at least: 6.0
 Tested up to: 7.2
-Stable tag: 3.1.0
+Stable tag: 3.1.1
 Requires PHP: 8.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -125,6 +125,10 @@ The plugin refuses attachments above the size you set (1–25 MB per file, 25 by
 
 == Changelog ==
 
+= 3.1.1 =
+* Fix: the WP-CLI command file can no longer be loaded directly, outside WordPress.
+* Tested with WordPress 7.2 and PHP 8.6.
+
 = 3.1.0 =
 * New: **Send newsletters through the bulk stream** — one checkbox on the settings screen. Campaign emails from Newsletter (The Newsletter Plugin), FluentCRM, Icegram Express and Groundhogg are recognized by their headers and sent through Mailtrap's bulk stream; everything else, including signup confirmations, stays on the transactional stream. Off by default.
 * New: the `X-SwiftTrap-Stream: bulk` / `transactional` header picks the stream for one `wp_mail()` call. New `swifttrap_mailtrap_bulk_source` filter; `swifttrap_mailtrap_use_bulk_stream` now also receives the email.
@@ -237,6 +241,9 @@ The plugin refuses attachments above the size you set (1–25 MB per file, 25 by
 * Improved log file locking
 
 == Upgrade Notice ==
+
+= 3.1.1 =
+Compatibility update for WordPress 7.2 and PHP 8.6. No changes to how emails are sent.
 
 = 3.1.0 =
 Newsletters can now go through Mailtrap's bulk stream with one checkbox. Fixes settings that could not be switched off, wp_mail() reporting success for emails that were not sent, and From filters. Recommended.
