@@ -2,7 +2,7 @@
 Contributors: simmotorlp
 Tags: mailtrap, transactional-email, email-api, wp-mail, email-log
 Requires at least: 6.0
-Tested up to: 7.1
+Tested up to: 7.2
 Stable tag: 3.1.0
 Requires PHP: 8.0
 License: GPLv2 or later
